@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class UnreadCountDto {
 
-    private long count;
+    private Long count;
 }

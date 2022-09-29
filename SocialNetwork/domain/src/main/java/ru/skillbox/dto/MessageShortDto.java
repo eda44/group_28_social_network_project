@@ -7,8 +7,8 @@ import lombok.Setter;
 @Setter
 public class MessageShortDto {
 
-    private long id;
-    private long time;
-    private long authorId;
+    private Long id;
+    private Long time;
+    private Long authorId;
     private String messageText;
 }

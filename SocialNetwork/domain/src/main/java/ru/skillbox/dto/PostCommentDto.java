@@ -7,14 +7,14 @@ import lombok.Setter;
 @Setter
 public class PostCommentDto {
 
-    private int id;
-    private long time;
+    private Integer id;
+    private Long time;
     private AccountByIdDto author;
-    private int parentId;
+    private Integer parentId;
     private String commentText;
-    private int postId;
-    private boolean isBlocked;
-    private int likes;
+    private Integer postId;
+    private Boolean isBlocked;
+    private Integer likes;
     private Boolean myLike;
     private PostCommentDto[] subComments;
 }

@@ -8,16 +8,16 @@ import ru.skillbox.dto.enums.NameNotification;
 @Setter
 public class NotificationsSettingsDto {
 
-    private long time;
+    private Long time;
     private SettingRq[] array;
-    private int user_id;
+    private Integer user_id;
 
 
     @Getter
     @Setter
     static class SettingRq {
 
-        private boolean enable;
+        private Boolean enable;
         private NameNotification notificationType;
     }
 }

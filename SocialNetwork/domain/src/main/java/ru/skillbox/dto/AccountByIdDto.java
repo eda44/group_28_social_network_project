@@ -8,7 +8,7 @@ import ru.skillbox.dto.enums.MessagePermission;
 @Setter
 public class AccountByIdDto {
 
-    private long id;
+    private Long id;
     private String email;
     private String phone;
     private String photo;
@@ -18,9 +18,9 @@ public class AccountByIdDto {
     private String firstName;
     private String lastName;
     private Long regDate;
-    private long birthDate;
+    private Long birthDate;
     private MessagePermission messagePermission;
-    private long lastOnlineTime;
-    private boolean isOnline;
-    private boolean isBlocked;
+    private Long lastOnlineTime;
+    private Boolean isOnline;
+    private Boolean isBlocked;
 }

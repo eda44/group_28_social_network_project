@@ -7,17 +7,17 @@ import lombok.Setter;
 @Setter
 public class AccountSearchDto {
 
-    private long[] ids;
+    private Long[] ids;
     private String author;
     private String firstName;
     private String lastName;
-    private long birthdateFrom;
-    private long birthdateTo;
+    private Long birthdateFrom;
+    private Long birthdateTo;
     private CityDto city;
-    private long cityId;
+    private Long cityId;
     private CountryDto country;
-    private long countryId;
-    private boolean isBlocked;
-    private boolean isDeleted;
+    private Long countryId;
+    private Boolean isBlocked;
+    private Boolean isDeleted;
     private PageableObject page;
 }

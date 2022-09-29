@@ -7,8 +7,8 @@ import lombok.Setter;
 @Setter
 public class DialogDto {
 
-    private long id;
+    private Long id;
     private AccountByIdDto conversationPartner;
-    private long unreadCount;
+    private Long unreadCount;
     private MessageDto last_message;
 }

@@ -8,7 +8,7 @@ import ru.skillbox.dto.enums.NameNotification;
 @Setter
 public class NotificationSentDto {
 
-    private long timestamp;
+    private Long timestamp;
     private NotificationDataRs[] data;
 
 
@@ -16,10 +16,10 @@ public class NotificationSentDto {
     @Setter
     static class NotificationDataRs {
 
-        private int id;
+        private Integer id;
         private AccountByIdDto author;
         private String content;
         private NameNotification notificationType;
-        private long sentTime;
+        private Long sentTime;
     }
 }

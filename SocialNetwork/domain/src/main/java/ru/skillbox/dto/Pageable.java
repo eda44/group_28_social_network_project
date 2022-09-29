@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class Pageable {
 
-    private int page;
-    private int size;
+    private Integer page;
+    private Integer size;
     private String[] sort;
 }

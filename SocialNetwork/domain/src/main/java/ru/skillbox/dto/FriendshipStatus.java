@@ -8,8 +8,8 @@ import ru.skillbox.dto.enums.Code;
 @Setter
 public class FriendshipStatus {
 
-    private long id;
-    private long time;
+    private Long id;
+    private Long time;
     private Code code;
 
 }

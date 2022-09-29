@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class CountryDto {
 
-    private long id;
+    private Long id;
     private String title;
     private CityDto[] cities;
 }
