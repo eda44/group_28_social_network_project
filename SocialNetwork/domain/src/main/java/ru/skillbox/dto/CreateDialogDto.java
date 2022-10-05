@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class CreateDialogDto {
 
-    private long id;
+    private Long id;
 
 }

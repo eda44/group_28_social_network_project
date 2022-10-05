@@ -8,7 +8,7 @@ import ru.skillbox.dto.enums.NameNotification;
 @Setter
 public class NotificationInputDto {
 
-    private long userId;
+    private Long userId;
     private NameNotification nameNotification;
     private String content;
 

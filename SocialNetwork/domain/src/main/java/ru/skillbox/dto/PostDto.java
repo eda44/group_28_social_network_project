@@ -8,8 +8,8 @@ import ru.skillbox.dto.enums.Type;
 @Setter
 public class PostDto {
 
-    private int id;
-    private long time;
+    private Integer id;
+    private Long time;
     private AccountByIdDto author;
     private String title;
     private Type type;
@@ -17,7 +17,7 @@ public class PostDto {
     private Boolean isBlocked;
     private PostCommentDto[] comments;
     private PostTagDto[] tags;
-    private int likes;
+    private Integer likes;
     private Boolean myLike;
     private String photoUrl;
 }

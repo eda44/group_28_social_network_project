@@ -7,10 +7,10 @@ import lombok.Setter;
 @Setter
 public class Friendship {
 
-    private long id;
-    private long srcPersonId;
-    private long destPersonId;
-    private long statusId;
+    private Long id;
+    private Long srcPersonId;
+    private Long destPersonId;
+    private Long statusId;
     private FriendshipStatus status;
     private String previousStatus;
 }

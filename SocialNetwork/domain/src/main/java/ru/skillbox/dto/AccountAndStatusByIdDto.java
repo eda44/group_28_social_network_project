@@ -9,7 +9,7 @@ import ru.skillbox.dto.enums.StatusCode;
 @Setter
 public class AccountAndStatusByIdDto {
 
-    private long id;
+    private Long id;
     private String email;
     private String phone;
     private String photo;
@@ -19,10 +19,10 @@ public class AccountAndStatusByIdDto {
     private StatusCode statusCode;
     private String firstName;
     private String lastName;
-    private long regDate;
-    private long birthDate;
+    private Long regDate;
+    private Long birthDate;
     private MessagePermission messagePermission;
-    private long lastOnlineTime;
-    private boolean isOnline;
-    private boolean isBlocked;
+    private Long lastOnlineTime;
+    private Boolean isOnline;
+    private Boolean isBlocked;
 }

@@ -7,10 +7,10 @@ import lombok.Setter;
 @Setter
 public class PageableObject {
 
-    private long offset;
+    private Long offset;
     private Sort sort;
-    private int pageNumber;
-    private int pageSize;
+    private Integer pageNumber;
+    private Integer pageSize;
     private Boolean unpaged;
     private Boolean paged;
 

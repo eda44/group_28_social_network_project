@@ -7,10 +7,10 @@ import lombok.Setter;
 @Setter
 public class MessageDto {
 
-    private long id;
-    private long time;
+    private Long id;
+    private Long time;
     private String status;
-    private long authorId;
-    private long recipientId;
+    private Long authorId;
+    private Long recipientId;
     private String messageText;
 }

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class PostTagDto {
 
-    private int id;
+    private Integer id;
     private String tag;
 
 }
