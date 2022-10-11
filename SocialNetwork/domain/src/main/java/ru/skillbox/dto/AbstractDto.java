@@ -7,4 +7,8 @@ import lombok.Setter;
 public class AbstractDto {
 
     private String message;
+
+    public AbstractDto(String message) {
+        this.message = message;
+    }
 }

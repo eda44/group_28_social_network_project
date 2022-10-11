@@ -3,7 +3,7 @@ package ru.skillbox.repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.skillbox.mappers.PersonMapper;
+import ru.skillbox.mapper.PersonMapper;
 import ru.skillbox.model.Person;
 
 import java.util.List;

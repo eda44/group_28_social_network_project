@@ -1,4 +1,4 @@
-package ru.skillbox.mappers;
+package ru.skillbox.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.skillbox.model.Person;
