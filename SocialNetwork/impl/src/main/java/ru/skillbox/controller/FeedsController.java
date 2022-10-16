@@ -102,7 +102,7 @@ public class FeedsController implements FeedsInterface {
 
 
     @GetMapping("/api/v1/notifications")
-    public ResponseEntity<Object> getNotifications(){
+    public ResponseEntity<Object> getNotifications() {
         return ResponseEntity.ok("{\n" +
                 "  \"timestamp\": 0,\n" +
                 "  \"data\": [\n" +
@@ -148,8 +148,8 @@ public class FeedsController implements FeedsInterface {
     }
 
     @GetMapping("/api/v1/users/me")
-    public ResponseEntity<Object> getUsersMe(){
-        return  ResponseEntity.ok("{\n" +
+    public ResponseEntity<Object> getUsersMe() {
+        return ResponseEntity.ok("{\n" +
                 "  \"error\": \"Неверный запрос\",\n" +
                 "  \"timestamp\": 1644234125000,\n" +
                 "  \"data\": {\n" +
@@ -190,7 +190,7 @@ public class FeedsController implements FeedsInterface {
     }
 
     @GetMapping("/api/v1/friends/recommendations")
-    public ResponseEntity<Object> getRecommendations(){
+    public ResponseEntity<Object> getRecommendations() {
         return ResponseEntity.ok("{\n" +
                 "  \"error\": \"Неверный запрос\",\n" +
                 "  \"timestamp\": 1644234125000,\n" +
@@ -230,8 +230,6 @@ public class FeedsController implements FeedsInterface {
                 "  \"error_description\": \"Неверные учетные данные\"\n" +
                 "}");
     }
-
-
 
 
 }

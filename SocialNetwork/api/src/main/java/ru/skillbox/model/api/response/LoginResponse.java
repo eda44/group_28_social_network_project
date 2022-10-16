@@ -3,7 +3,7 @@ package ru.skillbox.model.api.response;
 import lombok.Getter;
 import lombok.Setter;
 import ru.skillbox.dto.AccountDto;
-import ru.skillbox.model.api.model.User;
+import ru.skillbox.model.User;
 
 import java.util.Date;
 
