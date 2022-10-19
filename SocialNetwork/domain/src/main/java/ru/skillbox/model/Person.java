@@ -1,44 +1,51 @@
 package ru.skillbox.model;
 
-import org.springframework.stereotype.Component;
+import java.util.Date;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import lombok.Builder;
+import lombok.Data;
+import ru.skillbox.dto.enums.MessagePermission;
 
-@Component
+@Entity
+@Builder
+@Data
 public class Person {
-    private int id;
-    private String name;
-    private String lastname;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
-    public Person() {
-    }
+    private String firstName;
 
-    public Person(int id, String name, String lastname) {
-        this.id = id;
-        this.name = name;
-        this.lastname = lastname;
-    }
+    private String lastName;
 
-    public int getId() {
-        return id;
-    }
+    private Date regDate;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    private Date birthDate;
 
-    public String getName() {
-        return name;
-    }
+    private String email;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    private String phone;
 
-    public String getLastname() {
-        return lastname;
-    }
+    private String password;
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
+    private String photo;
+
+    private String about;
+
+    private String town;
+
+    private int confirmationCode;
+
+    private boolean isApproved;
+
+    private MessagePermission messagePermission;
+
+    private Date lastOnlineTime;
+
+    private boolean isBlocking;
+
 }
 

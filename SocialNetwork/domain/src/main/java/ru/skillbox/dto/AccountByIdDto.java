@@ -1,6 +1,7 @@
 package ru.skillbox.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import ru.skillbox.dto.enums.MessagePermission;
@@ -12,6 +13,7 @@ import javax.persistence.Id;
 
 @Getter
 @Setter
+@Builder
 public class AccountByIdDto {
 
     private Long id;
