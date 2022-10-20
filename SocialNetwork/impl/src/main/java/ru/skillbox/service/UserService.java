@@ -1,25 +1,59 @@
 package ru.skillbox.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.skillbox.exception.EmailNotFoundException;
+import ru.skillbox.exception.InvalidCredentialsException;
+import ru.skillbox.exception.UserIsAlreadyRegisteredException;
 import ru.skillbox.model.User;
 import ru.skillbox.model.api.request.LoginRequest;
+import ru.skillbox.model.api.request.PasswordRecoveryRequest;
 import ru.skillbox.model.api.request.RegistrationRequest;
+import ru.skillbox.model.api.response.LoginResponse;
+import ru.skillbox.model.api.response.PasswordRecoveryResponse;
+import ru.skillbox.model.api.response.RegistrationResponse;
 import ru.skillbox.repository.UserRepo;
 
+import java.security.SecureRandom;
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserRepo userRepo;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final EmailService emailService;
 
-    public boolean saveUser(RegistrationRequest request) {
+    public LoginResponse login(LoginRequest request) throws InvalidCredentialsException {
+        if (!passwordCheck(request)) {
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+        User user = loadUserByUsername(request.getEmail());
+        return LoginResponse.getOkResponse(user);
+    }
+
+    public RegistrationResponse registration(RegistrationRequest request) throws UserIsAlreadyRegisteredException {
+        if (!saveUser(request)) {
+            throw new UserIsAlreadyRegisteredException("User is already registered");
+        }
+        return RegistrationResponse.getOkResponse();
+    }
+
+    public PasswordRecoveryResponse passwordRecovery(PasswordRecoveryRequest request) throws EmailNotFoundException {
+        String email = request.getEmail();
+        if (getUserByEmail(email) == null) {
+            throw new EmailNotFoundException("Email not found");
+        }
+        String password = generateRandomPassword(8);
+        setNewPassword(email, password);
+        emailService.passwordRecoveryMessage(email, password);
+        return PasswordRecoveryResponse.getOkResponse();
+    }
+
+    private boolean saveUser(RegistrationRequest request) {
         User userFromDB = userRepo.findByEmail(request.getEmail());
         if (userFromDB != null) {
             return false;
@@ -34,7 +68,7 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
-    public boolean passwordCheck(LoginRequest request) {
+    private boolean passwordCheck(LoginRequest request) {
         User userFromDB = getUserByEmail(request.getEmail());
         return userFromDB != null && bCryptPasswordEncoder.matches(request.getPassword(), userFromDB.getPassword());
     }
@@ -48,7 +82,24 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public User getUserByEmail(String email){
+    private User getUserByEmail(String email) {
         return userRepo.findByEmail(email);
+    }
+
+    private void setNewPassword(String email, String password) {
+        User user = userRepo.findByEmail(email);
+        user.setPassword(bCryptPasswordEncoder.encode(password));
+        userRepo.save(user);
+    }
+
+    private String generateRandomPassword(int len) {
+        final String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            int randomIndex = random.nextInt(chars.length());
+            sb.append(chars.charAt(randomIndex));
+        }
+        return sb.toString();
     }
 }

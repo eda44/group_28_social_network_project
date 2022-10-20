@@ -3,31 +3,31 @@ package ru.skillbox.model.api.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
-import ru.skillbox.dto.AccountDto;
-import ru.skillbox.model.User;
+import ru.skillbox.dto.AbstractDto;
 
 import java.util.Date;
-@Builder
+
 @Getter
-public class LoginResponse {
+@Builder
+public class PasswordRecoveryResponse {
     private String error;
     private Long timestamp;
-    private AccountDto data;
+    private AbstractDto data;
     @JsonProperty("error_description")
     private String errorDescription;
 
-    public static LoginResponse getOkResponse(User user){
-        return LoginResponse.builder()
+    public static PasswordRecoveryResponse getOkResponse() {
+        return PasswordRecoveryResponse.builder()
                 .timestamp(new Date().getTime())
-                .data(AccountDto.getCorrectResponseFrom(user))
+                .data(new AbstractDto("ok"))
                 .build();
     }
 
-    public static LoginResponse getBadResponse(){
-        return LoginResponse.builder()
+    public static PasswordRecoveryResponse getBadResponse() {
+        return PasswordRecoveryResponse.builder()
                 .error("Неверный запрос")
                 .timestamp(new Date().getTime())
-                .errorDescription("Неверные учетные данные")
+                .errorDescription("Неверный код авторизации")
                 .build();
     }
 }
