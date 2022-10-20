@@ -1,19 +1,34 @@
 package ru.skillbox.model.api.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import ru.skillbox.dto.AbstractDto;
 
 
 import java.util.Date;
 
 @Getter
-@Setter
+@Builder
 public class RegistrationResponse {
-    private String error = "Неверный запрос";
-    private Long timestamp = new Date().getTime();
-    private AbstractDto data = new AbstractDto("ok");
+    private String error;
+    private Long timestamp;
+    private AbstractDto data;
     @JsonProperty("error_description")
-    private String errorDescription = "Этот аккуант уже зарегистрирован";
+    private String errorDescription;
+
+    public static RegistrationResponse getOkResponse() {
+        return RegistrationResponse.builder()
+                .timestamp(new Date().getTime())
+                .data(new AbstractDto("ok"))
+                .build();
+    }
+
+    public static RegistrationResponse getBadResponse() {
+        return RegistrationResponse.builder()
+                .error("Неверный запрос")
+                .timestamp(new Date().getTime())
+                .errorDescription("Этот аккуант уже зарегистрирован")
+                .build();
+    }
 }

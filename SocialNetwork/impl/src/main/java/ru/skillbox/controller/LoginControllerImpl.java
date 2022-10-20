@@ -1,30 +1,30 @@
 package ru.skillbox.controller;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.skillbox.exception.InvalidCredentialsException;
+import ru.skillbox.model.api.model.LoginController;
 import ru.skillbox.model.api.request.LoginRequest;
+import ru.skillbox.model.api.response.LoginResponse;
 import ru.skillbox.service.UserService;
 
 @RestController
-@RequestMapping("/api")
-public class LoginController {
+@RequiredArgsConstructor
+public class LoginControllerImpl implements LoginController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @PostMapping("/v1/auth/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
-/*        if (userService.passwordCheck(request)) {
-            User user = userService.loadUserByUsername(request.getEmail());
-            return ResponseEntity.ok(LoginResponse.getCorrectResponseFrom(user));
-        }
-        return ResponseEntity.badRequest().body(LoginResponse.getCorrectResponseFrom(new User()));*/
-     return ResponseEntity.ok("{\n" +
+    @Override
+    public ResponseEntity<String> login(LoginRequest request) {
+       /* try {
+            return ResponseEntity.ok(userService.login(request));
+        }catch (InvalidCredentialsException e){
+            return ResponseEntity.badRequest().body(LoginResponse.getBadResponse());
+        }*/
+
+      return ResponseEntity.ok("{\n" +
                 "  \"error\": \"Неверный запрос\",\n" +
                 "  \"timestamp\": 1644234125000,\n" +
                 "  \"data\": {\n" +
@@ -64,7 +64,7 @@ public class LoginController {
                 "}");
     }
 
-    @PostMapping("/v1/auth/logout")
+    @Override
     public String logout() {
         return "logout";
     }
