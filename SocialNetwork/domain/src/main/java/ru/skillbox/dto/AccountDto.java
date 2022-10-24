@@ -1,12 +1,13 @@
 package ru.skillbox.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import ru.skillbox.dto.enums.MessagePermission;
+import ru.skillbox.model.User;
 
+@Builder
 @Getter
-@Setter
 public class AccountDto {
     private Long id;
     private String email;
@@ -35,21 +36,16 @@ public class AccountDto {
     @JsonProperty("is_deleted")
     private Boolean isDeleted;
 
-    public static AccountDto getCorrectResponseFrom(Long id, String email, String firstName, String lastName, Long regDate) {
-        AccountDto accountDto = new AccountDto();
-
-        CityDto cityDto = new CityDto();
-
-        CountryDto countryDto = new CountryDto();
-
-        accountDto.setId(id);
-        accountDto.setEmail(email);
-        accountDto.setFirstName(firstName);
-        accountDto.setLastName(lastName);
-        accountDto.setRegDate(regDate);
-        accountDto.setCity(cityDto);
-        accountDto.setCountry(countryDto);
-        accountDto.setToken("asd");
-        return accountDto;
+    public static AccountDto getCorrectResponseFrom(User user) {
+        return AccountDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .regDate(user.getRegDate())
+                .city(new CityDto())
+                .country(new CountryDto())
+                .token("token")
+                .build();
     }
 }
