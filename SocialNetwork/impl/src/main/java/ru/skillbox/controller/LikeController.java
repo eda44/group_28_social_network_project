@@ -3,7 +3,7 @@ package ru.skillbox.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.dto.enums.LikeType;
-import ru.skillbox.model.api.request.PostLikeRequest;
+import ru.skillbox.request.PostLikeRequest;
 
 @RestController
 public class LikeController {

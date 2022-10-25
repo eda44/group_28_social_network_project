@@ -9,12 +9,12 @@ import ru.skillbox.exception.EmailNotFoundException;
 import ru.skillbox.exception.InvalidCredentialsException;
 import ru.skillbox.exception.UserIsAlreadyRegisteredException;
 import ru.skillbox.model.User;
-import ru.skillbox.model.api.request.LoginRequest;
-import ru.skillbox.model.api.request.PasswordRecoveryRequest;
-import ru.skillbox.model.api.request.RegistrationRequest;
-import ru.skillbox.model.api.response.LoginResponse;
-import ru.skillbox.model.api.response.PasswordRecoveryResponse;
-import ru.skillbox.model.api.response.RegistrationResponse;
+import ru.skillbox.request.LoginRequest;
+import ru.skillbox.request.PasswordRecoveryRequest;
+import ru.skillbox.request.RegistrationRequest;
+import ru.skillbox.response.LoginResponse;
+import ru.skillbox.response.PasswordRecoveryResponse;
+import ru.skillbox.response.RegistrationResponse;
 import ru.skillbox.repository.UserRepo;
 
 import java.security.SecureRandom;

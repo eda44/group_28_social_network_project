@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.skillbox.dto.AccountByIdDto;
 import ru.skillbox.mapper.PersonToAccountById;
 import ru.skillbox.model.Person;
-import ru.skillbox.model.api.response.account.SearchAccountRs;
+import ru.skillbox.response.account.SearchAccountRs;
 import ru.skillbox.repository.PersonRepo;
 import ru.skillbox.repository.UserRepo;
 

@@ -4,10 +4,8 @@ package ru.skillbox.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skillbox.exception.InvalidCredentialsException;
-import ru.skillbox.model.api.model.LoginController;
-import ru.skillbox.model.api.request.LoginRequest;
-import ru.skillbox.model.api.response.LoginResponse;
+import ru.skillbox.model.LoginController;
+import ru.skillbox.request.LoginRequest;
 import ru.skillbox.service.UserService;
 
 @RestController

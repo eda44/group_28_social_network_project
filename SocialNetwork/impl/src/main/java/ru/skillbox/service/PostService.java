@@ -2,14 +2,11 @@ package ru.skillbox.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.skillbox.model.Post;
-import ru.skillbox.model.api.request.PostAddRequest;
-import ru.skillbox.model.api.response.PostAddResponse;
+import ru.skillbox.request.PostAddRequest;
+import ru.skillbox.response.PostAddResponse;
 import ru.skillbox.repository.PostRepository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

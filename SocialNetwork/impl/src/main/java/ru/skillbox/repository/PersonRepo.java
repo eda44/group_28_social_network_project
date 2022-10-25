@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.skillbox.model.Person;
 
 @Repository
-public interface PersonRepo extends JpaRepository<Integer, Person> {
+public interface PersonRepo extends JpaRepository<Person, Long> {
 
   Optional<Person> findById(long id);
 
