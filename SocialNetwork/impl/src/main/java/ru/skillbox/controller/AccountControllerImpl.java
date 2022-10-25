@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.dto.AbstractDto;
-import ru.skillbox.model.api.request.account.AccountEditRq;
-import ru.skillbox.model.api.request.account.AccountRecoveryRequest;
-import ru.skillbox.model.api.response.account.RecoveryAccountRs;
-import ru.skillbox.model.api.model.Account;
+import ru.skillbox.request.account.AccountEditRq;
+import ru.skillbox.request.account.AccountRecoveryRequest;
+import ru.skillbox.response.account.RecoveryAccountRs;
+import ru.skillbox.model.Account;
 import ru.skillbox.service.AccountService;
 import ru.skillbox.service.SearchPersonService;
 

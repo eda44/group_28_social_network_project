@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.dto.*;
 import ru.skillbox.dto.enums.MessagePermission;
 import ru.skillbox.dto.enums.Type;
-import ru.skillbox.model.api.request.FeedsInterface;
-import ru.skillbox.model.api.response.FeedsResponseOK;
+import ru.skillbox.model.FeedsInterface;
+import ru.skillbox.response.FeedsResponseOK;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -98,53 +98,6 @@ public class FeedsController implements FeedsInterface {
         accountByIdDto.setPhone("+7 645 943 5082");
         accountByIdDto.setPhoto("data:image/png;base64...");
         return accountByIdDto;
-    }
-
-
-    @GetMapping("/api/v1/notifications")
-    public ResponseEntity<Object> getNotifications() {
-        return ResponseEntity.ok("{\n" +
-                "  \"timestamp\": 0,\n" +
-                "  \"data\": [\n" +
-                "    {\n" +
-                "      \"id\": 0,\n" +
-                "      \"author\": {\n" +
-                "        \"id\": 1,\n" +
-                "        \"email\": \"dsiegertsz0@fc2.com\",\n" +
-                "        \"phone\": \"+7 645 943 5082\",\n" +
-                "        \"photo\": \"data:image/png;base64...\",\n" +
-                "        \"about\": \"Maecenas tristique...\",\n" +
-                "        \"city\": {\n" +
-                "          \"id\": 0,\n" +
-                "          \"title\": \"string\",\n" +
-                "          \"country_id\": 0\n" +
-                "        },\n" +
-                "        \"country\": {\n" +
-                "          \"id\": 0,\n" +
-                "          \"title\": \"string\",\n" +
-                "          \"cities\": [\n" +
-                "            {\n" +
-                "              \"id\": 0,\n" +
-                "              \"title\": \"string\",\n" +
-                "              \"country_id\": 0\n" +
-                "            }\n" +
-                "          ]\n" +
-                "        },\n" +
-                "        \"first_name\": \"Davida\",\n" +
-                "        \"last_name\": \"Siegertsz\",\n" +
-                "        \"reg_date\": 1618070680000,\n" +
-                "        \"birth_date\": 702565308000,\n" +
-                "        \"message_permission\": \"ALL\",\n" +
-                "        \"last_online_time\": 1644234125000,\n" +
-                "        \"is_online\": true,\n" +
-                "        \"is_blocked\": false\n" +
-                "      },\n" +
-                "      \"content\": \"string\",\n" +
-                "      \"notification_type\": \"FRIEND_REQUEST\",\n" +
-                "      \"sent_time\": 0\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}");
     }
 
     @GetMapping("/api/v1/users/me")

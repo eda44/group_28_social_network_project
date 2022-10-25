@@ -2,16 +2,12 @@ package ru.skillbox.service;
 
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.skillbox.dto.AccountByIdDto;
-import ru.skillbox.mapper.PersonToAccountById;
-import ru.skillbox.model.Person;
 import ru.skillbox.model.User;
-import ru.skillbox.model.api.request.account.AccountEditRq;
-import ru.skillbox.model.api.request.account.AccountRecoveryRequest;
-import ru.skillbox.model.api.response.account.BlockingAccountRs;
-import ru.skillbox.model.api.response.account.DeleteAccountRs;
+import ru.skillbox.request.account.AccountEditRq;
+import ru.skillbox.request.account.AccountRecoveryRequest;
+import ru.skillbox.response.account.BlockingAccountRs;
+import ru.skillbox.response.account.DeleteAccountRs;
 import ru.skillbox.repository.PersonRepo;
 import ru.skillbox.repository.UserRepo;
 

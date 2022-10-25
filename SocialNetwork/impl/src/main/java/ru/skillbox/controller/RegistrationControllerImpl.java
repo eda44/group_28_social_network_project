@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.exception.UserIsAlreadyRegisteredException;
-import ru.skillbox.model.api.model.RegistrationController;
-import ru.skillbox.model.api.request.RegistrationRequest;
-import ru.skillbox.model.api.response.RegistrationResponse;
+import ru.skillbox.model.RegistrationController;
+import ru.skillbox.request.RegistrationRequest;
+import ru.skillbox.response.RegistrationResponse;
 import ru.skillbox.service.UserService;
 
 @RestController

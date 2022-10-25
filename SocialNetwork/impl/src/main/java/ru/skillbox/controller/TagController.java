@@ -3,8 +3,8 @@ package ru.skillbox.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.model.Tag;
-import ru.skillbox.model.api.request.PostTagRequest;
-import ru.skillbox.model.api.request.TagInterface;
+import ru.skillbox.request.PostTagRequest;
+import ru.skillbox.model.TagInterface;
 
 @RestController
 public class TagController implements TagInterface {
