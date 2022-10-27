@@ -1,23 +1,28 @@
-package ru.skillbox.dto;
+package ru.skillbox.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
-public class MessageDto {
+@Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class DialogData {
 
     private Long id;
+
     private Long time;
-    private String status;
 
     @JsonProperty("author_id")
     private Long authorId;
 
-    @JsonProperty("recipient_id")
-    private Long recipientId;
-
     @JsonProperty("message_text")
     private String messageText;
+
+    private String message;
+
+    private Long count;
+
 }
+
