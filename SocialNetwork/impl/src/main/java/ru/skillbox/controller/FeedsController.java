@@ -141,48 +141,4 @@ public class FeedsController implements FeedsInterface {
                 "  \"error_description\": \"Неверный код авторизации\"\n" +
                 "}");
     }
-
-    @GetMapping("/api/v1/friends/recommendations")
-    public ResponseEntity<Object> getRecommendations() {
-        return ResponseEntity.ok("{\n" +
-                "  \"error\": \"Неверный запрос\",\n" +
-                "  \"timestamp\": 1644234125000,\n" +
-                "  \"data\": [\n" +
-                "    {\n" +
-                "      \"id\": 1,\n" +
-                "      \"email\": \"dsiegertsz0@fc2.com\",\n" +
-                "      \"phone\": \"+7 645 943 5082\",\n" +
-                "      \"photo\": \"data:image/png;base64...\",\n" +
-                "      \"about\": \"Maecenas tristique...\",\n" +
-                "      \"city\": {\n" +
-                "        \"id\": 0,\n" +
-                "        \"title\": \"string\",\n" +
-                "        \"country_id\": 0\n" +
-                "      },\n" +
-                "      \"country\": {\n" +
-                "        \"id\": 0,\n" +
-                "        \"title\": \"string\",\n" +
-                "        \"cities\": [\n" +
-                "          {\n" +
-                "            \"id\": 0,\n" +
-                "            \"title\": \"string\",\n" +
-                "            \"country_id\": 0\n" +
-                "          }\n" +
-                "        ]\n" +
-                "      },\n" +
-                "      \"first_name\": \"Davida\",\n" +
-                "      \"last_name\": \"Siegertsz\",\n" +
-                "      \"reg_date\": 1618070680000,\n" +
-                "      \"birth_date\": 702565308000,\n" +
-                "      \"message_permission\": \"ALL\",\n" +
-                "      \"last_online_time\": 1644234125000,\n" +
-                "      \"is_online\": true,\n" +
-                "      \"is_blocked\": false\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"error_description\": \"Неверные учетные данные\"\n" +
-                "}");
-    }
-
-
 }
