@@ -3,7 +3,7 @@ package ru.skillbox.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
-import ru.skillbox.dto.AbstractDto;
+import ru.skillbox.dto.LogoutDto;
 
 
 import java.util.Date;
@@ -13,14 +13,14 @@ import java.util.Date;
 public class RegistrationResponse {
     private String error;
     private Long timestamp;
-    private AbstractDto data;
+    private LogoutDto data;
     @JsonProperty("error_description")
     private String errorDescription;
 
     public static RegistrationResponse getOkResponse() {
         return RegistrationResponse.builder()
                 .timestamp(new Date().getTime())
-                .data(new AbstractDto("ok"))
+                .data(new LogoutDto("ok"))
                 .build();
     }
 

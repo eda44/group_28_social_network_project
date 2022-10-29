@@ -7,24 +7,21 @@ import ru.skillbox.exception.EmailNotFoundException;
 import ru.skillbox.model.PasswordRecoveryController;
 import ru.skillbox.request.PasswordRecoveryRequest;
 import ru.skillbox.response.PasswordRecoveryResponse;
-import ru.skillbox.service.UserService;
+import ru.skillbox.service.PasswordRecoveryService;
 
 
 @RestController
 @RequiredArgsConstructor
 public class PasswordRecoveryControllerImpl implements PasswordRecoveryController {
 
-    private final UserService userService;
-
+    private final PasswordRecoveryService passwordRecoveryService;
 
     @Override
     public ResponseEntity<PasswordRecoveryResponse> passwordRecovery(PasswordRecoveryRequest request) {
         try {
-            return ResponseEntity.ok(userService.passwordRecovery(request));
+            return ResponseEntity.ok(passwordRecoveryService.passwordRecovery(request));
         } catch (EmailNotFoundException e) {
             return ResponseEntity.badRequest().body(PasswordRecoveryResponse.getBadResponse());
         }
     }
-
-
 }

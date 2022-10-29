@@ -7,17 +7,17 @@ import ru.skillbox.exception.UserIsAlreadyRegisteredException;
 import ru.skillbox.model.RegistrationController;
 import ru.skillbox.request.RegistrationRequest;
 import ru.skillbox.response.RegistrationResponse;
-import ru.skillbox.service.UserService;
+import ru.skillbox.service.RegistrationService;
 
 @RestController
 @RequiredArgsConstructor
 public class RegistrationControllerImpl implements RegistrationController {
-    private final UserService userService;
+    private final RegistrationService registrationService;
 
     @Override
     public ResponseEntity<RegistrationResponse> registration(RegistrationRequest request) {
         try {
-            return ResponseEntity.ok(userService.registration(request));
+            return ResponseEntity.ok(registrationService.registration(request));
         } catch (UserIsAlreadyRegisteredException e) {
             return ResponseEntity.badRequest().body(RegistrationResponse.getBadResponse());
         }

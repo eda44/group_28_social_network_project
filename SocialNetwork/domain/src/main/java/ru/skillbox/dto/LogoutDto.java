@@ -8,4 +8,8 @@ import lombok.Setter;
 public class LogoutDto {
 
     private String message;
+
+    public LogoutDto(String message) {
+        this.message = message;
+    }
 }
