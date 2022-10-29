@@ -1,51 +1,47 @@
 package ru.skillbox.model;
 
-import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import lombok.Builder;
-import lombok.Data;
+import javax.persistence.*;
+
+import lombok.Getter;
+import lombok.Setter;
 import ru.skillbox.dto.enums.MessagePermission;
 
 @Entity
-@Builder
-@Data
+@Table(name = "persons")
+@Getter
+@Setter
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
+    @Column(name = "first_name")
     private String firstName;
-
+    @Column(name = "last_name")
     private String lastName;
-
-    private Date regDate;
-
-    private Date birthDate;
+    @Column(name = "reg_date")
+    private long regDate;
+    @Column(name = "birth_date")
+    private long birthDate;
 
     private String email;
 
     private String phone;
-
-    private String password;
 
     private String photo;
 
     private String about;
 
     private String town;
-
+    @Column(name = "confirmation_code")
     private int confirmationCode;
-
+    @Column(name = "is_approved")
     private boolean isApproved;
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_permission")
     private MessagePermission messagePermission;
-
-    private Date lastOnlineTime;
-
-    private boolean isBlocking;
-
+    @Column(name = "last_online_time")
+    private long lastOnlineTime;
+    @Column(name = "is_blocked")
+    private boolean isBlocked;
 }
 

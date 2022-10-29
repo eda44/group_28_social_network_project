@@ -4,25 +4,27 @@ package ru.skillbox.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import ru.skillbox.exception.InvalidCredentialsException;
 import ru.skillbox.model.LoginController;
 import ru.skillbox.request.LoginRequest;
-import ru.skillbox.service.UserService;
+import ru.skillbox.response.LoginResponse;
+import ru.skillbox.service.LoginService;
 
 @RestController
 @RequiredArgsConstructor
 public class LoginControllerImpl implements LoginController {
 
-    private final UserService userService;
+    private final LoginService loginService;
 
     @Override
-    public ResponseEntity<String> login(LoginRequest request) {
-       /* try {
-            return ResponseEntity.ok(userService.login(request));
+    public ResponseEntity<LoginResponse> login(LoginRequest request) {
+       try {
+            return ResponseEntity.ok(loginService.login(request));
         }catch (InvalidCredentialsException e){
             return ResponseEntity.badRequest().body(LoginResponse.getBadResponse());
-        }*/
+        }
 
-      return ResponseEntity.ok("{\n" +
+     /* return ResponseEntity.ok("{\n" +
                 "  \"error\": \"Неверный запрос\",\n" +
                 "  \"timestamp\": 1644234125000,\n" +
                 "  \"data\": {\n" +
@@ -59,7 +61,7 @@ public class LoginControllerImpl implements LoginController {
                 "    \"is_deleted\": false\n" +
                 "  },\n" +
                 "  \"error_description\": \"asd\"\n" +
-                "}");
+                "}");*/
     }
 
     @Override

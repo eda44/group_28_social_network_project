@@ -23,7 +23,9 @@ public class User implements UserDetails {
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "reg_date")
-    private Long regDate;
+    private long regDate;
+    @Column(name = "account_non_locked")
+    private boolean AccountNonLocked;
 
 
     @Override
@@ -48,7 +50,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return AccountNonLocked;
     }
 
     @Override

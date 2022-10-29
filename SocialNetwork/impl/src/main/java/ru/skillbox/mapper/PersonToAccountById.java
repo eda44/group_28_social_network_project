@@ -14,12 +14,11 @@ public class PersonToAccountById {
         .about(person.getAbout())
         .firstName(person.getFirstName())
         .lastName(person.getLastName())
-        .regDate(person.getRegDate().getTime())
-        .birthDate(person.getBirthDate().getTime())
+        .regDate(person.getRegDate())
+        .birthDate(person.getBirthDate())
         .messagePermission(person.getMessagePermission())
-        .lastOnlineTime(person.getLastOnlineTime().getTime())
+        .lastOnlineTime(person.getLastOnlineTime())
         .isOnline(true)//как получить этот флаг
-        .isBlocked(person.isBlocking())
         .build();
   }
 
