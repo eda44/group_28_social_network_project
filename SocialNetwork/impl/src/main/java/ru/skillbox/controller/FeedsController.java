@@ -34,7 +34,7 @@ public class FeedsController implements FeedsInterface {
     }
 
     private static void postDtoInit(PostDto postDto) {
-        postDto.setId(0);
+        postDto.setId(0L);
         postDto.setTime(0L);
 
         postDto.setTitle("Очевидное - невероятное");
@@ -59,7 +59,7 @@ public class FeedsController implements FeedsInterface {
 
     private static void postCommentDtoInit(PostCommentDto postCommentDto) {
         AccountByIdDto accountByIdDto = accountByIdDtoInit();
-        postCommentDto.setAuthor(accountByIdDto);
+        postCommentDto.setAuthor(String.valueOf(accountByIdDto));
         postCommentDto.setCommentText("Сколько граммов принял на грудь, когда писал это?");
         postCommentDto.setId(0);
         postCommentDto.setIsBlocked(true);

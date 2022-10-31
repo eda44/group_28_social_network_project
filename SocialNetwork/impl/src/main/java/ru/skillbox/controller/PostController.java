@@ -3,643 +3,159 @@ package ru.skillbox.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.dto.Pageable;
+import ru.skillbox.model.*;
 import ru.skillbox.request.PostAddRequest;
+import ru.skillbox.response.ComplaintResponse;
+import ru.skillbox.response.post.PostAddResponse;
+import ru.skillbox.response.post.PostComplaintResponse;
+import ru.skillbox.response.post.PostResponse;
+import ru.skillbox.service.PersonService;
+import ru.skillbox.service.PostLikeService;
 import ru.skillbox.service.PostService;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
-public class PostController {
+public class PostController implements PostInterface {
 
     private final PostService postService;
+    private final PostLikeService postLikeService;
+    private final PersonService personService;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, PostLikeService postLikeService, PersonService personService) {
         this.postService = postService;
+        this.postLikeService = postLikeService;
+        this.personService = personService;
     }
 
     @PostMapping("/api/v1/post")
-    public ResponseEntity<String> addNewPost(@RequestBody PostAddRequest request) {
-        postService.postAddRs(request);
-        return ResponseEntity.ok("{\n" +
-                "  \"status\" : false\n" +
-                "}");
+    public ResponseEntity<PostAddResponse> addNewPost(@RequestBody PostAddRequest request) {
+        Post post = new Post();
+        Person person = personService.setPerson();
+        PostLike postLike = postLikeService.setPostLike();
+        post.setTitle(request.getTitle());
+        post.setPostText(request.getPostText());
+        List<Tag> tagList = new ArrayList<>();
+        for (String tag : request.getTags()) {
+            Tag t = new Tag();
+            t.setTag(tag);
+            tagList.add(t);
+        }
+        PostFile postFile = postService.setPostFile(post, request.getTitle(), request.getPhotoUrl());
+        post.setTags(tagList);
+        post.setPostFiles(List.of(postFile));
+        post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        post.setPerson(personService.getPersonById(1));
+        postLike.setPost(post);
+        person.setPostList(List.of(post));
+        person.setPostLikeList(List.of(postLike));
+        postLike.setPerson(person);
+        postService.savePost(post);
+        PostAddResponse response = new PostAddResponse();
+        response.setStatus(true);
+        return ResponseEntity.ok(response);
     }
 
+
+    @Override
     @GetMapping("/api/v1/post")
-    public ResponseEntity<Object> getPostsAll() {
-        return ResponseEntity.ok("{\n" +
-                "  \"total\" : 1,\n" +
-                "  \"size\" : 20,\n" +
-                "  \"data\" : [ {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  }, {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  } ],\n" +
-                "  \"page\" : 1,\n" +
-                "  \"timestamp\" : 16442341250\n" +
-                "}");
+    public ResponseEntity<PostResponse> getPostsAll(@RequestParam(name = "text", defaultValue = "string") String text,
+                                                    @RequestParam(required = false, name = "date_from") Long dateFrom,
+                                                    @RequestParam(required = false, name = "date_to") Long dateTo,
+                                                    @RequestParam(required = false, name = "author") User user,
+                                                    @RequestParam(required = false, name = "tags") List<Tag> tags,
+                                                    @RequestParam(name = "pageable") Pageable pageable) {
+        PostResponse response = new PostResponse();
+        response.setTimestamp(dateFrom);
+        response.setTotal(1);
+        response.setData(postService.getAllPosts());
+        response.setSize(pageable.getSize());
+        response.setPage(pageable.getPage());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/v1/post/wall")
+    public ResponseEntity<PostResponse> getPostWall() {
+        PostResponse response = new PostResponse();
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setTotal(1);
+        response.setData(postService.getAllPosts());
+        response.setSize(20);
+        response.setPage(1);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/api/v1/post/{id}")
-    public ResponseEntity<String> deletePostById(@PathVariable Integer id) {
-        return ResponseEntity.ok("{\n" +
-                "  \"total\" : 1,\n" +
-                "  \"size\" : 20,\n" +
-                "  \"data\" : [ {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  }, {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  } ],\n" +
-                "  \"page\" : 1,\n" +
-                "  \"timestamp\" : 16442341250\n" +
-                "}");
+    public ResponseEntity<PostResponse> deletePostById(@PathVariable String id) {
+
+        PostResponse response = new PostResponse();
+        response.setSize(20);
+        response.setTotal(1);
+        response.setPage(1);
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setData(postService.getAllPosts());
+        postService.deletePost(postService.getPostById(Long.parseLong(id)));
+        return ResponseEntity.ok(response);
     }
 
 
     @GetMapping("/api/v1/post/{id}")
-    public ResponseEntity<String> getPostById(@PathVariable Integer id) {
-        return ResponseEntity.ok("{\n" +
-                "  \"total\" : 1,\n" +
-                "  \"size\" : 20,\n" +
-                "  \"data\" : [ {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  }, {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  } ],\n" +
-                "  \"page\" : 1,\n" +
-                "  \"timestamp\" : 16442341250\n" +
-                "}");
+    public ResponseEntity<PostResponse> getPostById(@PathVariable String id) {
+        PostResponse response = new PostResponse();
+        response.setSize(20);
+        response.setTotal(1);
+        response.setPage(1);
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setData(List.of(postService.getPostById(Long.parseLong(id))));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/api/v1/post/{id}/report")
-    public ResponseEntity<String> addNewComplaint(@PathVariable Integer id) {
-        return ResponseEntity.ok("{\n" +
-                "  \"data\" : [ {\n" +
-                "    \"message\" : \"message\"\n" +
-                "  }, {\n" +
-                "    \"message\" : \"message\"\n" +
-                "  } ],\n" +
-                "  \"error_description\" : \"items: OrderedMap { \\\"type\\\": \\\"object\\\", \\\"properties\\\": OrderedMap { \\\"error_description\\\": OrderedMap { \\\"type\\\": \\\"string\\\", \\\"description\\\": \\\"Error description\\\", \\\"enum\\\": List [ \\\"Unauthorized\\\", \\\"An authorization code must be supplied\\\", \\\"Redirect URI mismatch\\\", \\\"Invalid authorization code: CODE\\\", \\\"Bad credentials\\\" ] } }, \\\"$$ref\\\": \\\"#/components/schemas/ErrorDescription\",\n" +
-                "  \"timestamp\" : 16442341250\n" +
-                "}");
+    public ResponseEntity<PostComplaintResponse> addNewComplaint(@PathVariable String id) {
+        Post post = postService.getPostById(Long.parseLong(id));
+        PostComplaintResponse response = new PostComplaintResponse();
+        response.setErrorDescription("error");
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        ComplaintResponse complaintResponse = new ComplaintResponse();
+        complaintResponse.setMessage("message");
+        response.setData(List.of(complaintResponse));
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/api/v1/post/{id}")
-    public ResponseEntity<String> putPostById(@RequestBody PostAddRequest request, @PathVariable Integer id) {
-        return ResponseEntity.ok("{\n" +
-                "  \"total\" : 1,\n" +
-                "  \"size\" : 20,\n" +
-                "  \"data\" : [ {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  }, {\n" +
-                "    \"is_blocked\" : true,\n" +
-                "    \"comments\" : [ {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    }, {\n" +
-                "      \"comment_text\" : \"comment_text\",\n" +
-                "      \"is_blocked\" : true,\n" +
-                "      \"post_id\" : 4,\n" +
-                "      \"my_like\" : true,\n" +
-                "      \"parent_id\" : 2,\n" +
-                "      \"id\" : 9,\n" +
-                "      \"time\" : 3,\n" +
-                "      \"sub_comments\" : [ null, null ],\n" +
-                "      \"likes\" : 7\n" +
-                "    } ],\n" +
-                "    \"my_like\" : true,\n" +
-                "    \"author\" : {\n" +
-                "      \"country\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"United States\"\n" +
-                "      },\n" +
-                "      \"city\" : {\n" +
-                "        \"id\" : 1,\n" +
-                "        \"title\" : \"Suchy Dab\"\n" +
-                "      },\n" +
-                "      \"birth_date\" : 702565308000,\n" +
-                "      \"about\" : \"Maecenas tristique...\",\n" +
-                "      \"photo\" : \"data:image/png;base64...\",\n" +
-                "      \"last_name\" : \"Siegertsz\",\n" +
-                "      \"reg_date\" : 1618070680000,\n" +
-                "      \"is_blocked\" : false,\n" +
-                "      \"message_permission\" : \"ALL\",\n" +
-                "      \"last_online_time\" : 1644234125000,\n" +
-                "      \"phone\" : \"+7 645 943 5082\",\n" +
-                "      \"id\" : 1,\n" +
-                "      \"is_online\" : true,\n" +
-                "      \"first_name\" : \"Davida\",\n" +
-                "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-                "    },\n" +
-                "    \"id\" : 2,\n" +
-                "    \"time\" : 7,\n" +
-                "    \"photo_url\" : \"photo_url\",\n" +
-                "    \"title\" : \"title\",\n" +
-                "    \"type\" : \"POSTED\",\n" +
-                "    \"post_text\" : \"post_text\",\n" +
-                "    \"tags\" : [ null, null ],\n" +
-                "    \"likes\" : 1\n" +
-                "  } ],\n" +
-                "  \"page\" : 1,\n" +
-                "  \"timestamp\" : 16442341250\n" +
-                "}");
+    public ResponseEntity<PostResponse> putPostById(@RequestBody PostAddRequest request, @PathVariable String id) {
+        PostResponse response = new PostResponse();
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setSize(20);
+        response.setTotal(1);
+        response.setPage(1);
+        response.setData(postService.getAllPosts());
+        Post post = postService.getPostById(Long.parseLong(id));
+        PostFile postFile = new PostFile();
+        postFile.setName(request.getTitle());
+        postFile.setPost(post);
+        postFile.setPath(request.getPhotoUrl());
+        post.setTitle(request.getTitle());
+        post.setPostText(request.getPostText());
+        post.setPostFiles(List.of(postFile));
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/api/v1/post/{id}/recover")
-    public ResponseEntity<String> recoveryPostById(@PathVariable Integer id) {
-return ResponseEntity.ok("{\n" +
-        "  \"total\" : 1,\n" +
-        "  \"size\" : 20,\n" +
-        "  \"data\" : [ {\n" +
-        "    \"is_blocked\" : true,\n" +
-        "    \"comments\" : [ {\n" +
-        "      \"comment_text\" : \"comment_text\",\n" +
-        "      \"is_blocked\" : true,\n" +
-        "      \"post_id\" : 4,\n" +
-        "      \"my_like\" : true,\n" +
-        "      \"parent_id\" : 2,\n" +
-        "      \"id\" : 9,\n" +
-        "      \"time\" : 3,\n" +
-        "      \"sub_comments\" : [ null, null ],\n" +
-        "      \"likes\" : 7\n" +
-        "    }, {\n" +
-        "      \"comment_text\" : \"comment_text\",\n" +
-        "      \"is_blocked\" : true,\n" +
-        "      \"post_id\" : 4,\n" +
-        "      \"my_like\" : true,\n" +
-        "      \"parent_id\" : 2,\n" +
-        "      \"id\" : 9,\n" +
-        "      \"time\" : 3,\n" +
-        "      \"sub_comments\" : [ null, null ],\n" +
-        "      \"likes\" : 7\n" +
-        "    } ],\n" +
-        "    \"my_like\" : true,\n" +
-        "    \"author\" : {\n" +
-        "      \"country\" : {\n" +
-        "        \"id\" : 1,\n" +
-        "        \"title\" : \"United States\"\n" +
-        "      },\n" +
-        "      \"city\" : {\n" +
-        "        \"id\" : 1,\n" +
-        "        \"title\" : \"Suchy Dab\"\n" +
-        "      },\n" +
-        "      \"birth_date\" : 702565308000,\n" +
-        "      \"about\" : \"Maecenas tristique...\",\n" +
-        "      \"photo\" : \"data:image/png;base64...\",\n" +
-        "      \"last_name\" : \"Siegertsz\",\n" +
-        "      \"reg_date\" : 1618070680000,\n" +
-        "      \"is_blocked\" : false,\n" +
-        "      \"message_permission\" : \"ALL\",\n" +
-        "      \"last_online_time\" : 1644234125000,\n" +
-        "      \"phone\" : \"+7 645 943 5082\",\n" +
-        "      \"id\" : 1,\n" +
-        "      \"is_online\" : true,\n" +
-        "      \"first_name\" : \"Davida\",\n" +
-        "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-        "    },\n" +
-        "    \"id\" : 2,\n" +
-        "    \"time\" : 7,\n" +
-        "    \"photo_url\" : \"photo_url\",\n" +
-        "    \"title\" : \"title\",\n" +
-        "    \"type\" : \"POSTED\",\n" +
-        "    \"post_text\" : \"post_text\",\n" +
-        "    \"tags\" : [ null, null ],\n" +
-        "    \"likes\" : 1\n" +
-        "  }, {\n" +
-        "    \"is_blocked\" : true,\n" +
-        "    \"comments\" : [ {\n" +
-        "      \"comment_text\" : \"comment_text\",\n" +
-        "      \"is_blocked\" : true,\n" +
-        "      \"post_id\" : 4,\n" +
-        "      \"my_like\" : true,\n" +
-        "      \"parent_id\" : 2,\n" +
-        "      \"id\" : 9,\n" +
-        "      \"time\" : 3,\n" +
-        "      \"sub_comments\" : [ null, null ],\n" +
-        "      \"likes\" : 7\n" +
-        "    }, {\n" +
-        "      \"comment_text\" : \"comment_text\",\n" +
-        "      \"is_blocked\" : true,\n" +
-        "      \"post_id\" : 4,\n" +
-        "      \"my_like\" : true,\n" +
-        "      \"parent_id\" : 2,\n" +
-        "      \"id\" : 9,\n" +
-        "      \"time\" : 3,\n" +
-        "      \"sub_comments\" : [ null, null ],\n" +
-        "      \"likes\" : 7\n" +
-        "    } ],\n" +
-        "    \"my_like\" : true,\n" +
-        "    \"author\" : {\n" +
-        "      \"country\" : {\n" +
-        "        \"id\" : 1,\n" +
-        "        \"title\" : \"United States\"\n" +
-        "      },\n" +
-        "      \"city\" : {\n" +
-        "        \"id\" : 1,\n" +
-        "        \"title\" : \"Suchy Dab\"\n" +
-        "      },\n" +
-        "      \"birth_date\" : 702565308000,\n" +
-        "      \"about\" : \"Maecenas tristique...\",\n" +
-        "      \"photo\" : \"data:image/png;base64...\",\n" +
-        "      \"last_name\" : \"Siegertsz\",\n" +
-        "      \"reg_date\" : 1618070680000,\n" +
-        "      \"is_blocked\" : false,\n" +
-        "      \"message_permission\" : \"ALL\",\n" +
-        "      \"last_online_time\" : 1644234125000,\n" +
-        "      \"phone\" : \"+7 645 943 5082\",\n" +
-        "      \"id\" : 1,\n" +
-        "      \"is_online\" : true,\n" +
-        "      \"first_name\" : \"Davida\",\n" +
-        "      \"email\" : \"dsiegertsz0@fc2.com\"\n" +
-        "    },\n" +
-        "    \"id\" : 2,\n" +
-        "    \"time\" : 7,\n" +
-        "    \"photo_url\" : \"photo_url\",\n" +
-        "    \"title\" : \"title\",\n" +
-        "    \"type\" : \"POSTED\",\n" +
-        "    \"post_text\" : \"post_text\",\n" +
-        "    \"tags\" : [ null, null ],\n" +
-        "    \"likes\" : 1\n" +
-        "  } ],\n" +
-        "  \"page\" : 1,\n" +
-        "  \"timestamp\" : 16442341250\n" +
-        "}");
+    public ResponseEntity<PostResponse> recoveryPostById(@PathVariable String id) {
+        PostResponse response = new PostResponse();
+        response.setPage(1);
+        response.setTotal(1);
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setSize(20);
+        response.setData(postService.getAllPosts());
+        Post post = postService.getPostById(Long.parseLong(id));
+        postService.savePost(post);
+        return ResponseEntity.ok(response);
     }
 }
