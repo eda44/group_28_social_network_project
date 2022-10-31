@@ -1,5 +1,6 @@
 package ru.skillbox.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import ru.skillbox.model.Tag;
@@ -10,7 +11,9 @@ import java.util.List;
 @Setter
 public class PostAddRequest {
     private String title;
-    private List<Tag> tags;
+    private List<String> tags;
+    @JsonProperty("post_text")
     private String postText;
-    private String photo_url;
+    @JsonProperty("photo_url")
+    private String photoUrl;
 }

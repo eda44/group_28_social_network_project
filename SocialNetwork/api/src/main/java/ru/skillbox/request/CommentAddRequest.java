@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class CommentAddRequest {
     @JsonProperty("parent_id")
-    private Integer parentId;
+    private Long parentId;
     @JsonProperty("comment_text")
     private String commentText;
 }

@@ -57,7 +57,7 @@ public class AccountAndStatusByIdDto {
                 .messagePermission(person.getMessagePermission())
                 .lastOnlineTime(person.getLastOnlineTime())
                 //TODO: isOnline
-                .isBlocked(person.isBlocked())
+//                .isBlocked(person.isBlocked())
                 .build();
     }
     public static List<AccountAndStatusByIdDto> getCorrectListResponseFrom(List<Person> persons) {

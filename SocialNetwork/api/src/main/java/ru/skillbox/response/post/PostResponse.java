@@ -1,8 +1,8 @@
-package ru.skillbox.response;
+package ru.skillbox.response.post;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.PostDto;
+import ru.skillbox.model.Post;
 
 import java.util.List;
 
@@ -14,5 +14,5 @@ public class PostResponse {
     private Integer page;
     private Integer size;
     private Integer total;
-    private List<PostDto> data;
+    private List<Post> data;
 }
