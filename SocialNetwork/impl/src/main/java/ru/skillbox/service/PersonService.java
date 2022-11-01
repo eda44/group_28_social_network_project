@@ -6,6 +6,8 @@ import ru.skillbox.dto.enums.MessagePermission;
 import ru.skillbox.model.Person;
 import ru.skillbox.model.User;
 import ru.skillbox.repository.PersonRepo;
+import ru.skillbox.request.LoginRequest;
+import ru.skillbox.request.RegistrationRequest;
 
 import java.util.Date;
 
@@ -15,15 +17,19 @@ public class PersonService {
 
     private final PersonRepo personRepo;
 
+    public Person getPersonByEmail(LoginRequest request) {
+        return personRepo.findByEmail(request.getEmail());
+    }
 
-    public void registrationPerson(User user) {
+    public void registrationPerson(User user, RegistrationRequest request) {
         Person person = new Person();
         person.setId(user.getId());
         person.setEmail(user.getEmail());
-        person.setRegDate(user.getRegDate());
-        person.setFirstName(user.getFirstName());
-        person.setLastName(user.getLastName());
-//        person.setBlocked(false);
+        person.setRegDate(new Date().getTime());
+        person.setFirstName(request.getFirstName());
+        person.setLastName(request.getLastName());
+        person.setBlocked(false);
+        person.setEnabled(true);
         person.setMessagePermission(MessagePermission.ALL);
         person.setLastOnlineTime(new Date().getTime());
         personRepo.save(person);
@@ -34,20 +40,18 @@ public class PersonService {
     }
 
     public Person getPersonById(long id) {
-        return personRepo.findById(id).get();
+        return personRepo.findById(id);
     }
 
     public Person setPerson() {
         Person person = new Person();
         person.setPhoto("my_image.png");
-        person.setPassword("pass");
-        person.setTown("town");
         person.setPhone("9999999999");
         person.setMessagePermission(MessagePermission.ALL);
         person.setEmail("email");
         person.setAbout("about");
         person.setLastName("last");
-        person.setBlocking(false);
+        person.setBlocked(false);
         person.setApproved(true);
         person.setFirstName("first");
         person.setConfirmationCode(1111);

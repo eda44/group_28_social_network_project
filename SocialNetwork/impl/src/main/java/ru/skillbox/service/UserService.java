@@ -6,11 +6,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.skillbox.model.User;
-import ru.skillbox.request.LoginRequest;
 import ru.skillbox.request.RegistrationRequest;
 import ru.skillbox.repository.UserRepo;
-
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +24,7 @@ public class UserService implements UserDetailsService {
         }
         registrationUser(request);
         User user = userRepo.findByEmail(request.getEmail());
-        personService.registrationPerson(user);
+        personService.registrationPerson(user, request);
         return true;
     }
 
@@ -35,16 +32,13 @@ public class UserService implements UserDetailsService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(bCryptPasswordEncoder.encode(request.getPasswd1()));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setRegDate(new Date().getTime());
         user.setAccountNonLocked(true);
+        user.setEnabled(true);
         userRepo.save(user);
     }
 
-    public boolean passwordCheck(LoginRequest request) {
-        User userFromDB = getUserByEmail(request.getEmail());
-        return userFromDB != null && bCryptPasswordEncoder.matches(request.getPassword(), userFromDB.getPassword());
+    public boolean passwordCheck(User user, String password) {
+        return bCryptPasswordEncoder.matches(password, user.getPassword());
     }
 
     @Override
@@ -57,7 +51,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User getUserByEmail(String email) {
-        return userRepo.findByEmail(email);
+        return loadUserByUsername(email);
     }
 
     public void setNewPassword(String email, String password) {
