@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import ru.skillbox.dto.AccountDto;
-import ru.skillbox.model.User;
+import ru.skillbox.model.Person;
 
 import java.util.Date;
 @Builder
@@ -16,10 +16,10 @@ public class LoginResponse {
     @JsonProperty("error_description")
     private String errorDescription;
 
-    public static LoginResponse getOkResponse(User user){
+    public static LoginResponse getOkResponse(Person person){
         return LoginResponse.builder()
                 .timestamp(new Date().getTime())
-                .data(AccountDto.getCorrectResponseFrom(user))
+                .data(AccountDto.getCorrectRsLogin(person, "token"))//TODO: token
                 .build();
     }
 

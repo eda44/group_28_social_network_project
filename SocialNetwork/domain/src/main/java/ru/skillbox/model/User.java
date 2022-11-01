@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -19,15 +18,10 @@ public class User implements UserDetails {
     private Long id;
     private String email;
     private String password;
-    @Column(name = "last_name")
-    private String lastName;
-    @Column(name = "first_name")
-    private String firstName;
-    @Column(name = "reg_date")
-    private long regDate;
     @Column(name = "account_non_locked")
-    private boolean AccountNonLocked;
-
+    private boolean isAccountNonLocked;
+    @Column(name = "is_enabled")
+    private boolean isEnabled;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -51,7 +45,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return AccountNonLocked;
+        return isAccountNonLocked;
     }
 
     @Override
@@ -61,6 +55,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 }
