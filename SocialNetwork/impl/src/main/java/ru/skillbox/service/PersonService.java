@@ -28,8 +28,8 @@ public class PersonService {
         person.setRegDate(new Date().getTime());
         person.setFirstName(request.getFirstName());
         person.setLastName(request.getLastName());
-        person.setBlocked(false);
-        person.setEnabled(true);
+        person.setIsBlocked(false);
+        person.setIsApproved(true);
         person.setMessagePermission(MessagePermission.ALL);
         person.setLastOnlineTime(new Date().getTime());
         personRepo.save(person);
@@ -51,10 +51,10 @@ public class PersonService {
         person.setEmail("email");
         person.setAbout("about");
         person.setLastName("last");
-        person.setBlocked(false);
-        person.setApproved(true);
+        person.setIsBlocked(false);
+        person.setIsApproved(true);
         person.setFirstName("first");
-        person.setConfirmationCode(1111);
+        person.setConfirmationCode("1111");
         person.setRegDate(48485151L);
         person.setBirthDate(55454615L);
 

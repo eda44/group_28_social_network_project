@@ -73,7 +73,7 @@ public class AccountDto {
                 .messagePermission(person.getMessagePermission())
                 .lastOnlineTime(person.getLastOnlineTime())
                 .isOnline(checkIsOnline(person.getLastOnlineTime()))
-                .isBlocked(person.isBlocked())
+                .isBlocked(person.getIsBlocked())
                 .build();
     }
 

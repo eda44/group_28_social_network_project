@@ -11,7 +11,7 @@ public class PostDto {
 
     private Long id;
     private Long time;
-    private AccountByIdDto author;
+    private AccountDto author;
     private String title;
     private Type type;
     @JsonProperty("post_text")

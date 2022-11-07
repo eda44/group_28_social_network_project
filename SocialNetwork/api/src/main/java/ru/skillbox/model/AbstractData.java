@@ -1,4 +1,4 @@
-package ru.skillbox.model;
+package ru.skillbox.api.model;
 
 import lombok.Getter;
 import lombok.Setter;

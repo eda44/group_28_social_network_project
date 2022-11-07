@@ -19,6 +19,7 @@ public class PersonToAccountById {
         .messagePermission(person.getMessagePermission())
         .lastOnlineTime(person.getLastOnlineTime())
         .isOnline(true)//как получить этот флаг
+        .isBlocked(person.getIsBlocked())
         .build();
   }
 
