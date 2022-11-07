@@ -4,25 +4,20 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Getter
+@Entity(name = "cities")
 @Setter
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "post_file")
-public class PostFile {
+public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String name;
-
-    @Column(name = "path")
-    private String path;
+    private String title;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id",referencedColumnName = "id",
-            insertable = false,updatable = false)
-    private Post post;
+    @JoinColumn(name = "country_id",referencedColumnName = "id", insertable = false,updatable = false)
+    private Country country;
 }
+

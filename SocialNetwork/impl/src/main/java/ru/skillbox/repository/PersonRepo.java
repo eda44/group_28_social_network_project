@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.model.Person;
 
+import java.util.Optional;
+
 @Repository
 public interface PersonRepo extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
 

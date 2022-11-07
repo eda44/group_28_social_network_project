@@ -5,5 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.skillbox.model.Tag;
 
 @Repository
-public interface TagRepository extends JpaRepository<Tag, Long> {
+public interface TagRepository  extends JpaRepository<Tag, Long>{
+
 }

@@ -4,21 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import java.util.List;
 
 @Getter
 @Setter
-@Entity
 public class PostCommentDto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Integer id;
     private Long time;
-//    private AccountByIdDto author;
-    private String author;
+    private AccountDto author;
     @JsonProperty("parent_id")
     private Integer parentId;
     @JsonProperty("comment_text")

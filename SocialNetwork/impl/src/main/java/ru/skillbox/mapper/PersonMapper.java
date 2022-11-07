@@ -10,7 +10,11 @@ public class PersonMapper implements RowMapper<Person> {
 
   @Override
   public Person mapRow(ResultSet rs, int rowNum) throws SQLException {
-    return new Person();
+    return   Person.builder()
+            .id(rs.getLong("id"))
+            .firstName(rs.getString("firstName"))
+            .lastName(rs.getString("lastName"))
+            .build();
   }
 }
 

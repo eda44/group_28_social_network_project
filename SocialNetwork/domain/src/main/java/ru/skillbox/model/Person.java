@@ -6,42 +6,80 @@ import ru.skillbox.dto.enums.MessagePermission;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
+@Entity(name = "people")
 @Getter
 @Setter
-@Table(name = "people")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
+
     @Column(name = "first_name")
     private String firstName;
+
     @Column(name = "last_name")
     private String lastName;
+
     @Column(name = "reg_date")
-    private long regDate;
+    private Long regDate;
+
     @Column(name = "birth_date")
     private Long birthDate;
-    private String email;
-    private String phone;
-    private String photo;
-    private String about;
-    @Column(name = "confirmation_code")
-    private int confirmationCode;
-    @Column(name = "is_approved")
-    private boolean isApproved;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "message_permission")
-    private MessagePermission messagePermission;
-    @Column(name = "last_online_time")
-    private long lastOnlineTime;
-    @Column(name = "is_blocked")
-    private boolean isBlocked;
-    @Column(name = "is_enabled")
-    private boolean isEnabled;
-    @OneToMany(mappedBy = "person")
-    private List<Post> postList;
-    @OneToMany(mappedBy = "person")
-    private List<PostLike> postLikeList;
-}
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "photo")
+    private String photo;
+
+    @Column(name = "about")
+    private String about;
+
+    @Column(name = "is_enabled")
+    private Boolean isEnabled;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id",referencedColumnName = "id", insertable = false,updatable = false)
+    private City city;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id",referencedColumnName = "id", insertable = false,updatable = false)
+    private Country country;
+
+    @Column(name = "confirmation_code")
+    private String confirmationCode;
+
+    @Column(name = "is_approved")
+    private Boolean isApproved;
+
+    @Column(name = "messages_permission", columnDefinition = "enum")
+    @Enumerated(EnumType.STRING)
+    private MessagePermission messagePermission;
+
+    @Column(name = "last_online_time")
+    private Long lastOnlineTime;
+
+    @Column(name="is_blocked")
+    private Boolean isBlocked;
+
+    @Column(name="is_online")
+    private Boolean isOnline;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private List<Post> postList;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id")
+    private List<PostLike> postLikeList;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private List<PostComment> postCommentList;
+}

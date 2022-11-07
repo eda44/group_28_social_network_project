@@ -49,7 +49,7 @@ public class PostCommentController implements PostCommentInterface {
         postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
         postComment.setIsBlocked(false);
         postCommentService.savePostComment(postComment);
-        post.setPostComments(List.of(postComment));
+        post.setPostCommentList(List.of(postComment));
         return ResponseEntity.ok(response);
     }
 
@@ -63,7 +63,7 @@ public class PostCommentController implements PostCommentInterface {
         response.setPerPage(2);
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(comment_id));
-        if (post.getPostComments().contains(postComment)) {
+        if (post.getPostCommentList().contains(postComment)) {
             postCommentService.deletePostComment(postComment);
         }
         response.setData(List.of(postComment));
@@ -95,7 +95,7 @@ public class PostCommentController implements PostCommentInterface {
         response.setTotal(1);
         response.setPerPage(perPage);
         Post post = postService.getPostById(id);
-        response.setData(post.getPostComments());
+        response.setData(post.getPostCommentList());
         return ResponseEntity.ok(response);
     }
 
@@ -109,7 +109,7 @@ public class PostCommentController implements PostCommentInterface {
         response.setPerPage(2);
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(comment_id));
-        if (post.getPostComments().contains(postComment)) {
+        if (post.getPostCommentList().contains(postComment)) {
             postComment.setCommentText(request.getCommentText());
             postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
             postComment.setIsBlocked(false);
@@ -130,7 +130,7 @@ public class PostCommentController implements PostCommentInterface {
         response.setPerPage(2);
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(comment_id));
-        if (post.getPostComments().contains(postComment)) {
+        if (post.getPostCommentList().contains(postComment)) {
             postCommentService.savePostComment(postComment);
         }
         response.setData(List.of());
