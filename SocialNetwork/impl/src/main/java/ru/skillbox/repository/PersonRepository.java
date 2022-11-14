@@ -1,25 +1,17 @@
 package ru.skillbox.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-import ru.skillbox.mapper.PersonMapper;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 import ru.skillbox.model.Person;
 
-import java.util.List;
+import java.util.Optional;
 
-@Component
-public class PersonRepository {
+@Repository
+public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
 
-    private final JdbcTemplate jdbcTemplate;
+    Optional<Person> findById(long id);
 
-    @Autowired
-    public PersonRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    Optional<Person> findByEmail(String email);
 
-    public List<Person> getAllUsers() {
-        return jdbcTemplate.query("SELECT * FROM People", new PersonMapper());
-    }
 }
-

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.dto.Pageable;
+import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.*;
 import ru.skillbox.request.PostAddRequest;
 import ru.skillbox.response.ComplaintResponse;
@@ -35,30 +36,34 @@ public class PostController implements PostInterface {
 
     @PostMapping("/api/v1/post")
     public ResponseEntity<PostAddResponse> addNewPost(@RequestBody PostAddRequest request) {
-        Post post = new Post();
-        Person person = personService.setPerson();
-        PostLike postLike = postLikeService.setPostLike();
-        post.setTitle(request.getTitle());
-        post.setPostText(request.getPostText());
-        List<Tag> tagList = new ArrayList<>();
-        for (String tag : request.getTags()) {
-            Tag t = new Tag();
-            t.setTag(tag);
-            tagList.add(t);
+        try {
+            Post post = new Post();
+            Person person = personService.setPerson();
+            PostLike postLike = postLikeService.setPostLike();
+            post.setTitle(request.getTitle());
+            post.setPostText(request.getPostText());
+            List<Tag> tagList = new ArrayList<>();
+            for (String tag : request.getTags()) {
+                Tag t = new Tag();
+                t.setTag(tag);
+                tagList.add(t);
+            }
+            PostFile postFile = postService.setPostFile(post, request.getTitle(), request.getPhotoUrl());
+            post.setTags(tagList);
+            post.setPostFiles(List.of(postFile));
+            post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+            post.setPerson(personService.getPersonById(1));
+            postLike.setPost(post);
+            person.setPostList(List.of(post));
+            person.setPostLikeList(List.of(postLike));
+            postLike.setPerson(person);
+            postService.savePost(post);
+            PostAddResponse response = new PostAddResponse();
+            response.setStatus(true);
+            return ResponseEntity.ok(response);
+        }catch (UserNotFoundException e){
+            return ResponseEntity.badRequest().body(new PostAddResponse());//TODO: исправить
         }
-        PostFile postFile = postService.setPostFile(post, request.getTitle(), request.getPhotoUrl());
-        post.setTags(tagList);
-        post.setPostFiles(List.of(postFile));
-        post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-        post.setPerson(personService.getPersonById(1));
-        postLike.setPost(post);
-        person.setPostList(List.of(post));
-        person.setPostLikeList(List.of(postLike));
-        postLike.setPerson(person);
-        postService.savePost(post);
-        PostAddResponse response = new PostAddResponse();
-        response.setStatus(true);
-        return ResponseEntity.ok(response);
     }
 
 

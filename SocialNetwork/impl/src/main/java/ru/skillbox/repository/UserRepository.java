@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.skillbox.model.User;
 
 @Repository
-public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     User findByEmail(String email);
 

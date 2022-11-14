@@ -19,12 +19,6 @@ public class User implements UserDetails {
     private String email;
     private String password;
 
-
-    private String firstName;
-
-    private String lastName;
-
-    private Long regDate;
     @Column(name = "account_non_locked")
     private boolean isAccountNonLocked;
     @Column(name = "is_enabled")
@@ -68,11 +62,8 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(Long id, String email, String lastName, String firstName, Long regDate) {
+    public User(Long id, String email) {
         this.id = id;
         this.email = email;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.regDate = regDate;
     }
 }

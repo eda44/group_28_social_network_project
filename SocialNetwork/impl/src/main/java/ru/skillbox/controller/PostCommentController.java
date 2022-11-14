@@ -3,6 +3,7 @@ package ru.skillbox.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.model.PostCommentInterface;
@@ -36,21 +37,25 @@ public class PostCommentController implements PostCommentInterface {
     public ResponseEntity<PostCommentResponse> addCommentByIdPost(
             @PathVariable String id, @RequestBody CommentAddRequest request) {
 
-        PostCommentResponse response = new PostCommentResponse();
-        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-        response.setOffset(20);
-        response.setTotal(1);
-        response.setPerPage(2);
-        Post post = postService.getPostById(Long.parseLong(id));
-        PostComment postComment = new PostComment();
-        postComment.setCommentText(request.getCommentText());
-        postComment.setPerson(personService.getPersonById(request.getParentId()));
-        postComment.setPost(post);
-        postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-        postComment.setIsBlocked(false);
-        postCommentService.savePostComment(postComment);
-        post.setPostCommentList(List.of(postComment));
-        return ResponseEntity.ok(response);
+        try {
+            PostCommentResponse response = new PostCommentResponse();
+            response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+            response.setOffset(20);
+            response.setTotal(1);
+            response.setPerPage(2);
+            Post post = postService.getPostById(Long.parseLong(id));
+            PostComment postComment = new PostComment();
+            postComment.setCommentText(request.getCommentText());
+            postComment.setPerson(personService.getPersonById(request.getParentId()));
+            postComment.setPost(post);
+            postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+            postComment.setIsBlocked(false);
+            postCommentService.savePostComment(postComment);
+            post.setPostCommentList(List.of(postComment));
+            return ResponseEntity.ok(response);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.badRequest().body(new PostCommentResponse());
+        }
     }
 
     @DeleteMapping("/api/v1/post/{id}/comments/{comment_id}")
@@ -102,22 +107,26 @@ public class PostCommentController implements PostCommentInterface {
     @PutMapping("/api/v1/post/{id}/comments/{comment_id}")
     public ResponseEntity<PostCommentResponse> putCommentByIdPost(@RequestBody CommentAddRequest request,
                                                                   @PathVariable String id, @PathVariable String comment_id) {
-        PostCommentResponse response = new PostCommentResponse();
-        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-        response.setOffset(20);
-        response.setTotal(1);
-        response.setPerPage(2);
-        Post post = postService.getPostById(Long.parseLong(id));
-        PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(comment_id));
-        if (post.getPostCommentList().contains(postComment)) {
-            postComment.setCommentText(request.getCommentText());
-            postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-            postComment.setIsBlocked(false);
-            postComment.setPerson(personService.getPersonById(request.getParentId()));
-            postComment.setPost(post);
-        }
-        response.setData(List.of(postComment));
-        return ResponseEntity.ok(response);
+       try {
+           PostCommentResponse response = new PostCommentResponse();
+           response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+           response.setOffset(20);
+           response.setTotal(1);
+           response.setPerPage(2);
+           Post post = postService.getPostById(Long.parseLong(id));
+           PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(comment_id));
+           if (post.getPostCommentList().contains(postComment)) {
+               postComment.setCommentText(request.getCommentText());
+               postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+               postComment.setIsBlocked(false);
+               postComment.setPerson(personService.getPersonById(request.getParentId()));
+               postComment.setPost(post);
+           }
+           response.setData(List.of(postComment));
+           return ResponseEntity.ok(response);
+       }catch (UserNotFoundException e){
+           return ResponseEntity.badRequest().body(new PostCommentResponse());//TODO: исправить
+       }
     }
 
     @PutMapping("/api/v1/post/{id}/comments/{comment_id}/recover")
