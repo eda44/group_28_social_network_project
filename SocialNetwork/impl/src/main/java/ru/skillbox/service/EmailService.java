@@ -24,6 +24,4 @@ public class EmailService {
         String subject = "New password";
         sendSimpleMessage(email, subject, text);
     }
-
-
 }

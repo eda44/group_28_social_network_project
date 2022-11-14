@@ -5,18 +5,18 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.AccountByIdDto;
+import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.mapper.PersonToAccountById;
 import ru.skillbox.response.account.SearchAccountRs;
-import ru.skillbox.repository.PersonRepo;
 
 @Service
 @AllArgsConstructor
 public class SearchPersonService {
 
-  private PersonRepo personRepo;
+  private PersonService personService;
 
-  public AccountByIdDto getPersonById(long id) {
-    return PersonToAccountById.personTo(personRepo.findById(id));
+  public AccountByIdDto getPersonById(long id) throws UserNotFoundException {
+    return PersonToAccountById.personTo(personService.getPersonById(id));
   }
 
   public List<Integer> getIdsPerson(){

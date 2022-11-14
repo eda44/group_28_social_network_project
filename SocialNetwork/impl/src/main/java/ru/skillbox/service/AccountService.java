@@ -4,20 +4,20 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.skillbox.model.User;
+import ru.skillbox.repository.PersonRepository;
 import ru.skillbox.request.account.AccountEditRq;
 import ru.skillbox.request.account.AccountRecoveryRequest;
 import ru.skillbox.response.account.BlockingAccountRs;
 import ru.skillbox.response.account.DeleteAccountRs;
-import ru.skillbox.repository.PersonRepo;
-import ru.skillbox.repository.UserRepo;
+import ru.skillbox.repository.UserRepository;
 
 @Service
 @AllArgsConstructor
 public class AccountService {
 
-  private UserRepo userRepo;
+  private UserRepository userRepo;
 
-  private PersonRepo personRepo;
+  private PersonRepository personRepo;
 
   public boolean recoveryAccount(AccountRecoveryRequest accountRecoveryRequest) {
     Optional<User> userOptional = userRepo.findByEmailAndPassword(accountRecoveryRequest.getEmail(),

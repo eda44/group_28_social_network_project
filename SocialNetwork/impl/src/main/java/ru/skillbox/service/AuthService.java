@@ -1,6 +1,13 @@
 package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skillbox.exception.EmailNotFoundException;
@@ -14,24 +21,28 @@ import ru.skillbox.response.PasswordRecoveryResponse;
 import ru.skillbox.response.RegistrationResponse;
 
 import java.security.SecureRandom;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserService userService;
     private final EmailService emailService;
-
     private final PersonService personService;
+    private final AuthenticationManager authenticationManager;
 
     public LoginResponse login(LoginRequest request) throws UsernameNotFoundException {
         User user = userService.getUserByEmail(request.getEmail());
         if (!userService.passwordCheck(user, request.getPassword())) {
             throw new UsernameNotFoundException("User not found");
         }
-        return LoginResponse.getOkResponse(personService.getPersonByEmail(request));
-
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");//TODO: справить
+        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(user.getEmail(), null, List.of(authority));
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        securityContext.setAuthentication(authentication);
+        return LoginResponse.getOkResponse(personService.getPersonByEmail(request.getEmail()));
     }
-
 
     public PasswordRecoveryResponse passwordRecovery(PasswordRecoveryRequest request) throws EmailNotFoundException {
         String email = request.getEmail();
@@ -45,9 +56,7 @@ public class AuthService {
     }
 
     public RegistrationResponse registration(RegistrationRequest request) throws UserIsAlreadyRegisteredException {
-        if (!userService.saveUser(request)) {
-            throw new UserIsAlreadyRegisteredException("User is already registered");
-        }
+        userService.saveUser(request);
         return RegistrationResponse.getOkResponse();
     }
 

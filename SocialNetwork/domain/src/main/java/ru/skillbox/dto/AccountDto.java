@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
 import ru.skillbox.dto.enums.MessagePermission;
 import ru.skillbox.dto.enums.StatusCode;
 import ru.skillbox.model.Person;
@@ -82,11 +83,9 @@ public class AccountDto {
         dto.setStatusCode(statusCode);
         return dto;
     }
-    public static List<AccountDto> getCorrectListRsSearch(List<Person> people) {
+    public static List<AccountDto> getCorrectListRsSearch(Page<Person> people) {
         List<AccountDto> accountDtos = new ArrayList<>();
-        for (Person person : people) {
-            accountDtos.add(getCorrectRsSearch(person, StatusCode.NONE));//TODO: StatusCode
-        }
+        people.stream().forEach(person -> accountDtos.add(getCorrectRsSearch(person, StatusCode.NONE)));//TODO: StatusCode
         return accountDtos;
     }
 

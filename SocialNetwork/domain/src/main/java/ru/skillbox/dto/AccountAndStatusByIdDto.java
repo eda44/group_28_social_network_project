@@ -21,8 +21,6 @@ public class AccountAndStatusByIdDto {
     private String about;
     private CityDto city;
     private CountryDto country;
-    @JsonProperty("status_code")
-    private StatusCode statusCode;
     @JsonProperty("first_name")
     private String firstName;
     @JsonProperty("last_name")
@@ -60,9 +58,9 @@ public class AccountAndStatusByIdDto {
 //                .isBlocked(person.isBlocked())
                 .build();
     }
-    public static List<AccountAndStatusByIdDto> getCorrectListResponseFrom(List<Person> persons) {
+    public static List<AccountAndStatusByIdDto> getCorrectListResponseFrom(List<Person> people) {
         List<AccountAndStatusByIdDto> accountDtos = new ArrayList<>();
-        for (Person person : persons) {
+        for (Person person : people) {
             accountDtos.add(getCorrectResponseFrom(person));
         }
         return accountDtos;

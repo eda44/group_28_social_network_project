@@ -1,24 +1,32 @@
 package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.enums.MessagePermission;
+import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Person;
 import ru.skillbox.model.User;
-import ru.skillbox.repository.PersonRepo;
-import ru.skillbox.request.LoginRequest;
+import ru.skillbox.repository.PersonRepository;
+
 import ru.skillbox.request.RegistrationRequest;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PersonService {
 
-    private final PersonRepo personRepo;
+    private final PersonRepository personRepository;
 
-    public Person getPersonByEmail(LoginRequest request) {
-        return personRepo.findByEmail(request.getEmail());
+    public Person getPersonByEmail(String email) {
+        Optional<Person> person = personRepository.findByEmail(email);
+        if (person.isEmpty()) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return person.get();
     }
 
     public void registrationPerson(User user, RegistrationRequest request) {
@@ -28,19 +36,29 @@ public class PersonService {
         person.setRegDate(new Date().getTime());
         person.setFirstName(request.getFirstName());
         person.setLastName(request.getLastName());
+        person.setIsEnabled(true);
         person.setIsBlocked(false);
         person.setIsApproved(true);
         person.setMessagePermission(MessagePermission.ALL);
         person.setLastOnlineTime(new Date().getTime());
-        personRepo.save(person);
+        personRepository.save(person);
+    }
+
+    public Person getCurrentPerson() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        return getPersonByEmail(email);
     }
 
     public void savePerson(Person person) {
-        personRepo.save(person);
+        personRepository.save(person);
     }
 
-    public Person getPersonById(long id) {
-        return personRepo.findById(id);
+    public Person getPersonById(long id) throws UserNotFoundException {
+        Optional<Person> person = personRepository.findById(id);
+        if (person.isEmpty()) {
+            throw new UserNotFoundException("User not found");
+        }
+        return person.get();
     }
 
     public Person setPerson() {

@@ -6,10 +6,9 @@ import ru.skillbox.dto.enums.LikeType;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.model.PostLike;
-import ru.skillbox.repository.PersonRepo;
+import ru.skillbox.repository.PersonRepository;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.repository.PostLikeRepository;
-import ru.skillbox.repository.PostRepository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -21,14 +20,14 @@ public class PostLikeService {
 
     private final PostLikeRepository postLikeRepository;
     private final PostService postService;
-    private final PersonRepo personRepo;
+    private final PersonRepository personRepository;
     private final PostCommentRepository postCommentRepository;
 
     @Autowired
-    public PostLikeService(PostLikeRepository postLikeRepository, PostService postService, PersonRepo personRepo, PostCommentRepository postCommentRepository) {
+    public PostLikeService(PostLikeRepository postLikeRepository, PostService postService, PersonRepository personRepository, PostCommentRepository postCommentRepository) {
         this.postLikeRepository = postLikeRepository;
         this.postService = postService;
-        this.personRepo = personRepo;
+        this.personRepository = personRepository;
         this.postCommentRepository = postCommentRepository;
     }
 

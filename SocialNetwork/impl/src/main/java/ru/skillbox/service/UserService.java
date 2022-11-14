@@ -1,31 +1,32 @@
 package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.skillbox.exception.UserIsAlreadyRegisteredException;
 import ru.skillbox.model.User;
 import ru.skillbox.request.RegistrationRequest;
-import ru.skillbox.repository.UserRepo;
+import ru.skillbox.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private final PersonService personService;
 
-    public boolean saveUser(RegistrationRequest request) {
-        User userFromDB = userRepo.findByEmail(request.getEmail());
+    public void saveUser(RegistrationRequest request) throws UserIsAlreadyRegisteredException {
+        User userFromDB = userRepository.findByEmail(request.getEmail());
         if (userFromDB != null) {
-            return false;
+            throw new UserIsAlreadyRegisteredException("User is already registered");
         }
         registrationUser(request);
-        User user = userRepo.findByEmail(request.getEmail());
+        User user = userRepository.findByEmail(request.getEmail());
         personService.registrationPerson(user, request);
-        return true;
     }
 
     private void registrationUser(RegistrationRequest request) {
@@ -34,7 +35,7 @@ public class UserService implements UserDetailsService {
         user.setPassword(bCryptPasswordEncoder.encode(request.getPasswd1()));
         user.setAccountNonLocked(true);
         user.setEnabled(true);
-        userRepo.save(user);
+        userRepository.save(user);
     }
 
     public boolean passwordCheck(User user, String password) {
@@ -43,7 +44,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public User loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepo.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
@@ -55,8 +56,13 @@ public class UserService implements UserDetailsService {
     }
 
     public void setNewPassword(String email, String password) {
-        User user = userRepo.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         user.setPassword(bCryptPasswordEncoder.encode(password));
-        userRepo.save(user);
+        userRepository.save(user);
+    }
+
+    public User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        return loadUserByUsername(email);
     }
 }
