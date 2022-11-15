@@ -6,8 +6,6 @@ import ru.skillbox.dto.enums.LikeType;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.model.PostLike;
-import ru.skillbox.repository.PersonRepository;
-import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.repository.PostLikeRepository;
 
 import java.time.LocalDateTime;
@@ -20,33 +18,30 @@ public class PostLikeService {
 
     private final PostLikeRepository postLikeRepository;
     private final PostService postService;
-    private final PersonRepository personRepository;
-    private final PostCommentRepository postCommentRepository;
+    private final PersonService personService;
+    private final PostCommentService postCommentService;
 
     @Autowired
-    public PostLikeService(PostLikeRepository postLikeRepository, PostService postService, PersonRepository personRepository, PostCommentRepository postCommentRepository) {
+    public PostLikeService(PostLikeRepository postLikeRepository, PostService postService,
+                           PersonService personService, PostCommentService postCommentService) {
         this.postLikeRepository = postLikeRepository;
         this.postService = postService;
-        this.personRepository = personRepository;
-        this.postCommentRepository = postCommentRepository;
+        this.personService = personService;
+        this.postCommentService = postCommentService;
     }
 
     public void deleteLike(long id) {
         postLikeRepository.deleteById(id);
     }
 
-    public Post getLikeByPostId(long id) {
-        return postLikeRepository.findById(id).get().getPost();
-    }
 
-    public void getLikeByCommentId(long id) {
-        postLikeRepository.findById(id);
+    public PostLike getLikeByCommentId(long id) {
+        return postLikeRepository.findById(id).get();
     }
 
     public void deleteLike(PostLike postLike) {
         postLikeRepository.delete(postLike);
     }
-
 
     public void saveLike(PostLike postLike) {
         postLikeRepository.save(postLike);
@@ -75,7 +70,7 @@ public class PostLikeService {
                 break;
             }
             case COMMENT: {
-                PostComment postComment = postCommentRepository.findById(id).get();
+                PostComment postComment = postCommentService.getPostCommentById(id);
                 for (PostLike postLike : postComment.getPost().getPostLikes()) {
                     if (postLike.getPerson().equals(postComment.getPerson())) {
                         return true;

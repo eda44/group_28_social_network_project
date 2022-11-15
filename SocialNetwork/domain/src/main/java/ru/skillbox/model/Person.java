@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity(name = "people")
+@Table
 @Getter
 @Setter
 @Builder
@@ -58,7 +59,7 @@ public class Person {
     @Column(name = "is_approved")
     private Boolean isApproved;
 
-    @Column(name = "messages_permission", columnDefinition = "enum")
+    @Column(name = "messages_permission")
     @Enumerated(EnumType.STRING)
     private MessagePermission messagePermission;
 
