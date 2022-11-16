@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "post_comment", schema = "db_social")
+@Table(name = "post_comment")
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
@@ -38,6 +38,6 @@ public class PostComment {
     private Long time;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
+    @JoinColumn(name = "comment_id", referencedColumnName = "id")
     private List<CommentLike> commentLikes;
 }

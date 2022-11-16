@@ -2,9 +2,11 @@ package ru.skillbox.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.skillbox.dto.PostTagDto;
 import ru.skillbox.model.Tag;
 import ru.skillbox.repository.TagRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,5 +33,15 @@ public class TagService {
 
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
+    }
+
+    public List<Tag> convertDtoToTag(PostTagDto[] postTagDto) {
+        List<Tag> tagList = new ArrayList<>();
+        for (PostTagDto tagDto : postTagDto) {
+            Tag tag = new Tag();
+            tag.setTag(tagDto.getTag());
+            tagList.add(tag);
+        }
+        return tagList;
     }
 }

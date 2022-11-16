@@ -1,7 +1,9 @@
 package ru.skillbox.controller;
 
-import liquibase.pro.packaged.P;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.dto.enums.LikeType;
@@ -10,6 +12,7 @@ import ru.skillbox.model.PostLike;
 import ru.skillbox.request.PostLikeRequest;
 import ru.skillbox.response.LikeResponse;
 import ru.skillbox.response.post.PostLikeResponse;
+import ru.skillbox.service.PostCommentService;
 import ru.skillbox.service.PostLikeService;
 import ru.skillbox.service.PostService;
 
@@ -22,12 +25,27 @@ public class PostLikeController {
 
     private final PostLikeService postLikeService;
     private final PostService postService;
+    private final PostCommentService postCommentService;
+
+    private static Logger logger = LogManager.getLogger(PostLikeController.class);
+
 
     @Autowired
-    public PostLikeController(PostLikeService postLikeService, PostService postService) {
+    public PostLikeController(PostLikeService postLikeService, PostService postService, PostCommentService postCommentService) {
         this.postLikeService = postLikeService;
         this.postService = postService;
+        this.postCommentService = postCommentService;
     }
+
+    @PostMapping("/api/v1/post/{id}/like")
+    public ResponseEntity<Object> createPostLike(@PathVariable String id) {
+        Post post = postService.getPostById(Long.parseLong(id));
+        PostLike postLike = new PostLike();
+
+//        post.setPostLikes();
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
 
     @GetMapping("/api/v1/liked")
     public ResponseEntity<PostLikeResponse> getLiked(Long id, LikeType type) {
@@ -47,21 +65,17 @@ public class PostLikeController {
     public ResponseEntity<PostLikeResponse> getLikes(Long id, LikeType type) {
         PostLikeResponse response = new PostLikeResponse();
         LikeResponse likeResponse = new LikeResponse();
-        Integer[] users = {1, 2};
         likeResponse.setLiked(true);
-//        likeResponse.setUsers(users);
         likeResponse.setLikes(2);
-        LikeResponse[] data = {likeResponse};
-//        response.setData(data);
         response.setError("ok");
         response.setTimestamp(1644234125L);
         response.setErrorDescription("description");
-
+        response.setData(List.of(likeResponse));
         if (type == LikeType.POST) {
-            postLikeService.getLikeByPostId(id);
+            postService.getPostById(id).getPostLikes().forEach(postLike -> postLikeService.getAllLikes());
         }
         if (type == LikeType.COMMENT) {
-            postLikeService.getLikeByCommentId(id);
+            postCommentService.getPostCommentById(id);
         }
 
         return ResponseEntity.ok(response);
@@ -106,5 +120,4 @@ public class PostLikeController {
 //        postLikeService.deleteLike();
         return ResponseEntity.ok(response);
     }
-
 }
