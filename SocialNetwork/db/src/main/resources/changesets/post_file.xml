@@ -1,0 +1,12 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
+    <changeSet id="createTable post_file" author="Andrey Glushko">
+        <createTable tableName="post_file">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="post_file_pkey"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="path" type="text"/>
+            <column name="post_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,19 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
+    <changeSet id="createTable tag" author="Andrey Glushko">
+        <createTable tableName="tag">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tag_pkey"/>
+            </column>
+            <column name="tag" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="createTable post2tag" author="Andrey Glushko">
+        <createTable tableName="post2tag">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="post2tag_pkey"/>
+            </column>
+            <column name="post_id" type="bigint"/>
+            <column name="tag_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
