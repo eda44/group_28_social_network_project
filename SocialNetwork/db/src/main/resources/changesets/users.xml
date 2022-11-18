@@ -1,0 +1,17 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
+    <changeSet id="createTable users" author="Andrey Glushko">
+        <createTable tableName="users">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_pkey"/>
+            </column>
+            <column name="email" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_non_locked" type="boolean"/>
+            <column name="is_enabled" type="boolean"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

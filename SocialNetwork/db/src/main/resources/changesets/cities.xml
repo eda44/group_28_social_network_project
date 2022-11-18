@@ -1,0 +1,11 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
+    <changeSet id="createTable cities" author="Andrey Glushko">
+        <createTable tableName="cities">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="cities_pkey"/>
+            </column>
+            <column name="title" type="varchar(255)"/>
+            <column name="country_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

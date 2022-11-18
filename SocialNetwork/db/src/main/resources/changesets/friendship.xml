@@ -1,0 +1,12 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
+    <changeSet id="createTable friendhip" author="Andrey Glushko">
+        <createTable tableName="friendship">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="friendship_pkey"/>
+            </column>
+            <column name="src_person_id" type="bigint"/>
+            <column name="dst_person_id" type="bigint"/>
+            <column name="code" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,12 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
+    <changeSet id="createTable post_like" author="Andrey Glushko">
+        <createTable tableName="post_like">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="post_like_pkey"/>
+            </column>
+            <column name="time" type="bigint"/>
+            <column name="person_id" type="bigint"/>
+            <column name="post_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
