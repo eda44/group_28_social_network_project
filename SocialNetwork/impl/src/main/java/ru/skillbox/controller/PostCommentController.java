@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.dto.Pageable;
+import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.request.CommentAddRequest;
@@ -41,12 +41,12 @@ public class PostCommentController {
     public ResponseEntity<Object> addCommentByIdPost(
             @PathVariable String id, @RequestBody CommentAddRequest request) throws UserNotFoundException {
         Post post = postService.getPostById(Long.parseLong(id));
-        logger.info("getting post by id");
+        logger.info("getting post by id " + id);
         PostComment postComment = new PostComment();
         postComment.setCommentText(request.getCommentText());
         postComment.setPerson(personService.getPersonById(request.getAuthorId()));
         postComment.setPost(post);
-        postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)); //timezone
+        postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
         postComment.setIsBlocked(false);
         postComment.setParentId(request.getParentId());
         postCommentService.savePostComment(postComment);
@@ -62,6 +62,7 @@ public class PostCommentController {
         if (post.getPostCommentList().contains(postComment)) {
             postCommentService.deletePostComment(postComment);
             logger.info("deleting comment");
+            post.getPostCommentList().remove(postComment);
             return ResponseEntity.ok(HttpStatus.OK);
 
         }
@@ -122,6 +123,9 @@ public class PostCommentController {
         }
         return ResponseEntity.ok(HttpStatus.OK);
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //    @PutMapping("/api/v1/post/{id}/comments/{comment_id}/recover")
 //    public ResponseEntity<PostCommentResponse> recoveryCommentByIdPost(@PathVariable String id,
