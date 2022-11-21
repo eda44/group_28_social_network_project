@@ -7,21 +7,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skillbox.dto.Pageable;
+import ru.skillbox.config.CloudinaryConfig;
 import ru.skillbox.dto.PhotoDto;
 import ru.skillbox.dto.PostSearchDto;
-import ru.skillbox.model.Post;
 import ru.skillbox.request.PostAddRequest;
-import ru.skillbox.response.ComplaintResponse;
 import ru.skillbox.response.post.PagePostDto;
-import ru.skillbox.response.post.PostComplaintResponse;
 import ru.skillbox.response.post.PostResponse;
-import ru.skillbox.response.post.WallResponse;
 import ru.skillbox.service.PostService;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
 
 @RestController
 public class PostController {
@@ -41,13 +33,12 @@ public class PostController {
         logger.info("saving post");
     }
 
-    @RequestMapping(value = "/api/v1/storagePostPhoto", method = RequestMethod.POST,
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RequestMapping(value = "/api/v1/post/storagePostPhoto", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PhotoDto> uploadFile(@RequestParam("file") MultipartFile file) {
         PhotoDto photoDto = new PhotoDto();
         postService.uploadImage(file);
+        photoDto.setImagePath(CloudinaryConfig.uploadImage(file).getPath());
         logger.info("file uploaded");
-        photoDto.setImagePath(file.getName());
         return ResponseEntity.ok(photoDto);
     }
 
@@ -74,22 +65,25 @@ public class PostController {
 
 
     @GetMapping("/api/v1/post")
-    public ResponseEntity<PagePostDto> getPostsAll(PostSearchDto searchDto,
-                                                   @RequestParam Pageable pageable) {
-        PagePostDto response = new PagePostDto();
-        response.setTotalPages(pageable.getPage());
-        response.setSize(pageable.getSize());
-        response.setNumber(searchDto.getAccountIds().size());
-        PostResponse postResponse = new PostResponse();
-        postResponse.setTags(searchDto.getTags());
-        postResponse.setPostText(searchDto.getPostText());
-        postResponse.setTitle(searchDto.getTitle());
-        postResponse.setTimeChanged(searchDto.getDateTo());
-        postResponse.setTime(searchDto.getDateFrom());
-        postResponse.setIsDelete(searchDto.getIsDelete());
-        response.setContent(List.of(postResponse));
+    public ResponseEntity<PagePostDto> getPostsAll(@RequestParam PostSearchDto searchDto,
+                                                   @RequestParam(name = "page", defaultValue = "0") int page,
+                                                   @RequestParam(name = "size", defaultValue = "1") int size,
+                                                   @RequestParam(name = "sort", defaultValue = "time") String[] sort,
+                                                   @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                   @RequestParam(name = "limit", defaultValue = "20") int limit) {
+//        PagePostDto response = new PagePostDto();
+//        Pageable pageable = PageRequest.of();
+//        response.setNumber(searchDto.getAccountIds().size());
+//        PostResponse postResponse = new PostResponse();
+//        postResponse.setTags(searchDto.getTags());
+//        postResponse.setPostText(searchDto.getPostText());
+//        postResponse.setTitle(searchDto.getTitle());
+//        postResponse.setTimeChanged(searchDto.getDateTo());
+//        postResponse.setTime(searchDto.getDateFrom());
+//        postResponse.setIsDelete(searchDto.getIsDelete());
+//        response.setContent(List.of(postResponse));
 
-        return ResponseEntity.ok(response);
+        return postService.getPostsAll(searchDto, page, size, sort, offset, limit);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

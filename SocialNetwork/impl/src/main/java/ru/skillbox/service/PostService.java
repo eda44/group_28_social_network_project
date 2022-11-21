@@ -1,10 +1,16 @@
 package ru.skillbox.service;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skillbox.config.CloudinaryConfig;
+import ru.skillbox.dto.PostSearchDto;
 import ru.skillbox.dto.enums.Type;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Post;
@@ -12,14 +18,14 @@ import ru.skillbox.model.PostFile;
 import ru.skillbox.model.Tag;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.request.PostAddRequest;
+import ru.skillbox.response.FeedsResponseError;
+import ru.skillbox.response.post.PagePostDto;
 import ru.skillbox.response.post.PostResponse;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class PostService {
@@ -71,7 +77,6 @@ public class PostService {
         postRepository.delete(post);
     }
 
-
     public void setPost(PostAddRequest request) {
         Post post = new Post();
 
@@ -94,6 +99,10 @@ public class PostService {
         savePost(post);
     }
 
+    public void uploadImage(MultipartFile multipartFile) {
+        postFileService.savePostFile(CloudinaryConfig.uploadImage(multipartFile));
+    }
+
     public PostResponse setPostResponse(String id) {
         Post post = getPostById(Long.parseLong(id));
         PostResponse response = new PostResponse();
@@ -109,35 +118,17 @@ public class PostService {
         return response;
     }
 
-    public void uploadImage(MultipartFile file) {
-        Cloudinary cloudinary = PostService.getCloudinary();
-        Map upload = null;
-        try {
-            upload = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        PostFile postFile = new PostFile();
-        String url = (String) upload.get("url");
-        postFile.setPath(url);
-        postFile.setName(file.getOriginalFilename());
-        postFileService.savePostFile(postFile);
-    }
+    public ResponseEntity<PagePostDto> getPostsAll(@RequestParam PostSearchDto searchDto,
+                                                   @RequestParam(name = "page", defaultValue = "0")  int page,
+                                                   @RequestParam(name = "size", defaultValue = "1") int size,
+                                                   @RequestParam(name = "sort", defaultValue = "time") String[] sort,
+                                                   @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                   @RequestParam(name = "limit", defaultValue = "20") int limit) {
+        PagePostDto response = new PagePostDto();
+        Pageable pageable = PageRequest.of(page,size, Sort.by(sort).descending());
 
-    public static Cloudinary getCloudinary() {
-        return new Cloudinary(ObjectUtils.asMap(
-                "cloud_name", "diie0ma4r",
-                "api_key", "952226954255419",
-                "api_secret", "0fbUzyBNOPBcfhDyik77QetyjrQ",
-                "secure", true));
-    }
 
-    public static Map getParams() {
-        return ObjectUtils.asMap(
-                "use_filename", true,
-                "unique_filename", false,
-                "overwrite", true
-        );
+        return ResponseEntity.ok(response);
     }
 
     public PostFile setPostFile(Post post, String name, String path) {
