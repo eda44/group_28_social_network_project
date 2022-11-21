@@ -7,7 +7,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skillbox.config.CloudinaryConfig;
 import ru.skillbox.dto.PhotoDto;
 import ru.skillbox.dto.PostSearchDto;
 import ru.skillbox.request.PostAddRequest;
@@ -37,7 +36,7 @@ public class PostController {
     public ResponseEntity<PhotoDto> uploadFile(@RequestParam("file") MultipartFile file) {
         PhotoDto photoDto = new PhotoDto();
         postService.uploadImage(file);
-        photoDto.setImagePath(CloudinaryConfig.uploadImage(file).getPath());
+        photoDto.setImagePath(file.getName());
         logger.info("file uploaded");
         return ResponseEntity.ok(photoDto);
     }

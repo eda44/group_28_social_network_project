@@ -1,7 +1,6 @@
 package ru.skillbox.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,7 +17,6 @@ import ru.skillbox.model.PostFile;
 import ru.skillbox.model.Tag;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.request.PostAddRequest;
-import ru.skillbox.response.FeedsResponseError;
 import ru.skillbox.response.post.PagePostDto;
 import ru.skillbox.response.post.PostResponse;
 
@@ -30,16 +28,18 @@ import java.util.List;
 @Service
 public class PostService {
 
-
     private final PostRepository postRepository;
     private final PostFileService postFileService;
     private final PersonService personService;
+    private final CloudinaryConfig cloudinaryConfig;
 
     @Autowired
-    public PostService(PostRepository postRepository, PostFileService postFileService, PersonService personService) {
+    public PostService(PostRepository postRepository, PostFileService postFileService,
+                       PersonService personService, CloudinaryConfig cloudinaryConfig) {
         this.postRepository = postRepository;
         this.postFileService = postFileService;
         this.personService = personService;
+        this.cloudinaryConfig = cloudinaryConfig;
     }
 
     public List<Post> getAllPosts() {
@@ -53,7 +53,6 @@ public class PostService {
     public void savePost(Post post) {
         postRepository.save(post);
     }
-
 
     public List<Tag> convertStringToTag(List<String> tagsFromRequest) {
         List<Tag> tagList = new ArrayList<>();
@@ -100,7 +99,7 @@ public class PostService {
     }
 
     public void uploadImage(MultipartFile multipartFile) {
-        postFileService.savePostFile(CloudinaryConfig.uploadImage(multipartFile));
+        postFileService.savePostFile(cloudinaryConfig.uploadImage(multipartFile));
     }
 
     public PostResponse setPostResponse(String id) {
