@@ -1,10 +1,9 @@
 package config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -14,22 +13,22 @@ import javax.sql.DataSource;
 @PropertySource("database.properties")
 public class Config {
 
-    private final Environment env;
-
-    @Autowired
-    public Config(Environment env) {
-        this.env = env;
-    }
+    @Value("${db.driver}")
+    private String dbDriver;
+    @Value("${db.url}")
+    private String dbUrl;
+    @Value("${db.user}")
+    private String dbUser;
+    @Value("${db.pass}")
+    private String dbPassword;
 
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
-        dataSource.setDriverClassName(env.getRequiredProperty("driver"));
-        dataSource.setUrl(env.getRequiredProperty("url"));
-        dataSource.setUsername(env.getRequiredProperty("user"));
-        dataSource.setPassword(env.getRequiredProperty("password"));
-
+        dataSource.setDriverClassName(dbDriver);
+        dataSource.setUrl(dbUrl);
+        dataSource.setUsername(dbUser);
+        dataSource.setPassword(dbPassword);
         return dataSource;
     }
 

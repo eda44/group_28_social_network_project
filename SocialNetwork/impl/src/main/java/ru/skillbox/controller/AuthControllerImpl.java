@@ -1,6 +1,7 @@
 package ru.skillbox.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import ru.skillbox.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor
+@Log4j2
 public class AuthControllerImpl implements AuthController {
 
     private final AuthService authService;
@@ -24,8 +26,10 @@ public class AuthControllerImpl implements AuthController {
     @Override
     public ResponseEntity<LoginResponse> login(LoginRequest request) {
         try {
+            log.info("{} is login in", request.getEmail());
             return ResponseEntity.ok(authService.login(request));
-        }catch (UsernameNotFoundException e){
+        } catch (UsernameNotFoundException e) {
+            log.error("login attempt for {}", request.getEmail());
             return ResponseEntity.badRequest().body(LoginResponse.getBadResponse());
         }
     }
@@ -33,6 +37,7 @@ public class AuthControllerImpl implements AuthController {
     @Override
     public ResponseEntity<RegistrationResponse> registration(RegistrationRequest request) {
         try {
+            log.info("{} registered", request.getEmail());
             return ResponseEntity.ok(authService.registration(request));
         } catch (UserIsAlreadyRegisteredException e) {
             return ResponseEntity.badRequest().body(RegistrationResponse.getBadResponse());
