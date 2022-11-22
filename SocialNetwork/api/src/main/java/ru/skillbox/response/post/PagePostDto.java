@@ -3,7 +3,7 @@ package ru.skillbox.response.post;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.Pageable;
+import org.springframework.data.domain.Pageable;
 import ru.skillbox.dto.Sort;
 
 import java.util.List;
