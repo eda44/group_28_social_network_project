@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
     private void registrationUser(RegistrationRequest request) {
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setPassword(bCryptPasswordEncoder.encode(request.getPasswd1()));
+        user.setPassword(bCryptPasswordEncoder.encode(request.getPassword1()));
         user.setAccountNonLocked(true);
         user.setEnabled(true);
         userRepository.save(user);
