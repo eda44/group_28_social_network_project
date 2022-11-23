@@ -1,6 +1,7 @@
 package ru.skillbox.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -54,6 +55,10 @@ public class PostService {
         postRepository.save(post);
     }
 
+    public Page<Post> findAll(Pageable pageable) {
+        return postRepository.findAll(pageable);
+    }
+
     public List<Tag> convertStringToTag(List<String> tagsFromRequest) {
         List<Tag> tagList = new ArrayList<>();
         for (String tagString : tagsFromRequest) {
@@ -62,6 +67,10 @@ public class PostService {
             tagList.add(tag);
         }
         return tagList;
+    }
+
+    public List<Post> getPostsByIds(List<Long> ids) {
+        return postRepository.findAllById(ids);
     }
 
     public List<String> convertTagToString(List<Tag> tagList) {
@@ -74,6 +83,53 @@ public class PostService {
 
     public void deletePost(Post post) {
         postRepository.delete(post);
+    }
+
+    public ResponseEntity<PagePostDto> getPostsAll(@RequestParam PostSearchDto searchDto,
+                                                   @RequestParam(name = "page", defaultValue = "0") int page,
+                                                   @RequestParam(name = "size", defaultValue = "1") int size,
+                                                   @RequestParam(name = "sort", defaultValue = "time") String[] sort) {
+
+        PagePostDto pageResponse = new PagePostDto();
+        PostResponse postResponse = new PostResponse();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
+        Page<Post> postPage = postRepository.findAll(pageable);
+        List<Post> pageContent = postPage.getContent();
+        postResponse.setPostText(searchDto.getPostText());
+        postResponse.setPublishDate(searchDto.getDateTo());
+        postResponse.setTime(searchDto.getDateFrom());
+        postResponse.setTitle(searchDto.getTitle());
+        postResponse.setTags(searchDto.getTags());
+        postResponse.setLikeAmount(1); //todo
+        postResponse.setType(Type.POSTED); //todo
+        postResponse.setIsBlocked(searchDto.getBlockedIds().isEmpty()); //todo
+        postResponse.setCommentsCount(1); //todo
+        List<Post> posts = getPostsByIds(searchDto.getIds());
+        for (Post post : posts) {
+            postResponse.setTags(convertTagToString(post.getTags()));
+        }
+        postResponse.setIsDelete(false); //todo
+        postResponse.setMyLike(true); //todo
+        postResponse.setImagePath(postFileService.getPostFileById(0L).getPath()); //todo
+        postResponse.setAuthorId(searchDto.getAccountIds().get(0)); //todo
+        pageResponse.setSize(size);
+        pageResponse.setEmpty(pageContent.size() > 0);
+        pageResponse.setNumberOfElements(pageContent.size());
+        pageResponse.setTotalPages(sort.length);
+        pageResponse.setPageable(pageable);
+        pageResponse.setFirst(pageContent.size() == 1);
+        pageResponse.setNumber(1); //todo
+        pageResponse.setLast(true); //todo
+        pageResponse.setSort(new ru.skillbox.dto.Sort()); //todo
+        pageResponse.setContent(List.of(postResponse)); //todo
+
+        return ResponseEntity.ok(pageResponse);
+    }
+
+    public void mmm(List<Post> posts) {
+        for (Post post : posts) {
+
+        }
     }
 
     public void setPost(PostAddRequest request) {
@@ -115,19 +171,6 @@ public class PostService {
         response.setCommentsCount(post.getPostCommentList().size());
         response.setTags(convertTagToString(post.getTags()));
         return response;
-    }
-
-    public ResponseEntity<PagePostDto> getPostsAll(@RequestParam PostSearchDto searchDto,
-                                                   @RequestParam(name = "page", defaultValue = "0")  int page,
-                                                   @RequestParam(name = "size", defaultValue = "1") int size,
-                                                   @RequestParam(name = "sort", defaultValue = "time") String[] sort,
-                                                   @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                   @RequestParam(name = "limit", defaultValue = "20") int limit) {
-        PagePostDto response = new PagePostDto();
-        Pageable pageable = PageRequest.of(page,size, Sort.by(sort).descending());
-
-
-        return ResponseEntity.ok(response);
     }
 
     public PostFile setPostFile(Post post, String name, String path) {

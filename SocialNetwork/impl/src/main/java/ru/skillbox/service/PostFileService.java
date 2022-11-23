@@ -18,4 +18,8 @@ public class PostFileService {
     public void savePostFile(PostFile postFile) {
         postFileRepository.save(postFile);
     }
+
+    public PostFile getPostFileById(Long id) {
+        return postFileRepository.findById(id).get();
+    }
 }

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1/tags")
 public class TagController implements TagInterface {
 
     private final TagService tagService;
@@ -30,7 +31,7 @@ public class TagController implements TagInterface {
     }
 
     @Override
-    @GetMapping("/api/v1/tags/")
+    @GetMapping
     public ResponseEntity<PostTagResponse> getTags(Tag tag, Integer offset, Integer itemPerPage) {
         PostTagResponse response = new PostTagResponse();
         response.setTotal(6);
@@ -42,7 +43,7 @@ public class TagController implements TagInterface {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/api/v1/tags/{postId}")
+    @PutMapping("/{postId}")
     public ResponseEntity<PostTagResponse> putTag(@PathVariable String postId, @RequestBody PostTagRequest request) {
         Post post = postService.getPostById(Long.parseLong(postId));
         List<Tag> tagList = new ArrayList<>();
@@ -63,7 +64,7 @@ public class TagController implements TagInterface {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/api/v1/tags/{postId}/{tagId}")
+    @DeleteMapping("/{postId}/{tagId}")
     public ResponseEntity<TagResponse> deleteTag(@PathVariable String postId, @PathVariable String tagId) {
         TagResponse response = new TagResponse();
         response.setMessage("ok");

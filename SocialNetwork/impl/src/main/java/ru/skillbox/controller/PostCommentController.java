@@ -21,6 +21,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1/post/{id}/comment")
 public class PostCommentController {
 
     private final PostCommentService postCommentService;
@@ -37,7 +38,7 @@ public class PostCommentController {
         this.personService = personService;
     }
 
-    @PostMapping("/api/v1/post/{id}/comment")
+    @PostMapping
     public ResponseEntity<Object> addCommentByIdPost(
             @PathVariable String id, @RequestBody CommentAddRequest request) throws UserNotFoundException {
         Post post = postService.getPostById(Long.parseLong(id));
@@ -54,7 +55,7 @@ public class PostCommentController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @DeleteMapping("/api/v1/post/{id}/comment/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<Object> deleteCommentByIdPost(@PathVariable String id,
                                                         @PathVariable String commentId) {
         Post post = postService.getPostById(Long.parseLong(id));
@@ -69,7 +70,7 @@ public class PostCommentController {
         return ResponseEntity.badRequest().body("bad request");
     }
 
-    @GetMapping("/api/v1/post/{id}/comment")
+    @GetMapping
     public ResponseEntity<PostCommentResponse> getCommentByIdPost(@PathVariable String id,
                                                                   @RequestParam Pageable pageable) {
 
@@ -87,7 +88,7 @@ public class PostCommentController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/v1/post/{id}/comment/{commentId}/subcomment")
+    @GetMapping("/{commentId}/subcomment")
     public ResponseEntity<PostCommentResponse> getByPostIdAndCommentId(@PathVariable String id,
                                                                        @PathVariable String commentId,
                                                                        @RequestParam Pageable pageable) {
@@ -106,7 +107,7 @@ public class PostCommentController {
     }
 
 
-    @PutMapping("/api/v1/post/{id}/comment/{commentId}")
+    @PutMapping("/{commentId}")
     public ResponseEntity<Object> putCommentByIdPost(@RequestBody CommentAddRequest request,
                                                      @PathVariable String id, @PathVariable String commentId) throws UserNotFoundException {
         Post post = postService.getPostById(Long.parseLong(id));

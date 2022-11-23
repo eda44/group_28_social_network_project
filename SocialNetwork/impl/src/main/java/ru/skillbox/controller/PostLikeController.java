@@ -23,6 +23,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1/post/{id}")
 public class PostLikeController {
 
     private final PostLikeService postLikeService;
@@ -40,7 +41,7 @@ public class PostLikeController {
         this.commentLikeService = commentLikeService;
     }
 
-    @PostMapping("/api/v1/post/{id}/like")
+    @PostMapping("/like")
     public ResponseEntity<Object> createPostLike(@PathVariable String id) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostLike postLike = new PostLike();
@@ -50,7 +51,7 @@ public class PostLikeController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PostMapping("/api/v1/post/{id}/comment/{commentId}/like")
+    @PostMapping("/comment/{commentId}/like")
     public ResponseEntity<Object> likeToComment(@PathVariable String id,
                                                 @PathVariable String commentId) {
         Post post = postService.getPostById(Long.parseLong(id));
@@ -63,7 +64,7 @@ public class PostLikeController {
         return ResponseEntity.ok("ok");
     }
 
-    @DeleteMapping("/api/v1/post/{id}/like")
+    @DeleteMapping("/like")
     public ResponseEntity<Object> deleteLike(@PathVariable String id) {
         Post post = postService.getPostById(Long.parseLong(id));
         List<PostLike> postLikes = post.getPostLikes();
@@ -76,7 +77,7 @@ public class PostLikeController {
         return ResponseEntity.ok("ok");
     }
 
-    @DeleteMapping("/api/v1/post/{id}/comment/{commentId}/like")
+    @DeleteMapping("/comment/{commentId}/like")
     public ResponseEntity<Object> deleteLikeToComment(@PathVariable String id,
                                                       @PathVariable String commentId) {
         Post post = postService.getPostById(Long.parseLong(id));

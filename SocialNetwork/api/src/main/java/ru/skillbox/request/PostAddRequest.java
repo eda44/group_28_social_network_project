@@ -16,7 +16,6 @@ public class PostAddRequest {
     private Long authorId;
     private String title;
     private Type type;
-    @JsonProperty("post_text")
     private String postText;
     private Boolean isBlocked;
     private Boolean isDelete;
