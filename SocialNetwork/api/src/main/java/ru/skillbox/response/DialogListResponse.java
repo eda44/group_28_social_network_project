@@ -62,7 +62,7 @@ public class DialogListResponse {
         country.setId(0);
         country.setTitle("string");
         CityDto[] cities = {city};
-        country.setCities(cities);
+        //country.setCities(cities);
 
         conversationPartner.setCity(city);
         conversationPartner.setCountry(country);

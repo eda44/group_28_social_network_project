@@ -2,129 +2,196 @@ package ru.skillbox.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import org.apache.logging.log4j.Logger;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import lombok.Value;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.skillbox.controller.FeedsController;
-import ru.skillbox.dto.PostDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.skillbox.response.PostCommentDto;
+import ru.skillbox.response.PostDto;
+import ru.skillbox.mapper.PostCommentMapper;
 import ru.skillbox.mapper.PostMapper;
 import ru.skillbox.model.Post;
+import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostRepository;
+import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponseError;
 import ru.skillbox.response.FeedsResponseOK;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+
+
+
+
+@Log4j2
 @Service
 public class FeedsService {
-
-
-
+    //TODO: Добавить логирование комментариев
     private PostRepository postRepository;
 
-    private AccountService accountService;
+    private UserService userService;
 
-    private Logger logger = FeedsController.getLogger();
-
-    @Autowired
-    public FeedsService(PostRepository postRepository, AccountService accountService) {
+       @Autowired
+    public FeedsService(PostRepository postRepository,
+                        UserService userService) {
         this.postRepository = postRepository;
-        this.accountService = accountService;
+        this.userService = userService;
+
     }
 
-    public ResponseEntity<Object> getObjectResponseEntity(int page, int size, String[] sort, int offset, int limit) throws JsonProcessingException {
-        long currentUserId = getUserId();
+    @Transactional
+    public ResponseEntity<FeedsResponseOK> getObjectResponseEntity(Pageable pageable, boolean isTest)
+            throws JsonProcessingException {
+           long currentUserId;
 
-        logger.info("Detecting currentUserId");
-        ResponseEntity<Object> feedsError = generateFeedsResponseError(currentUserId);
-
-        if (feedsError != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            logger.info(mapper.writeValueAsString(feedsError));
-            return feedsError;
+        if(isTest){
+            currentUserId = 1;
+            log.info("Test mode!");
+        } else {
+            currentUserId = userService.getCurrentUser().getId();
         }
 
-        Pageable pageable = PageRequest.of(page,size, Sort.by(sort).descending());
+        log.info("CurrentUserId={}",currentUserId);
+
+
         Page<Post> postsPage = postRepository.findAll(pageable);
         List<Post> posts = postsPage.getContent();
-        logger.info("Find all posts from repository");
+        log.info("Find all posts from repository");
+
 
         if(posts==null || posts.size() == 0){
             FeedsResponseError feedsResponseError = new FeedsResponseError();
             feedsResponseError.setError("No posts!");
             feedsResponseError.setErrorDescription("No posts found. Please fill your database!");
             ObjectMapper mapper = new ObjectMapper();
-            logger.info(mapper.writeValueAsString(feedsResponseError));
-            return ResponseEntity.ok(feedsResponseError);
+            log.info(mapper.writeValueAsString(feedsResponseError));
+            return null;
         }
 
         List<PostDto> postDtoList = new ArrayList<>();
 
         for(Post post : posts) {
-            logger.info("Mapping post number " + post.getId());
+            log.info("Mapping post number " + post.getId());
             PostDto postDto = PostMapper.INSTANCE.postToPostDto(post, currentUserId);
             postDtoList.add(postDto);
         }
+
             FeedsResponseOK feedsResponse = new FeedsResponseOK();
-            logger.info("Generating feeds response!");
-            feedsResponse.setTimeStamp((new Date()).getTime());
-            feedsResponse.setPage(page);
-            feedsResponse.setSize(size);
-            feedsResponse.setTotal(sort.length);
-            feedsResponse.setData(postDtoList);
+            log.info("Generating feeds response!");
+            feedsResponse.setContent(postDtoList);
+            feedsResponse.setSize(pageable.getPageSize());
+            feedsResponse.setTotalElements(postsPage.getTotalElements());
+            feedsResponse.setTotalPages(postsPage.getTotalPages());
+            feedsResponse.setEmpty(postsPage.isEmpty());
+            feedsResponse.setSort(postsPage.getSort());
+            feedsResponse.setFirst(postsPage.isFirst());
+            feedsResponse.setLast(postsPage.isLast());
+            feedsResponse.setNumber(postsPage.getNumber());
+            feedsResponse.setNumberOfElements(postsPage.getNumberOfElements());
+            feedsResponse.setPageable(pageable);
             ObjectMapper mapper = new ObjectMapper();
-            logger.info(mapper.writeValueAsString(feedsResponse));
+            log.info(mapper.writeValueAsString(feedsResponse));
             return ResponseEntity.ok(feedsResponse);
     }
 
-    private  ResponseEntity<Object> generateFeedsResponseError(long currentUserId) throws JsonProcessingException {
-        if(currentUserId ==-1L){
-            FeedsResponseError feedsResponseError = new FeedsResponseError();
-            feedsResponseError.setError("Not authorized");
-            feedsResponseError.setErrorDescription("Please authorize in system, then continue!");
-            ObjectMapper mapper = new ObjectMapper();
-            logger.info(mapper.writeValueAsString(feedsResponseError));
-            return ResponseEntity.ok(feedsResponseError);
+
+    public Pageable generatePageableObjectByServlet(HttpServletRequest httpServletRequest){
+        String pageString = httpServletRequest.getParameter("page");
+        int page = pageString!=null?Integer.parseInt(pageString):0;
+        log.info("page= " + page);
+        String sizeString = httpServletRequest.getParameter("size");
+        int size = sizeString!=null?Integer.parseInt(sizeString):1;
+        log.info("size= " + size);
+        String sort = httpServletRequest.getParameter("sort");
+        if(page < 0){
+            page = 0;
         }
-        return null;
-    }
+        String[] words = sort.split(",");
 
-    private long getUserId() {
-        long currentUserId;
-        try {
-            currentUserId = getCurrentUserId();
-        } catch (IOException|ParseException exception) {
-            exception.printStackTrace();
-            currentUserId = -1L;
-        }
-        return currentUserId;
-    }
-
-    private  Long getCurrentUserId() throws IOException, ParseException {
-       String currentPerson = accountService.getCurrentPerson();
-
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) parser.parse(currentPerson);
-        Object jsonData = jsonObject.get("data");
-        if(jsonData!=null) {
-            JSONObject idString = (JSONObject) parser.parse(jsonData.toString());
-            Object jsonGetId = idString.get("id");
-            Long id = Long.parseLong(jsonGetId.toString());
-            return id;
+        Pageable pageable;
+        if(words[1].equals("desc")) {
+            pageable = PageRequest.of(page, size, Sort.by(words[0]).descending());
         } else {
-            throw new IOException( "User is not authorized!");
+            pageable = PageRequest.of(page, size, Sort.by(words[0]).ascending());
         }
+        return pageable;
+    }
+
+    @Transactional
+    public ResponseEntity<CommentResponse> getComments(long id, Pageable pageable, boolean isTest)
+            throws JsonProcessingException {
+        List<PostComment> postCommentList = postRepository.findById(id).get().getPostCommentList();
+        List<PostComment> noSubCommentList= postCommentList.stream()
+                .filter(postComment -> postComment.getParentId()==0)
+                .collect(Collectors.toList());
+        Page<PostComment> pages = new PageImpl<>(noSubCommentList, pageable, noSubCommentList.size());
+
+        CommentResponse commentResponse = getCommentResponse(pageable, pages, isTest);
+
+        return ResponseEntity.ok(commentResponse);
+    }
+
+    private CommentResponse getCommentResponse(Pageable pageable, Page<PostComment> pages, boolean isTest)
+            throws JsonProcessingException {
+        log.info("Generating comment response!");
+        CommentResponse commentResponse = new CommentResponse();
+        commentResponse.setSize(pageable.getPageSize());
+        commentResponse.setTotalElements(pages.getTotalElements());
+        commentResponse.setTotalPages(pages.getTotalPages());
+        commentResponse.setEmpty(pages.isEmpty());
+        commentResponse.setSort(pages.getSort());
+        commentResponse.setFirst(pages.isFirst());
+        commentResponse.setLast(pages.isLast());
+        commentResponse.setNumber(pages.getNumber());
+        commentResponse.setNumberOfElements(pages.getNumberOfElements());
+        commentResponse.setPageable(pageable);
+
+        List<PostComment> comments = pages.getContent();
+        List<PostCommentDto> postCommentDtoList = new ArrayList<>();
+        long currentUserId;
+        if(isTest){
+            currentUserId = 1;
+            log.info("Test mode!");
+        } else {
+            currentUserId = userService.getCurrentUser().getId();
+        }
+
+
+        for(PostComment comment : comments) {
+            log.info("Mapping comment number " + comment.getId());
+            PostCommentDto postCommentDtoDto = PostCommentMapper.
+                    INSTANCE.postCommentToPostCommentDto(comment, currentUserId);
+            postCommentDtoList.add(postCommentDtoDto);
+        }
+        commentResponse.setContent(postCommentDtoList);
+        ObjectMapper mapper = new ObjectMapper();
+        log.info(mapper.writeValueAsString(commentResponse));
+        return commentResponse;
+    }
+
+    @Transactional
+    public ResponseEntity<CommentResponse> getSubComments(long id, long commentId, Pageable pageable,
+    boolean isTest)
+            throws JsonProcessingException {
+
+        List<PostComment> postCommentList = postRepository.findById(id).get().getPostCommentList();
+        PostComment postComment = postCommentList.stream().filter(p -> p.getId().equals(commentId)).findFirst().get();
+
+        List<PostComment> subCommentList = postComment.getPost().getPostCommentList()
+                .stream().filter(p ->
+                p.getParentId().equals(postComment.getId())
+        ).collect(Collectors.toList());
+
+        Page<PostComment> pages = new PageImpl<>(subCommentList, pageable, subCommentList.size());
+        CommentResponse commentResponse = getCommentResponse(pageable, pages,isTest);
+
+        return ResponseEntity.ok(commentResponse);
     }
 }

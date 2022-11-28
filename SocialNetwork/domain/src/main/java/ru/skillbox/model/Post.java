@@ -20,11 +20,15 @@ public class Post {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "post2tag",
-            joinColumns = {@JoinColumn(name = "post_id")},
-            inverseJoinColumns = {@JoinColumn(name = "tag_id")}
+        joinColumns = {@JoinColumn(name = "post_id")},
+        inverseJoinColumns = {@JoinColumn(name = "tag_id")}
     )
     private List<Tag> tags;
     private String title;
+
+    private Boolean isDelete;
+
+    private Long timeChanged;
     @Column(name = "post_text")
     private String postText;
     @Column(name = "is_blocked")
@@ -37,8 +41,8 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private Type type;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id",referencedColumnName = "id")
     private Person person;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

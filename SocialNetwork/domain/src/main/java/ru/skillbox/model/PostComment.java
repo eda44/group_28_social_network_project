@@ -18,15 +18,26 @@ public class PostComment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id",referencedColumnName = "id", insertable = false,updatable = false)
+    @Column(name = "comment_type")
+    private String commentType;
+
+    private Long timeChanged;
+
+    private Boolean isDelete;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id", referencedColumnName = "id")
+    private List<CommentFile> commentFiles;
+
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id",referencedColumnName = "id")
     private Post post;
 
     @Column(name = "parent_id")
     private Long parentId;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id",referencedColumnName = "id", insertable = false,updatable = false)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id",referencedColumnName = "id")
     private Person person;
 
     @Column(name = "comment_text")
@@ -40,4 +51,8 @@ public class PostComment {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", referencedColumnName = "id")
     private List<CommentLike> commentLikes;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
+    private PostComment postComment;//TODO: Продумать альтернативный вариант
 }

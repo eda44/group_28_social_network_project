@@ -10,7 +10,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
 @Configuration
-@PropertySource("database.properties")
+//@PropertySource("database.properties")
 public class Config {
 
     @Value("${db.driver}")

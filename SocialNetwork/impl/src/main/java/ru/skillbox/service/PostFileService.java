@@ -15,11 +15,15 @@ public class PostFileService {
         this.postFileRepository = postFileRepository;
     }
 
-    public void savePostFile(PostFile postFile) {
-        postFileRepository.save(postFile);
+    public PostFile savePostFile(PostFile postFile) {
+       return postFileRepository.save(postFile);
     }
 
     public PostFile getPostFileById(Long id) {
         return postFileRepository.findById(id).get();
+    }
+
+    public PostFile getPostFileByPath(String name){
+        return  postFileRepository.findByPath(name).get();
     }
 }

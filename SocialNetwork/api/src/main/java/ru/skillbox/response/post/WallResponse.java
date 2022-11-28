@@ -2,7 +2,7 @@ package ru.skillbox.response.post;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.PostDto;
+import ru.skillbox.response.PostDto;
 
 import java.util.List;
 

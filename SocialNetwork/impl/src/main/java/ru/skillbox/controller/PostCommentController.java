@@ -70,7 +70,7 @@ public class PostCommentController {
         return ResponseEntity.badRequest().body("bad request");
     }
 
-    @GetMapping
+    //@GetMapping
     public ResponseEntity<PostCommentResponse> getCommentByIdPost(@PathVariable String id,
                                                                   @RequestParam Pageable pageable) {
 
@@ -88,7 +88,7 @@ public class PostCommentController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{commentId}/subcomment")
+    //@GetMapping("/{commentId}/subcomment")
     public ResponseEntity<PostCommentResponse> getByPostIdAndCommentId(@PathVariable String id,
                                                                        @PathVariable String commentId,
                                                                        @RequestParam Pageable pageable) {
