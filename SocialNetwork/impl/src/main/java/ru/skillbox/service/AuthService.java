@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skillbox.exception.EmailNotFoundException;
 import ru.skillbox.exception.UserIsAlreadyRegisteredException;
+import ru.skillbox.jwt.JwtTokenProvider;
 import ru.skillbox.model.User;
 import ru.skillbox.request.LoginRequest;
 import ru.skillbox.request.PasswordRecoveryRequest;
@@ -31,6 +32,8 @@ public class AuthService {
     private final PersonService personService;
     private final AuthenticationManager authenticationManager;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     public LoginResponse login(LoginRequest request) throws UsernameNotFoundException {
         User user = userService.getUserByEmail(request.getEmail());
         if (!userService.passwordCheck(user, request.getPassword())) {
@@ -41,7 +44,8 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(authentication);
-        return LoginResponse.getOkResponse(personService.getPersonByEmail(request.getEmail()));
+        String jwt = jwtTokenProvider.createToken(authentication.getName(), "ROLE_USER");
+        return LoginResponse.getOkResponse(personService.getPersonByEmail(request.getEmail()), jwt);
     }
 
     public PasswordRecoveryResponse passwordRecovery(PasswordRecoveryRequest request) throws EmailNotFoundException {

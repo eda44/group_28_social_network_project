@@ -17,6 +17,7 @@ import ru.skillbox.request.account.AccountRecoveryRequest;
 import ru.skillbox.response.account.RecoveryAccountRs;
 import ru.skillbox.model.Account;
 import ru.skillbox.service.AccountService;
+import ru.skillbox.service.PersonService;
 import ru.skillbox.service.SearchPersonService;
 
 @RestController
@@ -27,6 +28,8 @@ public class AccountControllerImpl implements Account {
     private AccountService accountService;
 
     private SearchPersonService searchService;
+
+    private PersonService personService;
 
 
     @Override
@@ -52,7 +55,7 @@ public class AccountControllerImpl implements Account {
     @Override
     @GetMapping("me")
     public ResponseEntity<?> getUser() {
-        return ResponseEntity.ok(accountService.getCurrentPerson());
+        return ResponseEntity.ok(personService.getCurrentPerson());
     }
 
     @Override
