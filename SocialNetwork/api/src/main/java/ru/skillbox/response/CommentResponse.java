@@ -3,18 +3,18 @@ package ru.skillbox.response;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.Sort;
-
+import ru.skillbox.response.PostCommentDto;
 
 import java.util.List;
 
 @Setter
 @Getter
-public class FeedsResponseOK {
+public class CommentResponse {
     private long totalElements;
     private long totalPages;
     private long number;
     private long size;
-    private List<PostDto> content;
+    private List<PostCommentDto> content;
 
     private Sort sort;
     boolean first;

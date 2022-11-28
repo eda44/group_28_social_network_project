@@ -1,8 +1,13 @@
 package ru.skillbox.service;
 
 import java.util.Optional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.skillbox.dto.AccountDto;
+import ru.skillbox.mapper.AccountMapper;
 import ru.skillbox.model.User;
 import ru.skillbox.repository.PersonRepository;
 import ru.skillbox.request.account.AccountEditRq;
@@ -19,6 +24,8 @@ public class AccountService {
 
   private PersonRepository personRepo;
 
+  private PersonService personService;
+
   public boolean recoveryAccount(AccountRecoveryRequest accountRecoveryRequest) {
     Optional<User> userOptional = userRepo.findByEmailAndPassword(accountRecoveryRequest.getEmail(),
         accountRecoveryRequest.getPassword());
@@ -33,45 +40,10 @@ public class AccountService {
     return BlockingAccountRs.builder().build();
   }
 
-  public String getCurrentPerson() {
-    return "{\n" +
-        "  \"error\": \"Неверный запрос\",\n" +
-        "  \"timestamp\": 1644234125000,\n" +
-        "  \"data\": {\n" +
-        "    \"id\": 1,\n" +
-        "    \"email\": \"dsiegertsz0@fc2.com\",\n" +
-        "    \"phone\": \"+7 645 943 5082\",\n" +
-        "    \"photo\": \"data:image/png;base64...\",\n" +
-        "    \"about\": \"Maecenas tristique...\",\n" +
-        "    \"city\": {\n" +
-        "      \"id\": 0,\n" +
-        "      \"title\": \"string\",\n" +
-        "      \"country_id\": 0\n" +
-        "    },\n" +
-        "    \"country\": {\n" +
-        "      \"id\": 0,\n" +
-        "      \"title\": \"string\",\n" +
-        "      \"cities\": [\n" +
-        "        {\n" +
-        "          \"id\": 0,\n" +
-        "          \"title\": \"string\",\n" +
-        "          \"country_id\": 0\n" +
-        "        }\n" +
-        "      ]\n" +
-        "    },\n" +
-        "    \"token\": \"string\",\n" +
-        "    \"first_name\": \"Davida\",\n" +
-        "    \"last_name\": \"Siegertsz\",\n" +
-        "    \"reg_date\": 1618070680000,\n" +
-        "    \"birth_date\": 702565308000,\n" +
-        "    \"message_permission\": \"ALL\",\n" +
-        "    \"last_online_time\": 1644234125000,\n" +
-        "    \"is_online\": true,\n" +
-        "    \"is_blocked\": false,\n" +
-        "    \"is_deleted\": false\n" +
-        "  },\n" +
-        "  \"error_description\": \"asd\"\n" +
-        "}";
+  public String getCurrentPerson() throws JsonProcessingException {
+    AccountDto accountDto = AccountMapper.INSTANCE.personToAccountDto(personService.getCurrentPerson());
+    ObjectMapper mapper = new ObjectMapper();
+    return mapper.writeValueAsString(accountDto);
   }
 
   public AccountEditRq modifyCurrentPerson() {

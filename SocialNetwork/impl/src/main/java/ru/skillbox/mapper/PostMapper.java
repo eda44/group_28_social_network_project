@@ -5,13 +5,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import ru.skillbox.dto.*;
 import ru.skillbox.model.*;
+import ru.skillbox.response.PostDto;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 
 @Mapper
@@ -20,50 +20,54 @@ public interface PostMapper {
 
     PostMapper INSTANCE = Mappers.getMapper( PostMapper.class );
 
-
-    @Mapping(source = "person", target = "author")
-    @Mapping(source = "postFiles", target = "photoUrl", qualifiedByName = "mapPhoto")
-    @Mapping(source = "postLikes", target = "likes", qualifiedByName = "mapLikes")
+    @Mapping(source = "time", target = "time", qualifiedByName = "mapTime")
+    @Mapping(source = "person", target = "authorId", qualifiedByName = "mapAuthorId")
+    @Mapping(source = "postCommentList", target = "commentsCount", qualifiedByName = "mapCommentsCount")
+    @Mapping(source = "postFiles", target = "imagePath", qualifiedByName = "mapImagePath")
+    @Mapping(source = "postLikes", target = "likeAmount", qualifiedByName = "mapLikeAmount")
     @Mapping(source = "postLikes", target = "myLike", qualifiedByName = "mapMyLike")
-    @Mapping(source = "postCommentList", target = "comments", qualifiedByName = "mapComments")
+    @Mapping(source = "time", target = "publishDate", qualifiedByName = "mapPublishDate")
+    @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTags")
+    @Mapping(source = "timeChanged", target = "timeChanged", qualifiedByName = "mapPublishDate")
+    @Mapping(source = "isDelete", target = "isDelete")
     PostDto postToPostDto(Post post, @Context Long currentUser);
-    CountryDto countryToCountryDto(Country country);
-    @Mapping(target = "isOnline")
-    @Mapping(target = "isBlocked")
 
-    AccountDto personToAccountDto(Person person);
+    @Named("mapTime")
+    default String mapTime(Long time){
 
+        LocalDateTime localDateTime = LocalDateTime.now();
 
-
-    @Mapping(source = "post", target = "postId", qualifiedByName = "getPostId")
-    @Mapping(source = "commentLikes", target = "likes", qualifiedByName = "mapCommentLikes")
-    @Mapping(source = "person", target = "author")
-    PostCommentDto commentToPostCommentDto(PostComment postComment);
-
-    @Mapping(target = "person")
-    LikeDto postLikeToLikeDto(PostLike postLike);
-
-    @Mapping(target = "person")
-    LikeDto commentLikeToLikeDto(CommentLike commentLike);
+        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+    }
 
 
-    @Mapping(source = "country", target = "countryId", qualifiedByName = "mapCountry")
-    CityDto cityToCityDto(City city);
-    
-    @Named("mapLikes")
-    default Integer mapLikes(List<PostLike> likes) {
+    @Named("mapAuthorId")
+    default Long mapAuthorId(Person person){
+        return person.getId();
+    }
+
+    @Named("mapCommentsCount")
+    default Integer mapCommentsCount(List<PostComment> postCommentList){
+        if(postCommentList!=null) {
+            return postCommentList.size();
+        }
+        return 0;
+    }
+
+    @Named("mapImagePath")
+    default String mapPhoto(List<PostFile> postFiles) {
+        if(postFiles != null && !postFiles.isEmpty() ) {
+            return postFiles.get(0).getPath();
+        }
+        return  null;
+    }
+
+    @Named("mapLikeAmount")
+    default Integer mapLikeAmount(List<PostLike> likes) {
         if(likes==null) {
             return 0;
         }
         return likes.size();
-    }
-
-    @Named("mapPhoto")
-    default String mapPhoto(List<PostFile> postFiles) {
-        if(postFiles == null) {
-            return null;
-        }
-        return postFiles.get(0).getPath();
     }
 
     @Named("mapMyLike")
@@ -71,67 +75,38 @@ public interface PostMapper {
         if(likes==null) {
             return null;
         }
-        List<LikeDto> likeDtoList = new ArrayList<>();
-        likes.forEach(l -> likeDtoList.add(new LikeDto(l.getPerson())));
-        boolean isMyLike = getMyLike(likeDtoList, currentUser);
-        return isMyLike;
-    }
-
-    private static boolean getMyLike(List<LikeDto> likes, Long currentUser) {
-           boolean isMyLike = false;
-        for(LikeDto like : likes){
-            if(like.getPerson().getId() == currentUser){
-                isMyLike = true;
-                break;
+        for(PostLike like : likes) {
+            if(like.getPerson().getId().equals(currentUser)) {
+                return true;
             }
         }
-        return isMyLike;
+        return false;
     }
 
 
-    @Named("mapCountry")
-    default Long mapCountry(Country country) {
-        if ( country == null ) {
-            return null;
+
+    @Named("mapPublishDate")
+    default String mapPublishDate(Long time){
+        if(time!=null) {
+            Timestamp timestamp = new Timestamp(time);
+            LocalDateTime localDateTime = timestamp.toLocalDateTime();
+
+            return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
         }
-        return country.getId();
+        return "";
     }
 
-    @Named("mapComments")
-    default PostCommentDto[] findComments(List<PostComment> comments, @Context Long currentUser){
-        Map<Long, PostCommentDto> postCommentDtoMap = new HashMap<>();
-        List<String> subCommentList = new ArrayList<>();
-        for(PostComment comment : comments){
-            if(comment.getParentId() == 0L) {
-                PostCommentDto postCommentDto = commentToPostCommentDto(comment);
-                List<LikeDto> likeDtoList = new ArrayList<>();
-                comment.getCommentLikes().forEach(l -> likeDtoList.add(new LikeDto(l.getPerson())));
-                boolean isMyLike = getMyLike(likeDtoList, currentUser);
-                postCommentDto.setMyLike(isMyLike);
-                postCommentDtoMap.put(comment.getId(),postCommentDto);
-
-            } else {
-                PostCommentDto postCommentDto = postCommentDtoMap.get(comment.getParentId());
-                String subComment = comment.getCommentText();
-                subCommentList.add(subComment);
-                String[] subComments = new String[subCommentList.size()];
-                subCommentList.toArray(subComments);
-                postCommentDto.setSubComments(subComments);
+    @Named("mapTags")
+    default String[] mapTags(List<Tag> tags){
+        if(tags!=null) {
+            List<String> tagList = new ArrayList<>();
+            for (Tag tag : tags) {
+                tagList.add(tag.getTag());
             }
+            String[] tagArray = new String[tagList.size()];
+            tagList.toArray(tagArray);
+            return tagArray;
         }
-        return postCommentDtoMap.values().toArray(new PostCommentDto[postCommentDtoMap.size()]);
-    }
-
-
-
-
-    @Named("getPostId")
-    default Long getPostId(Post post){
-        return post.getId();
-    }
-
-    @Named("mapCommentLikes")
-    default Integer mapCommentLikes(List<CommentLike> commentLikes){
-        return  commentLikes.size();
+        return null;
     }
 }

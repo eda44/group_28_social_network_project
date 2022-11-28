@@ -9,5 +9,5 @@ public class CountryDto {
 
     private Integer id;
     private String title;
-    private CityDto[] cities;
+//    private CityDto[] cities;
 }

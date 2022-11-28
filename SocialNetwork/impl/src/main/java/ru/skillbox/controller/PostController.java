@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skillbox.dto.PhotoDto;
 import ru.skillbox.dto.PostSearchDto;
+import ru.skillbox.exception.UserNotFoundException;
+import ru.skillbox.model.PostFile;
 import ru.skillbox.request.PostAddRequest;
 import ru.skillbox.response.post.PagePostDto;
 import ru.skillbox.response.post.PostResponse;
@@ -28,7 +30,7 @@ public class PostController {
     }
 
     @PostMapping
-    public void addNewPost(@RequestBody PostAddRequest request) {
+    public void addNewPost(@RequestBody PostAddRequest request) throws UserNotFoundException {
         postService.setPost(request);
         logger.info("saving post, post text = " + request.getPostText());
     }
@@ -37,8 +39,8 @@ public class PostController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PhotoDto> uploadFile(@RequestParam("file") MultipartFile file) {
         PhotoDto photoDto = new PhotoDto();
-        postService.uploadImage(file);
-        photoDto.setImagePath(file.getName());
+        PostFile postFile = postService.uploadImage(file);
+        photoDto.setImagePath(postFile.getPath());
         logger.info("file uploaded");
         return ResponseEntity.ok(photoDto);
     }
@@ -65,7 +67,7 @@ public class PostController {
     }
 
 
-    @GetMapping
+    //@GetMapping
     public ResponseEntity<PagePostDto> getPostsAll(@RequestParam PostSearchDto searchDto,
                                                    @RequestParam(name = "page", defaultValue = "0") int page,
                                                    @RequestParam(name = "size", defaultValue = "1") int size,

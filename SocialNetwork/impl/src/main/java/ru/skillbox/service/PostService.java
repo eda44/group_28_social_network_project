@@ -132,13 +132,16 @@ public class PostService {
         }
     }
 
-    public void setPost(PostAddRequest request) {
+    public void setPost(PostAddRequest request) throws UserNotFoundException {
         Post post = new Post();
 
         post.setTitle(request.getTitle());
         post.setPostText(request.getPostText());
         post.setTags(convertStringToTag(request.getTags()));
         post.setIsBlocked(request.getIsBlocked());
+        post.setPerson(personService.getCurrentPerson());
+        post.setPostFiles(List.of(postFileService.getPostFileByPath(request.getImagePath())));
+
         if (request.getPublishDate() != null) {
             post.setType(Type.QUEUED);
         } else {
@@ -154,8 +157,8 @@ public class PostService {
         savePost(post);
     }
 
-    public void uploadImage(MultipartFile multipartFile) {
-        postFileService.savePostFile(cloudinaryConfig.uploadImage(multipartFile));
+    public PostFile uploadImage(MultipartFile multipartFile) {
+       return postFileService.savePostFile(cloudinaryConfig.uploadImage(multipartFile));
     }
 
     public PostResponse setPostResponse(String id) {

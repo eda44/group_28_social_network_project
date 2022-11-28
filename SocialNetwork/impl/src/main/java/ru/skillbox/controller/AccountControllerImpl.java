@@ -1,5 +1,6 @@
 package ru.skillbox.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,8 +55,8 @@ public class AccountControllerImpl implements Account {
 
     @Override
     @GetMapping("me")
-    public ResponseEntity<?> getUser() {
-        return ResponseEntity.ok(personService.getCurrentPerson());
+    public ResponseEntity<?> getUser() throws JsonProcessingException {
+        return ResponseEntity.ok(accountService.getCurrentPerson());
     }
 
     @Override

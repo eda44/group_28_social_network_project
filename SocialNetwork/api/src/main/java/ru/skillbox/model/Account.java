@@ -1,5 +1,6 @@
 package ru.skillbox.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.skillbox.request.account.AccountEditRq;
@@ -20,7 +21,7 @@ public interface Account {
    *
    * @return
    */
-  ResponseEntity<?> getUser();
+  ResponseEntity<?> getUser() throws JsonProcessingException;
 
   /**
    * Редактирование текущего аккаунта
