@@ -15,11 +15,15 @@ public class LoginResponse {
     private AccountDto data;
     @JsonProperty("error_description")
     private String errorDescription;
+    private String accessToken;
+    private String tokenType;
 
-    public static LoginResponse getOkResponse(Person person){
+    public static LoginResponse getOkResponse(Person person, String token){
         return LoginResponse.builder()
                 .timestamp(new Date().getTime())
-                .data(AccountDto.getCorrectRsLogin(person, "token"))//TODO: token
+                .data(AccountDto.getCorrectRsLogin(person, token))
+                .accessToken(token)
+                .tokenType("Bearer")
                 .build();
     }
 

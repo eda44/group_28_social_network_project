@@ -7,11 +7,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ru.skillbox.jwt.JwtConfigurer;
 
 import java.util.Arrays;
 
@@ -20,6 +20,12 @@ import java.util.Arrays;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private final JwtConfigurer jwtConfigurer;
+
+    public SecurityConfig(JwtConfigurer jwtConfigurer) {
+        this.jwtConfigurer = jwtConfigurer;
+    }
+
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http
@@ -27,8 +33,8 @@ public class SecurityConfig {
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
                 .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                //.and()
                 .authorizeRequests()
                 .antMatchers("/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/post/**").permitAll()
@@ -36,8 +42,8 @@ public class SecurityConfig {
                 .antMatchers("/api/v1/auth/logout").permitAll()
                 .anyRequest()
                 .authenticated()
-        // .and()
-        // .apply(jwtConfigurer)
+                .and()
+                .apply(jwtConfigurer)
         ;
 
         return http.build();
@@ -45,7 +51,7 @@ public class SecurityConfig {
 
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://194.58.100.187:8090"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8086/"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "content-type", "x-requested-with",
                 "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "x-auth-token", "x-app-id",
