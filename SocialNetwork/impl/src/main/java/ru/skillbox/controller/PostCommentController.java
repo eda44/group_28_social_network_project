@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.dto.Pageable;
-import ru.skillbox.exception.UserNotFoundException;
+
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.request.CommentAddRequest;
@@ -18,6 +18,7 @@ import ru.skillbox.service.PostService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -40,16 +41,20 @@ public class PostCommentController {
 
     @PostMapping
     public ResponseEntity<Object> addCommentByIdPost(
-            @PathVariable String id, @RequestBody CommentAddRequest request) throws UserNotFoundException {
+            @PathVariable String id, @RequestBody CommentAddRequest request)  {
         Post post = postService.getPostById(Long.parseLong(id));
         logger.info("getting post by id " + id);
         PostComment postComment = new PostComment();
         postComment.setCommentText(request.getCommentText());
-        postComment.setPerson(personService.getPersonById(request.getAuthorId()));
+        postComment.setPerson(personService.getCurrentPerson());
         postComment.setPost(post);
         postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
         postComment.setIsBlocked(false);
-        postComment.setParentId(request.getParentId());
+        if(request.getParentId()!=null) {
+            postComment.setParentId(request.getParentId());
+        } else {
+            postComment.setParentId(0L);
+        }
         postCommentService.savePostComment(postComment);
         logger.info("saving comment");
         return ResponseEntity.ok(HttpStatus.OK);
@@ -64,6 +69,7 @@ public class PostCommentController {
             postCommentService.deletePostComment(postComment);
             logger.info("deleting comment");
             post.getPostCommentList().remove(postComment);
+            postService.savePost(post);
             return ResponseEntity.ok(HttpStatus.OK);
 
         }
@@ -109,16 +115,16 @@ public class PostCommentController {
 
     @PutMapping("/{commentId}")
     public ResponseEntity<Object> putCommentByIdPost(@RequestBody CommentAddRequest request,
-                                                     @PathVariable String id, @PathVariable String commentId) throws UserNotFoundException {
+                                                     @PathVariable String id, @PathVariable String commentId)  {
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(commentId));
         if (!post.getPostCommentList().isEmpty()) {
             postComment.setCommentText(request.getCommentText());
-            postComment.setPerson(personService.getPersonById(request.getAuthorId()));
+            postComment.setPerson(personService.getCurrentPerson());
             postComment.setPost(post);
             postComment.setTime(request.getTime());
+            postComment.setTimeChanged((new Date().getTime()));
             postComment.setIsBlocked(request.getIsBlocked());
-            postComment.setParentId(request.getParentId());
             postCommentService.savePostComment(postComment);
             logger.info("updating comment");
         }

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.skillbox.model.PostFile;
 import ru.skillbox.repository.PostFileRepository;
 
+import java.util.Optional;
+
 @Service
 public class PostFileService {
 
@@ -23,7 +25,7 @@ public class PostFileService {
         return postFileRepository.findById(id).get();
     }
 
-    public PostFile getPostFileByPath(String name){
-        return  postFileRepository.findByPath(name).get();
+    public Optional<PostFile> getPostFileByPath(String name){
+        return  postFileRepository.findByPath(name);
     }
 }

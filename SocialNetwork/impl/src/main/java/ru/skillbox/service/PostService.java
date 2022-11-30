@@ -24,7 +24,9 @@ import ru.skillbox.response.post.PostResponse;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostService {
@@ -140,7 +142,10 @@ public class PostService {
         post.setTags(convertStringToTag(request.getTags()));
         post.setIsBlocked(request.getIsBlocked());
         post.setPerson(personService.getCurrentPerson());
-        post.setPostFiles(List.of(postFileService.getPostFileByPath(request.getImagePath())));
+        Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
+        if(postFile.isPresent()){
+             post.setPostFiles(List.of(postFile.get()));
+        }
 
         if (request.getPublishDate() != null) {
             post.setType(Type.QUEUED);
@@ -187,17 +192,20 @@ public class PostService {
     public void updatePost(PostAddRequest request, String id) {
         Post post = getPostById(Long.parseLong(id));
         post.setTitle(request.getTitle());
+        post.setTime(request.getTime());
+        post.setTimeChanged((new Date()).getTime());
         post.setPostText(request.getPostText());
-        try {
-            post.setPerson(personService.getPersonById(request.getAuthorId()));
-        } catch (UserNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        post.setPerson(personService.getCurrentPerson());
+        post.setIsDelete(request.getIsDelete());
+        post.setIsBlocked(request.getIsBlocked());
         post.setType(request.getType());
         post.setIsBlocked(request.getIsBlocked());
         post.setTags(convertStringToTag(request.getTags()));
         post.setTime(request.getTime());
-        post.setPostFiles(List.of(setPostFile(post, request.getTitle(), request.getImagePath())));
+        Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
+        if(postFile.isPresent()){
+            post.setPostFiles(new ArrayList<>(List.of(postFile.get())));
+        }
         savePost(post);
     }
 }

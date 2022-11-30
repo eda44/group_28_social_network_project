@@ -8,6 +8,6 @@
                    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd
                    http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-<!--        <includeAll path="changesets"/>-->
-<include file="db/changelog/changelog_add.xml"/>
+    <includeAll path="changesets"/>
+<!--<include file="db/changelog/changelog_add.xml"/>-->
 </databaseChangeLog>
