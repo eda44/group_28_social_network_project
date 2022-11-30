@@ -1,19 +1,16 @@
 package ru.skillbox.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class DialogDto {
 
     private Long id;
-    private AccountByIdDto conversationPartner;
-
-    @JsonProperty("unread_count")
+    private AccountDto conversationPartner;
     private Long unreadCount;
-
-    @JsonProperty("last_message")
     private MessageDto lastMessage;
 }

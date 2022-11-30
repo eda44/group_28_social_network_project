@@ -1,5 +1,6 @@
 package ru.skillbox.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import ru.skillbox.dto.enums.MessagePermission;
 
@@ -83,4 +84,10 @@ public class Person {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private List<PostComment> postCommentList;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Dialog> myDialogs;
+
+    @OneToMany(mappedBy = "conversationPartner")
+    private List<Dialog> partnerDialogs;
 }

@@ -41,14 +41,15 @@ public class AccountDto {
     }
 
     public static AccountDto getBase(Person person) {
+
         return AccountDto.builder()
                 .id(person.getId())
                 .email(person.getEmail())
                 .phone(person.getPhone())
                 .photo(person.getPhoto())
                 .about(person.getAbout())
-                .city(new CityDto())//TODO:заглушка
-                .country(new CountryDto())//TODO:заглушка
+                /*.city("")//TODO:заглушка
+                .country("")//TODO:заглушка*/
                 .firstName(person.getFirstName())
                 .lastName(person.getLastName())
                 .regDate(person.getRegDate())
