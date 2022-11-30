@@ -1,10 +1,8 @@
 package ru.skillbox.controller;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.log4j.Log4j2;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +14,6 @@ import ru.skillbox.config.CloudinaryConfig;
 import ru.skillbox.dto.CityDto;
 import ru.skillbox.dto.CountryDto;
 import ru.skillbox.dto.enums.StatusCode;
-import ru.skillbox.mapper.AccountMapper;
 import ru.skillbox.model.*;
 import ru.skillbox.repository.CountryRepository;
 import ru.skillbox.repository.FriendsRepository;
@@ -29,12 +26,8 @@ import ru.skillbox.service.GeoService;
 import ru.skillbox.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Log4j2
 @RestController
@@ -83,7 +76,7 @@ public class FeedsController implements FeedsInterface {
     public ResponseEntity<FeedsResponseOK> getFeedsSearch(HttpServletRequest httpServletRequest
 
     )
-            throws SQLException, IOException, ParseException {
+            throws  IOException {
 
         Pageable pageable = feedsService.generatePageableObjectByServlet(httpServletRequest);
 

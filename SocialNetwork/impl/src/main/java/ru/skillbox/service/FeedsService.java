@@ -2,10 +2,8 @@ package ru.skillbox.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,7 +31,6 @@ import java.util.stream.Collectors;
 @Log4j2
 @Service
 public class FeedsService {
-    //TODO: Добавить логирование комментариев
     private PostRepository postRepository;
 
     private UserService userService;
@@ -53,17 +50,17 @@ public class FeedsService {
 
         if(isTest){
             currentUserId = 1;
-            log.info("Test mode!");
+            log.debug("Test mode!");
         } else {
             currentUserId = userService.getCurrentUser().getId();
         }
 
-        log.info("CurrentUserId={}",currentUserId);
+        log.debug("CurrentUserId={}",currentUserId);
 
 
         Page<Post> postsPage = postRepository.findAll(pageable);
         List<Post> posts = postsPage.getContent();
-        log.info("Find all posts from repository");
+        log.debug("Find all posts from repository");
 
 
         if(posts==null || posts.size() == 0){
@@ -78,13 +75,13 @@ public class FeedsService {
         List<PostDto> postDtoList = new ArrayList<>();
 
         for(Post post : posts) {
-            log.info("Mapping post number " + post.getId());
+            log.debug("Mapping post number " + post.getId());
             PostDto postDto = PostMapper.INSTANCE.postToPostDto(post, currentUserId);
             postDtoList.add(postDto);
         }
 
             FeedsResponseOK feedsResponse = new FeedsResponseOK();
-            log.info("Generating feeds response!");
+            log.debug("Generating feeds response!");
             feedsResponse.setContent(postDtoList);
             feedsResponse.setSize(pageable.getPageSize());
             feedsResponse.setTotalElements(postsPage.getTotalElements());
@@ -97,7 +94,7 @@ public class FeedsService {
             feedsResponse.setNumberOfElements(postsPage.getNumberOfElements());
             feedsResponse.setPageable(pageable);
             ObjectMapper mapper = new ObjectMapper();
-            log.info(mapper.writeValueAsString(feedsResponse));
+            log.debug(mapper.writeValueAsString(feedsResponse));
             return ResponseEntity.ok(feedsResponse);
     }
 
@@ -105,21 +102,25 @@ public class FeedsService {
     public Pageable generatePageableObjectByServlet(HttpServletRequest httpServletRequest){
         String pageString = httpServletRequest.getParameter("page");
         int page = pageString!=null?Integer.parseInt(pageString):0;
-        log.info("page= " + page);
+        log.debug("page= " + page);
         String sizeString = httpServletRequest.getParameter("size");
         int size = sizeString!=null?Integer.parseInt(sizeString):1;
-        log.info("size= " + size);
+        log.debug("size= " + size);
         String sort = httpServletRequest.getParameter("sort");
         if(page < 0){
             page = 0;
         }
-        String[] words = sort.split(",");
-
         Pageable pageable;
-        if(words[1].equals("desc")) {
-            pageable = PageRequest.of(page, size, Sort.by(words[0]).descending());
-        } else {
-            pageable = PageRequest.of(page, size, Sort.by(words[0]).ascending());
+        if(sort!=null){
+            String[] words = sort.split(",");
+            if(words.length > 2 && words[1].equals("desc")) {
+                pageable = PageRequest.of(page, size, Sort.by(words[0]).descending());
+            } else {
+                pageable = PageRequest.of(page, size, Sort.by(words[0]).ascending());
+            }
+        }
+        else {
+            pageable = PageRequest.of(page, size, Sort.by("time").descending());
         }
         return pageable;
     }
@@ -129,7 +130,7 @@ public class FeedsService {
             throws JsonProcessingException {
         List<PostComment> postCommentList = postRepository.findById(id).get().getPostCommentList();
         List<PostComment> noSubCommentList= postCommentList.stream()
-                .filter(postComment -> postComment.getParentId()==0)
+                .filter(postComment -> postComment.getParentId()==null || postComment.getParentId()==0)
                 .collect(Collectors.toList());
         Page<PostComment> pages = new PageImpl<>(noSubCommentList, pageable, noSubCommentList.size());
 
@@ -140,7 +141,7 @@ public class FeedsService {
 
     private CommentResponse getCommentResponse(Pageable pageable, Page<PostComment> pages, boolean isTest)
             throws JsonProcessingException {
-        log.info("Generating comment response!");
+        log.debug("Generating comment response!");
         CommentResponse commentResponse = new CommentResponse();
         commentResponse.setSize(pageable.getPageSize());
         commentResponse.setTotalElements(pages.getTotalElements());
@@ -158,21 +159,21 @@ public class FeedsService {
         long currentUserId;
         if(isTest){
             currentUserId = 1;
-            log.info("Test mode!");
+            log.debug("Test mode!");
         } else {
             currentUserId = userService.getCurrentUser().getId();
         }
 
 
         for(PostComment comment : comments) {
-            log.info("Mapping comment number " + comment.getId());
+            log.debug("Mapping comment number " + comment.getId());
             PostCommentDto postCommentDtoDto = PostCommentMapper.
                     INSTANCE.postCommentToPostCommentDto(comment, currentUserId);
             postCommentDtoList.add(postCommentDtoDto);
         }
         commentResponse.setContent(postCommentDtoList);
         ObjectMapper mapper = new ObjectMapper();
-        log.info(mapper.writeValueAsString(commentResponse));
+        log.debug(mapper.writeValueAsString(commentResponse));
         return commentResponse;
     }
 
@@ -186,7 +187,7 @@ public class FeedsService {
 
         List<PostComment> subCommentList = postComment.getPost().getPostCommentList()
                 .stream().filter(p ->
-                p.getParentId().equals(postComment.getId())
+                p.getParentId()!=null&&p.getParentId().equals(postComment.getId())
         ).collect(Collectors.toList());
 
         Page<PostComment> pages = new PageImpl<>(subCommentList, pageable, subCommentList.size());

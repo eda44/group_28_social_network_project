@@ -48,7 +48,7 @@ public interface PostCommentMapper {
         List<PostComment> postCommentList = postComment.getPost().getPostCommentList();
         System.out.println();
         List<PostComment> filteredPostCommentList = postCommentList.stream().filter(p ->
-                p.getParentId().equals(postComment.getId())
+                    p.getParentId()!=null &&p.getParentId().equals(postComment.getId())
         ).collect(Collectors.toList());
         return filteredPostCommentList.size();
 
