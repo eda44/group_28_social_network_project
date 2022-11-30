@@ -21,7 +21,7 @@ public class LoginResponse {
     public static LoginResponse getOkResponse(Person person, String token){
         return LoginResponse.builder()
                 .timestamp(new Date().getTime())
-                .data(AccountDto.getCorrectRsLogin(person, token))
+                .data(AccountDto.getCorrectRsLogin(person))
                 .accessToken(token)
                 .tokenType("Bearer")
                 .build();
