@@ -1,7 +1,6 @@
 package ru.skillbox.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,14 +33,11 @@ public class AccountDto {
     private Long lastOnlineTime;
     private Boolean isOnline;
     private Boolean isBlocked;
-    private String token;
     private Boolean isDeleted;
     private StatusCode statusCode;
 
-    public static AccountDto getCorrectRsLogin(Person person, String token) {
-        AccountDto dto = getBase(person);
-        dto.setToken(token);
-        return dto;
+    public static AccountDto getCorrectRsLogin(Person person) {
+        return getBase(person);
     }
 
     public static AccountDto getBase(Person person) {
