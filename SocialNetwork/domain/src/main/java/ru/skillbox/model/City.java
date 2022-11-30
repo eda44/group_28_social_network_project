@@ -1,5 +1,6 @@
 package ru.skillbox.model;
 
+
 import lombok.*;
 
 import javax.persistence.*;

@@ -118,7 +118,7 @@ public class FeedsController implements FeedsInterface {
                 "  \"messagePermission\": \"string\",\n" +
                 "  \"lastOnlineTime\": \"2022-11-16T05:00:33.669Z\",\n" +
                 "  \"isOnline\": true,\n" +
-                "  \"isBlocked\": true,\n" +
+                "  \"isBlocked\": false,\n" +
                 "  \"isDeleted\": false,\n" +
                 "  \"photoId\": \"string\",\n" +
                 "  \"photoName\": \"string\",\n" +
