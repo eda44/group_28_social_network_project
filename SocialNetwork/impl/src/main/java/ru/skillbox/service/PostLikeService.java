@@ -1,12 +1,16 @@
 package ru.skillbox.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.enums.LikeType;
+import ru.skillbox.model.CommentLike;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.model.PostLike;
+import ru.skillbox.repository.CommentLikeRepository;
 import ru.skillbox.repository.PostLikeRepository;
+import ru.skillbox.repository.PostRepository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -17,23 +21,33 @@ import java.util.List;
 public class PostLikeService {
 
     private final PostLikeRepository postLikeRepository;
+
+    private final PostRepository postRepository;
+
+    private final CommentLikeRepository commentLikeRepository;
     private final PostService postService;
     private final PersonService personService;
     private final PostCommentService postCommentService;
 
     @Autowired
     public PostLikeService(PostLikeRepository postLikeRepository, PostService postService,
-                           PersonService personService, PostCommentService postCommentService) {
+                           PersonService personService, PostCommentService postCommentService,
+                           CommentLikeRepository commentLikeRepository,
+                           PostRepository postRepository) {
         this.postLikeRepository = postLikeRepository;
         this.postService = postService;
         this.personService = personService;
         this.postCommentService = postCommentService;
+        this.commentLikeRepository = commentLikeRepository;
+        this.postRepository = postRepository;
     }
 
-    public void deleteLike(long id) {
-        postLikeRepository.deleteById(id);
-    }
 
+
+    public PostLike getLikeByPostIdAndPersonId(Long postId, Long personId)
+    {
+        return postLikeRepository.findByPostIdAndPersonId(postId,personId).get();
+    }
 
     public PostLike getLikeByCommentId(long id) {
         return postLikeRepository.findById(id).get();
@@ -41,10 +55,11 @@ public class PostLikeService {
 
     public void deleteLike(PostLike postLike) {
         postLikeRepository.delete(postLike);
+        postLikeRepository.flush();
     }
 
     public void saveLike(PostLike postLike) {
-        postLikeRepository.save(postLike);
+        postLikeRepository.saveAndFlush(postLike);
     }
 
     public List<PostLike> getAllLikes() {
@@ -53,7 +68,8 @@ public class PostLikeService {
 
     public PostLike setPostLike() {
         PostLike postLike = new PostLike();
-        postLike.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        postLike.setTime(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
         saveLike(postLike);
         return postLike;
     }
@@ -96,5 +112,18 @@ public class PostLikeService {
 
         }
         return new ArrayList<>();
+    }
+
+    public void saveCommentLike(CommentLike commentLike) {
+        commentLikeRepository.saveAndFlush(commentLike);
+    }
+
+    public void deleteCommentLike(CommentLike commentLike) {
+        commentLikeRepository.delete(commentLike);
+        commentLikeRepository.flush();
+    }
+
+    public CommentLike getLikeByCommentIdAndPersonId(Long commentId, Long personId) {
+        return commentLikeRepository.findByCommentIdAndPersonId(commentId,personId).get();
     }
 }

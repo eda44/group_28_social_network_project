@@ -7,16 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.dto.enums.LikeType;
-import ru.skillbox.model.Post;
-import ru.skillbox.model.PostComment;
-import ru.skillbox.model.PostLike;
+import ru.skillbox.model.*;
 import ru.skillbox.request.PostLikeRequest;
 import ru.skillbox.response.LikeResponse;
 import ru.skillbox.response.post.PostLikeResponse;
-import ru.skillbox.service.CommentLikeService;
-import ru.skillbox.service.PostCommentService;
-import ru.skillbox.service.PostLikeService;
-import ru.skillbox.service.PostService;
+import ru.skillbox.service.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -27,6 +22,8 @@ import java.util.List;
 public class PostLikeController {
 
     private final PostLikeService postLikeService;
+
+    private final PersonService personService;
     private final PostService postService;
     private final PostCommentService postCommentService;
     private final CommentLikeService commentLikeService;
@@ -34,45 +31,56 @@ public class PostLikeController {
 
 
     @Autowired
-    public PostLikeController(PostLikeService postLikeService, PostService postService, PostCommentService postCommentService, CommentLikeService commentLikeService) {
+    public PostLikeController(PostLikeService postLikeService, PostService postService,
+                              PostCommentService postCommentService, CommentLikeService commentLikeService,
+                              PersonService personService) {
         this.postLikeService = postLikeService;
         this.postService = postService;
         this.postCommentService = postCommentService;
         this.commentLikeService = commentLikeService;
+        this.personService = personService;
     }
 
     @PostMapping("/like")
     public ResponseEntity<Object> createPostLike(@PathVariable String id) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostLike postLike = new PostLike();
-        postLike.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        postLike.setTime(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
         postLike.setPost(post);
-        post.setPostLikes(List.of(postLike));
+        postLike.setPerson(personService.getCurrentPerson());
+        postLikeService.saveLike(postLike);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PostMapping("/comment/{commentId}/like")
     public ResponseEntity<Object> likeToComment(@PathVariable String id,
                                                 @PathVariable String commentId) {
-        Post post = postService.getPostById(Long.parseLong(id));
-        postCommentService.getPostCommentById(Long.parseLong(commentId));
-        PostLike postLike = new PostLike();
-        postLike.setPost(post);
-        postLikeService.saveLike(postLike);
+        PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(commentId));
+        CommentLike commentLike = new CommentLike();
+        commentLike.setTime(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+        commentLike.setComment(postComment);
+        commentLike.setPerson(personService.getCurrentPerson());
+        postLikeService.saveCommentLike(commentLike);
         logger.info("adding like to comment");
-        postLike.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
         return ResponseEntity.ok("ok");
     }
 
     @DeleteMapping("/like")
     public ResponseEntity<Object> deleteLike(@PathVariable String id) {
         Post post = postService.getPostById(Long.parseLong(id));
-        List<PostLike> postLikes = post.getPostLikes();
-        if (!postLikes.isEmpty() ||
-                postLikeService.isLiked(Long.valueOf(id), LikeType.POST)) {
-            postLikeService.deleteLike(postLikes.get(0));
-            logger.info("deleting post like");
-            postLikes.remove(0);
+        Person person = personService.getCurrentPerson();
+        PostLike postLike = postLikeService.getLikeByPostIdAndPersonId(post.getId(), person.getId());
+        if (post.getPostLikes().contains(postLike)) {
+
+            logger.info("deleting postLike");
+            post.getPostLikes().remove(postLike);
+            postService.savePost(post);
+           if(person.getPostLikeList().contains(postLike)){
+               person.getPostLikeList().remove(postLike);
+            }
+            postLikeService.deleteLike(postLike);
         }
         return ResponseEntity.ok("ok");
     }
@@ -80,12 +88,15 @@ public class PostLikeController {
     @DeleteMapping("/comment/{commentId}/like")
     public ResponseEntity<Object> deleteLikeToComment(@PathVariable String id,
                                                       @PathVariable String commentId) {
-        Post post = postService.getPostById(Long.parseLong(id));
         PostComment comment = postCommentService.getPostCommentById(Long.parseLong(commentId));
-        if (post.getPostCommentList().contains(comment) ||
-                postLikeService.isLiked(Long.valueOf(commentId), LikeType.COMMENT)) {
-            commentLikeService.delete(comment.getCommentLikes().get(0));
-            logger.info("deleting comment like");
+        Person person = personService.getCurrentPerson();
+        CommentLike commentLike = postLikeService.getLikeByCommentIdAndPersonId(comment.getId(), person.getId());
+        if (comment.getCommentLikes().contains(commentLike)) {
+
+            logger.info("deleting commentLike");
+            comment.getCommentLikes().remove(commentLike);
+            postCommentService.savePostComment(comment);
+            postLikeService.deleteCommentLike(commentLike);
         }
         return ResponseEntity.ok("ok");
     }

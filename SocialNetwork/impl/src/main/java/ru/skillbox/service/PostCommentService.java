@@ -3,11 +3,13 @@ package ru.skillbox.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.CommentDto;
-import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostCommentRepository;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostCommentService {
@@ -31,7 +33,22 @@ public class PostCommentService {
     }
 
     public void deletePostComment(PostComment postComment) {
-        postCommentRepository.delete(postComment);
+        postComment.setIsDelete(true);
+        postComment.setTimeChanged(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+        postCommentRepository.saveAndFlush(postComment);
+        if(postComment.getParentId()==null || postComment.getParentId().equals(0L)) {
+            List<PostComment> postComments = postCommentRepository.findAll()
+                    .stream().filter(p -> p.getParentId()!=null &&
+                            p.getParentId().equals(postComment.getId()))
+                    .collect(Collectors.toList());
+            postComments.forEach(p -> {
+                p.setIsDelete(true);
+                p.setTimeChanged(LocalDateTime.now()
+                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                postCommentRepository.saveAndFlush(p);
+            });
+        }
     }
 
     public CommentDto setPostCommentDto(List<PostComment> postComments) {
@@ -42,6 +59,7 @@ public class PostCommentService {
             commentDto.setAuthorId(postComment.getPerson().getId());
             commentDto.setPostId(postComment.getPost().getId());
             commentDto.setIsBlocked(postComment.getIsBlocked());
+            commentDto.setIsDelete(postComment.getIsDelete());
             commentDto.setLikeAmount(postComment.getCommentLikes().size());
             commentDto.setParentId(postComment.getParentId());
             commentDto.setTime(postComment.getTime());
@@ -56,7 +74,11 @@ public class PostCommentService {
         commentDto.setPostId(postComment.getPost().getId());
         commentDto.setIsBlocked(postComment.getIsBlocked());
         commentDto.setLikeAmount(postComment.getCommentLikes().size());
-        commentDto.setParentId(postComment.getParentId());
+        if(postComment.getParentId()!=null) {
+            commentDto.setParentId(postComment.getParentId());
+        } else {
+            commentDto.setParentId(0L);
+        }
         commentDto.setTime(postComment.getTime());
         return commentDto;
     }
