@@ -29,15 +29,10 @@ import ru.skillbox.repository.PostRepository;
 import ru.skillbox.repository.TagRepository;
 import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponseOK;
-import ru.skillbox.response.PostCommentDto;
-import ru.skillbox.response.PostDto;
 import ru.skillbox.service.FeedsService;
 import ru.skillbox.service.UserService;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -91,7 +86,7 @@ public class FeedsServiceTest extends TestCase {
         post.setPostCommentList(null);
         post.setTitle("SomeTitle");
         post.setIsBlocked(true);
-        post.setIsDelete(true);
+        post.setIsDelete(false);
 
         postRepository.saveAndFlush(post);
 
@@ -138,7 +133,7 @@ public class FeedsServiceTest extends TestCase {
             String timeString = AdditionalFunctions.getTimeString();
             Pageable pageable = PageRequest.of(0, 5, Sort.by("time").descending());
 
-            ResponseEntity<FeedsResponseOK> response = feedsService.getObjectResponseEntity(pageable,
+            ResponseEntity<FeedsResponseOK> response = feedsService.getObjectResponseEntity(pageable,null,
                     isTestString.equals("{true}"));
             FeedsResponseOK responseBody = AdditionalFunctions.correctContent(response.getBody(),timeString);
 

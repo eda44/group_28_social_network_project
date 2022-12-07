@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Mapper
@@ -49,7 +50,10 @@ public interface PostMapper {
     @Named("mapCommentsCount")
     default Integer mapCommentsCount(List<PostComment> postCommentList){
         if(postCommentList!=null) {
-            return postCommentList.size();
+            return postCommentList.stream()
+                    .filter(p-> p.getIsDelete().equals(false))
+                    .collect(Collectors.toList())
+                    .size();
         }
         return 0;
     }

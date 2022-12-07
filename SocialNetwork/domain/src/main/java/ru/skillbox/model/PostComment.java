@@ -51,8 +51,4 @@ public class PostComment {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", referencedColumnName = "id")
     private List<CommentLike> commentLikes;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private PostComment postComment;//TODO: Продумать альтернативный вариант
 }

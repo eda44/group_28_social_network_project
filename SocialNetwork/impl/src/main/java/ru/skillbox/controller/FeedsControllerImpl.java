@@ -31,7 +31,7 @@ import java.util.List;
 
 @Log4j2
 @RestController
-public class FeedsController implements FeedsInterface {
+public class FeedsControllerImpl implements FeedsInterface {
 
 
     private final FeedsService feedsService;
@@ -55,12 +55,12 @@ public class FeedsController implements FeedsInterface {
 
 
     @Autowired
-    public FeedsController(FeedsService feedsService, PostRepository postRepository,
-                           CountryRepository countryRepository, FriendsRepository friendsRepository,
-                           UserService userService,
-                           CloudinaryConfig config,
-                           PersonRepository personRepository,
-                           GeoService geoService) {
+    public FeedsControllerImpl(FeedsService feedsService, PostRepository postRepository,
+                               CountryRepository countryRepository, FriendsRepository friendsRepository,
+                               UserService userService,
+                               CloudinaryConfig config,
+                               PersonRepository personRepository,
+                               GeoService geoService) {
         this.postRepository = postRepository;
         this.userService = userService;
         this.feedsService = feedsService;
@@ -79,8 +79,9 @@ public class FeedsController implements FeedsInterface {
             throws  IOException {
 
         Pageable pageable = feedsService.generatePageableObjectByServlet(httpServletRequest);
+        String text = feedsService.getText(httpServletRequest);
 
-        return feedsService.getObjectResponseEntity(pageable, isTestString.equals("{true}"));
+        return feedsService.getObjectResponseEntity(pageable, text, isTestString.equals("{true}"));
     }
 
 
@@ -96,7 +97,7 @@ public class FeedsController implements FeedsInterface {
     }
 
 
-    //Пока заглушка, ждем, когда подготовят эндпоинты к аккаунту
+    //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере
     @GetMapping("/api/v1/account/{id}")
     public ResponseEntity<Object> getOne(@PathVariable long id){
         Person person = personRepository.findById(id).get();
@@ -130,7 +131,21 @@ public class FeedsController implements FeedsInterface {
     }
 
 
-    //Пока заглушка, чтобы не плодить сервисы
+    //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере
+    @GetMapping("/api/v1/dialogs/unreaded")
+    public  String uneaded(){
+        return "{\n" +
+                "  \"error\": \"Неверный запрос\",\n" +
+                "  \"timestamp\": 1644234125,\n" +
+                "  \"data\": {\n" +
+                "    \"count\": 10\n" +
+                "  },\n" +
+                "  \"error_description\": \"Неверный код авторизации\"\n" +
+                "}";
+    }
+
+
+    //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере
     @GetMapping("/api/v1/friends/count")
     public ResponseEntity countF(){
         Long myId = userService.getCurrentUser().getId();

@@ -18,7 +18,6 @@ import ru.skillbox.service.PostService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -48,8 +47,10 @@ public class PostCommentController {
         postComment.setCommentText(request.getCommentText());
         postComment.setPerson(personService.getCurrentPerson());
         postComment.setPost(post);
-        postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        postComment.setTime(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
         postComment.setIsBlocked(false);
+        postComment.setIsDelete(false);
         if(request.getParentId()!=null) {
             postComment.setParentId(request.getParentId());
         } else {
@@ -68,8 +69,6 @@ public class PostCommentController {
         if (post.getPostCommentList().contains(postComment)) {
             postCommentService.deletePostComment(postComment);
             logger.info("deleting comment");
-            post.getPostCommentList().remove(postComment);
-            postService.savePost(post);
             return ResponseEntity.ok(HttpStatus.OK);
 
         }
@@ -122,9 +121,14 @@ public class PostCommentController {
             postComment.setCommentText(request.getCommentText());
             postComment.setPerson(personService.getCurrentPerson());
             postComment.setPost(post);
-            postComment.setTime(request.getTime());
-            postComment.setTimeChanged((new Date().getTime()));
-            postComment.setIsBlocked(request.getIsBlocked());
+            if(request.getTime()!=null) {
+                postComment.setTime(request.getTime());
+            }
+            postComment.setTimeChanged(LocalDateTime.now()
+                    .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+            if(request.getTime()!=null) {
+                postComment.setIsBlocked(request.getIsBlocked());
+            }
             postCommentService.savePostComment(postComment);
             logger.info("updating comment");
         }

@@ -5,8 +5,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import ru.skillbox.response.PostCommentDto;
 import ru.skillbox.model.*;
+import ru.skillbox.repository.PostCommentRepository;
+import ru.skillbox.response.PostCommentDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,13 +21,14 @@ public interface PostCommentMapper {
 
     @Mapping(target = "time", qualifiedByName = "mapTime")
     @Mapping(source = "person", target = "authorId", qualifiedByName = "mapAuthorId")
-    @Mapping(source = "postComment", target = "commentsCount", qualifiedByName = "mapCommentsCount")
+    @Mapping(source = "id", target = "commentsCount", qualifiedByName = "mapCommentsCount")
     @Mapping(source = "commentFiles", target = "imagePath", qualifiedByName = "mapImagePath")
     @Mapping(source = "commentLikes", target = "likeAmount", qualifiedByName = "mapLikeAmount")
     @Mapping(source = "commentLikes", target = "myLike", qualifiedByName = "mapMyLike")
     @Mapping(source = "post", target = "postId", qualifiedByName = "mapPostId")
     @Mapping(source = "isDelete", target = "isDelete")
-    PostCommentDto postCommentToPostCommentDto(PostComment comment, @Context long currentUserId);
+    PostCommentDto postCommentToPostCommentDto(PostComment comment, @Context long currentUserId,
+                                               @Context PostCommentRepository postCommentRepository);
 
 
     @Named("mapTime")
@@ -44,11 +46,13 @@ public interface PostCommentMapper {
     }
 
     @Named("mapCommentsCount")
-    default Integer mapCommentsCount(PostComment postComment) {
+    default Integer mapCommentsCount(Long id, @Context PostCommentRepository postCommentRepository) {
+        PostComment postComment = postCommentRepository.findById(id).get();
         List<PostComment> postCommentList = postComment.getPost().getPostCommentList();
-        System.out.println();
+
         List<PostComment> filteredPostCommentList = postCommentList.stream().filter(p ->
                     p.getParentId()!=null &&p.getParentId().equals(postComment.getId())
+                && p.getIsDelete().equals(false)
         ).collect(Collectors.toList());
         return filteredPostCommentList.size();
 

@@ -21,10 +21,11 @@ import ru.skillbox.request.PostAddRequest;
 import ru.skillbox.response.post.PagePostDto;
 import ru.skillbox.response.post.PostResponse;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +85,10 @@ public class PostService {
     }
 
     public void deletePost(Post post) {
-        postRepository.delete(post);
+        post.setIsDelete(true);
+        post.setTimeChanged(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+        postRepository.saveAndFlush(post);
     }
 
     public ResponseEntity<PagePostDto> getPostsAll(@RequestParam PostSearchDto searchDto,
@@ -134,7 +138,7 @@ public class PostService {
         }
     }
 
-    public void setPost(PostAddRequest request) throws UserNotFoundException {
+    public void setPost(PostAddRequest request, HttpServletRequest httpServletRequest) throws UserNotFoundException {
         Post post = new Post();
 
         post.setTitle(request.getTitle());
@@ -142,22 +146,28 @@ public class PostService {
         post.setTags(convertStringToTag(request.getTags()));
         post.setIsBlocked(request.getIsBlocked());
         post.setPerson(personService.getCurrentPerson());
+        post.setIsBlocked(false);
+        post.setIsDelete(false);
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
         if(postFile.isPresent()){
              post.setPostFiles(List.of(postFile.get()));
         }
 
-        if (request.getPublishDate() != null) {
+        String publishDateString = httpServletRequest.getParameter("publishDate");
+
+
+        if (publishDateString != null) {
             post.setType(Type.QUEUED);
         } else {
             post.setType(Type.POSTED);
         }
         switch (post.getType()) {
             case POSTED:
-                post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+                post.setTime(LocalDateTime.now()
+                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
                 break;
             case QUEUED:
-                post.setTime(request.getPublishDate());
+                post.setTime(Long.parseLong(publishDateString));
         }
         savePost(post);
     }
@@ -189,22 +199,36 @@ public class PostService {
         return postFile;
     }
 
-    public void updatePost(PostAddRequest request, String id) {
+    public void updatePost(PostAddRequest request, HttpServletRequest httpServletRequest,String id) {
         Post post = getPostById(Long.parseLong(id));
         post.setTitle(request.getTitle());
-        post.setTime(request.getTime());
-        post.setTimeChanged((new Date()).getTime());
+        if(request.getTime()!=null) {
+            post.setTime(request.getTime());
+        }
+        post.setTimeChanged(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
         post.setPostText(request.getPostText());
         post.setPerson(personService.getCurrentPerson());
-        post.setIsDelete(request.getIsDelete());
-        post.setIsBlocked(request.getIsBlocked());
-        post.setType(request.getType());
-        post.setIsBlocked(request.getIsBlocked());
-        post.setTags(convertStringToTag(request.getTags()));
-        post.setTime(request.getTime());
+        if(convertStringToTag(request.getTags())!=null) {
+            post.setTags(convertStringToTag(request.getTags()));
+        }
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
         if(postFile.isPresent()){
             post.setPostFiles(new ArrayList<>(List.of(postFile.get())));
+        }
+        String publishDateString = httpServletRequest.getParameter("publishDate");
+        if (publishDateString != null) {
+            post.setType(Type.QUEUED);
+        } else {
+            post.setType(Type.POSTED);
+        }
+        switch (post.getType()) {
+            case POSTED:
+                post.setTime(LocalDateTime.now()
+                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                break;
+            case QUEUED:
+                post.setTime(Long.parseLong(publishDateString));
         }
         savePost(post);
     }

@@ -16,6 +16,8 @@ import ru.skillbox.response.post.PagePostDto;
 import ru.skillbox.response.post.PostResponse;
 import ru.skillbox.service.PostService;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/v1/post")
 public class PostController {
@@ -30,8 +32,9 @@ public class PostController {
     }
 
     @PostMapping
-    public void addNewPost(@RequestBody PostAddRequest request) throws UserNotFoundException {
-        postService.setPost(request);
+    public void addNewPost(@RequestBody PostAddRequest request, HttpServletRequest httpServletRequest)
+            throws UserNotFoundException {
+        postService.setPost(request, httpServletRequest);
         logger.info("saving post, post text = " + request.getPostText());
     }
 
@@ -60,8 +63,9 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> putPostById(@RequestBody PostAddRequest request, @PathVariable String id) {
-        postService.updatePost(request, id);
+    public ResponseEntity<String> putPostById(@RequestBody PostAddRequest request,
+                                              HttpServletRequest httpServletRequest,@PathVariable String id) {
+        postService.updatePost(request, httpServletRequest,id);
         logger.info("updating post");
         return ResponseEntity.ok("ok");
     }

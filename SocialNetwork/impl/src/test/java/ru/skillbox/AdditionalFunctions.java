@@ -106,7 +106,7 @@ public class AdditionalFunctions {
                 "\"type\": \"POSTED\"," +
                 "\"postText\": \"SomeText\"," +
                 "\"isBlocked\": true," +
-                "\"isDelete\": true," +
+                "\"isDelete\": false," +
                 "\"commentsCount\": 2," +
                 "\"tags\": []," +
                 "\"likeAmount\": 0," +
