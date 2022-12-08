@@ -17,13 +17,13 @@ public class PostLikeController {
 
     @PostMapping("/like")
     public void createPostLike(@PathVariable String id) {
-        likeService.setPostLike(id);
+        likeService.addPostLike(id);
     }
 
     @PostMapping("/comment/{commentId}/like")
     public void likeToComment(@PathVariable String id,
                               @PathVariable String commentId) {
-        likeService.setCommentLike(id, commentId);
+        likeService.addCommentLike(id, commentId);
     }
 
     @DeleteMapping("/like")

@@ -18,7 +18,6 @@ public class PostController {
 
     private final PostService postService;
 
-
     @Autowired
     public PostController(PostService postService) {
         this.postService = postService;
@@ -26,7 +25,7 @@ public class PostController {
 
     @PostMapping
     public void addNewPost(@RequestBody PostAddRequest request) throws UserNotFoundException {
-        postService.setPost(request);
+        postService.addPost(request);
     }
 
     @RequestMapping(value = "/storagePostPhoto", method = RequestMethod.POST,
@@ -46,7 +45,7 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable String id) {
-        PostResponse response = postService.setPostResponse(id);
+        PostResponse response = postService.addPostResponse(id);
         return ResponseEntity.ok(response);
     }
 
