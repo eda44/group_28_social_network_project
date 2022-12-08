@@ -18,14 +18,10 @@ public class PostFileService {
     }
 
     public PostFile savePostFile(PostFile postFile) {
-       return postFileRepository.save(postFile);
+        return postFileRepository.save(postFile);
     }
 
-    public PostFile getPostFileById(Long id) {
-        return postFileRepository.findById(id).get();
-    }
-
-    public Optional<PostFile> getPostFileByPath(String name){
-        return  postFileRepository.findByPath(name);
+    public Optional<PostFile> getPostFileByPath(String name) {
+        return postFileRepository.findByPath(name);
     }
 }
