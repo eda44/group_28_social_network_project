@@ -35,7 +35,7 @@ public class LikeService {
     }
 
 
-    public void setPostLike(String id) {
+    public void addPostLike(String id) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostLike postLike = new PostLike();
         postLike.setTime(new Date().getTime());
@@ -46,11 +46,11 @@ public class LikeService {
         logger.info("saving postLike");
     }
 
-    public void setCommentLike(String id, String commentId) {
+    public void addCommentLike(String id, String commentId) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(commentId));
         CommentLike commentLike = new CommentLike();
-        if (post.getPostCommentList().contains(postComment)) {
+        if (post.getPostCommentList().contains(postComment) && !isLiked(Long.valueOf(commentId), LikeType.COMMENT)) {
             commentLike.setComment(postComment);
             commentLike.setPerson(personService.getCurrentPerson() == null ?
                     new Person() : personService.getCurrentPerson());
@@ -64,9 +64,10 @@ public class LikeService {
     public void deletePostLike(String id) {
         Post post = postService.getPostById(Long.parseLong(id));
         List<PostLike> postLikes = post.getPostLikes();
-        if (!postLikes.isEmpty() || isLiked(Long.valueOf(id), LikeType.POST)) {
+        if (!postLikes.isEmpty() && isLiked(Long.valueOf(id), LikeType.POST)) {
             for (PostLike postLike : postLikes) {
                 postLikeRepository.delete(postLike);
+                postLikeRepository.flush();
                 logger.info("deleting post like");
             }
         }
@@ -76,13 +77,14 @@ public class LikeService {
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment comment = postCommentService.getPostCommentById(Long.parseLong(commentId));
         List<PostComment> postCommentList = post.getPostCommentList();
-        if (postCommentList.contains(comment) ||
-                isLiked(Long.valueOf(commentId), LikeType.COMMENT)) {
+        if (postCommentList.contains(comment)) {
             for (PostComment postComment : postCommentList) {
-                List<CommentLike> commentLikes = postComment.getCommentLikes();
-                for (CommentLike commentLike : commentLikes) {
-                    commentLikeRepository.delete(commentLike);
-                    logger.info("deleting comment like");
+                if (!postCommentList.isEmpty() && isLiked(Long.valueOf(commentId), LikeType.COMMENT)) {
+                    for (CommentLike commentLike : postComment.getCommentLikes()) {
+                        commentLikeRepository.delete(commentLike);
+                        commentLikeRepository.flush();
+                        logger.info("deleting comment like");
+                    }
                 }
             }
         }

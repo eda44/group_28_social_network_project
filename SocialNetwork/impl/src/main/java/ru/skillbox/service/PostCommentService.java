@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.skillbox.dto.CommentDto;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostCommentRepository;
@@ -15,8 +14,6 @@ import ru.skillbox.request.CommentAddRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PostCommentService {
@@ -34,34 +31,6 @@ public class PostCommentService {
 
     public PostComment getPostCommentById(long id) {
         return postCommentRepository.findById(id).get();
-    }
-
-    public CommentDto setPostCommentDto(List<PostComment> postComments) {
-        CommentDto commentDto = new CommentDto();
-        for (PostComment postComment : postComments) {
-            commentDto.setCommentsCount(postComments.size());
-            commentDto.setCommentText(postComment.getCommentText());
-            commentDto.setAuthorId(postComment.getPerson().getId());
-            commentDto.setPostId(postComment.getPost().getId());
-            commentDto.setIsBlocked(postComment.getIsBlocked());
-            commentDto.setIsDelete(postComment.getIsDelete());
-            commentDto.setLikeAmount(postComment.getCommentLikes().size());
-            commentDto.setParentId(postComment.getParentId());
-            commentDto.setTime(postComment.getTime());
-        }
-        return commentDto;
-    }
-
-    public CommentDto setPostCommentDto(PostComment postComment) {
-        CommentDto commentDto = new CommentDto();
-        commentDto.setCommentText(postComment.getCommentText());
-        commentDto.setAuthorId(postComment.getPerson().getId());
-        commentDto.setPostId(postComment.getPost().getId());
-        commentDto.setIsBlocked(postComment.getIsBlocked());
-        commentDto.setLikeAmount(postComment.getCommentLikes().size());
-        commentDto.setParentId(postComment.getParentId());
-        commentDto.setTime(postComment.getTime());
-        return commentDto;
     }
 
     public void addComment(String id, CommentAddRequest request) {

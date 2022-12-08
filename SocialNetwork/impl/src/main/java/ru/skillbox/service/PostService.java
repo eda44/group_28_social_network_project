@@ -74,9 +74,8 @@ public class PostService {
         logger.info("deleting post № " + post.getId());
     }
 
-    public void setPost(PostAddRequest request) {
+    public void addPost(PostAddRequest request) {
         Post post = new Post();
-
         post.setTitle(request.getTitle());
         post.setPostText(request.getPostText());
         post.setTags(convertStringToTag(request.getTags()));
@@ -106,7 +105,7 @@ public class PostService {
         return postFileService.savePostFile(cloudinaryConfig.uploadImage(multipartFile));
     }
 
-    public PostResponse setPostResponse(String id) {
+    public PostResponse addPostResponse(String id) {
         Post post = getPostById(Long.parseLong(id));
         PostResponse response = new PostResponse();
         response.setPostText(post.getPostText());
