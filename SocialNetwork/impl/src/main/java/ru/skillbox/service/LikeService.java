@@ -23,7 +23,6 @@ public class LikeService {
     private final PostCommentService postCommentService;
     private static final Logger logger = LogManager.getLogger(LikeService.class);
 
-
     @Autowired
     public LikeService(PostLikeRepository postLikeRepository, CommentLikeRepository commentLikeRepository, PostService postService,
                        PersonService personService, PostCommentService postCommentService) {
@@ -33,7 +32,6 @@ public class LikeService {
         this.personService = personService;
         this.postCommentService = postCommentService;
     }
-
 
     public void addPostLike(String id) {
         Post post = postService.getPostById(Long.parseLong(id));
@@ -68,7 +66,7 @@ public class LikeService {
             for (PostLike postLike : postLikes) {
                 postLikeRepository.delete(postLike);
                 postLikeRepository.flush();
-                logger.info("deleting post like");
+                logger.info("deleting postLike");
             }
         }
     }
@@ -76,16 +74,12 @@ public class LikeService {
     public void deleteCommentLike(String id, String commentId) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment comment = postCommentService.getPostCommentById(Long.parseLong(commentId));
-        List<PostComment> postCommentList = post.getPostCommentList();
-        if (postCommentList.contains(comment)) {
-            for (PostComment postComment : postCommentList) {
-                if (!postCommentList.isEmpty() && isLiked(Long.valueOf(commentId), LikeType.COMMENT)) {
-                    for (CommentLike commentLike : postComment.getCommentLikes()) {
-                        commentLikeRepository.delete(commentLike);
-                        commentLikeRepository.flush();
-                        logger.info("deleting comment like");
-                    }
-                }
+        logger.info(post.getPostCommentList().size());
+        if (post.getPostCommentList().contains(comment) && isLiked(Long.valueOf(commentId), LikeType.COMMENT)) {
+            for (CommentLike commentLike : comment.getCommentLikes()) {
+                commentLikeRepository.delete(commentLike);
+                commentLikeRepository.flush();
+                logger.info("deleting commentLike");
             }
         }
     }
@@ -95,18 +89,14 @@ public class LikeService {
             case POST: {
                 Post post = postService.getPostById(id);
                 for (PostLike postLike : post.getPostLikes()) {
-                    if (postLike.getPerson().equals(post.getPerson())) {
-                        return true;
-                    }
+                    return postLikeRepository.findAll().contains(postLike);
                 }
                 break;
             }
             case COMMENT: {
                 PostComment postComment = postCommentService.getPostCommentById(id);
-                for (PostLike postLike : postComment.getPost().getPostLikes()) {
-                    if (postLike.getPerson().equals(postComment.getPerson())) {
-                        return true;
-                    }
+                for (CommentLike commentLike : postComment.getCommentLikes()) {
+                    return commentLikeRepository.findAll().contains(commentLike);
                 }
             }
         }
