@@ -13,7 +13,6 @@ import ru.skillbox.request.CommentAddRequest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Date;
 
 @Service
 public class PostCommentService {
@@ -42,11 +41,6 @@ public class PostCommentService {
         postComment.setPost(post);
         postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
         postComment.setIsBlocked(false);
-        if (request.getParentId() != null) {
-            postComment.setParentId(request.getParentId());
-        } else {
-            postComment.setParentId(0L);
-        }
         postCommentRepository.save(postComment);
         logger.info("saving comment № " + postComment.getId());
     }
@@ -72,7 +66,6 @@ public class PostCommentService {
             postComment.setPerson(personService.getCurrentPerson());
             postComment.setPost(post);
             postComment.setTime(request.getTime());
-            postComment.setTimeChanged((new Date().getTime()));
             postComment.setIsBlocked(request.getIsBlocked());
             postCommentRepository.save(postComment);
             logger.info("updating comment № " + postComment.getId());

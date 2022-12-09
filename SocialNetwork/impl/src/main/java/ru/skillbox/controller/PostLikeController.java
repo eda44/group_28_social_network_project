@@ -21,8 +21,7 @@ public class PostLikeController {
     }
 
     @PostMapping("/comment/{commentId}/like")
-    public void likeToComment(@PathVariable String id,
-                              @PathVariable String commentId) {
+    public void likeToComment(@PathVariable String id, @PathVariable String commentId) {
         likeService.addCommentLike(id, commentId);
     }
 
