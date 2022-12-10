@@ -85,6 +85,10 @@ public class Person {
     @JoinColumn(name = "author_id")
     private List<PostComment> postCommentList;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "setting_id")
+    private SettingsNotification settingsNotification;
+
     @OneToMany(mappedBy = "owner")
     private List<Dialog> myDialogs;
 

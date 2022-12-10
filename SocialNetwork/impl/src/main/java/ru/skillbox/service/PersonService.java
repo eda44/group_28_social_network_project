@@ -1,15 +1,18 @@
 package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.enums.MessagePermission;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Person;
+import ru.skillbox.model.SettingsNotification;
 import ru.skillbox.model.User;
 import ru.skillbox.repository.PersonRepository;
 
+import ru.skillbox.repository.SettingNotificationRepository;
 import ru.skillbox.request.RegistrationRequest;
 
 import java.util.Date;
@@ -19,7 +22,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PersonService {
 
+    @Autowired
     private final PersonRepository personRepository;
+
+    @Autowired
+    private final SettingNotificationRepository repositorySettings;
+
 
     public Person getPersonByEmail(String email) {
         Optional<Person> person = personRepository.findByEmail(email);
@@ -41,6 +49,7 @@ public class PersonService {
         person.setIsApproved(true);
         person.setMessagePermission(MessagePermission.ALL);
         person.setLastOnlineTime(new Date().getTime());
+        person.setSettingsNotification(myMetod(person.getId()));
         personRepository.save(person);
     }
 
@@ -75,7 +84,21 @@ public class PersonService {
         person.setConfirmationCode("1111");
         person.setRegDate(48485151L);
         person.setBirthDate(55454615L);
-
         return person;
+    }
+
+    public SettingsNotification myMetod(Long personId) {
+        SettingsNotification setting = new SettingsNotification();
+        setting.setId(personId);
+        setting.setFriendRequest(true);
+        setting.setFriendBirthday(true);
+        setting.setPostComment(true);
+        setting.setCommentComment(true);
+        setting.setMessage(true);
+        setting.setPost(true);
+        setting.setSendPhoneMessage(true);
+        setting.setSendEmailMessage(true);
+        repositorySettings.save(setting);
+        return setting;
     }
 }
