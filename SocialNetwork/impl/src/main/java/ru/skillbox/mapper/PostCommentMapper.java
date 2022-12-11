@@ -71,7 +71,8 @@ public interface PostCommentMapper {
         if (likes == null || likes.isEmpty()) {
             return 0;
         }
-        return likes.size();
+        return likes.stream().filter(p -> p.getIsDelete().equals(false))
+                .collect(Collectors.toList()).size();
     }
 
     @Named("mapMyLike")
@@ -80,7 +81,8 @@ public interface PostCommentMapper {
             return null;
         }
         for (CommentLike like : likes) {
-            if (like.getPerson().getId().equals(currentUser)) {
+            if (like.getPerson().getId().equals(currentUser)&&
+            like.getIsDelete().equals(false)) {
                 return true;
             }
         }

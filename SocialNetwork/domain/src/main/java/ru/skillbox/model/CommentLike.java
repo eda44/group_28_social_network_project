@@ -22,4 +22,7 @@ public class CommentLike {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
     private PostComment comment;
+
+    @Column(name="is_delete")
+    private Boolean isDelete;
 }

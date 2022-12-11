@@ -87,8 +87,8 @@ public class PostLikeService {
             }
             case COMMENT: {
                 PostComment postComment = postCommentService.getPostCommentById(id);
-                for (PostLike postLike : postComment.getPost().getPostLikes()) {
-                    if (postLike.getPerson().equals(postComment.getPerson())) {
+                for (CommentLike commentLike : postComment.getCommentLikes()) {
+                    if (commentLike.getPerson().equals(postComment.getPerson())) {
                         return true;
                     }
                 }
