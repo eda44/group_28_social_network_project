@@ -1,11 +1,13 @@
 package ru.skillbox.response.settings;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import ru.skillbox.dto.enums.NameNotification;
 
 @Getter
 @Setter
+@Builder
 public class NotificationDto {
 
     private Long id;
