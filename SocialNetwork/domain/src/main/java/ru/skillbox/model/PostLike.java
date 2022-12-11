@@ -21,4 +21,7 @@ public class PostLike {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
+
+    @Column(name="is_delete")
+    private Boolean isDelete;
 }
