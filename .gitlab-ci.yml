@@ -31,7 +31,7 @@ deploy-job:
   stage: deploy
   before_script:
     - docker logout
-    - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+#    - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
   script:
 #    - docker build -t typuctroot/sn28 .
     - echo "Deploying application..."
