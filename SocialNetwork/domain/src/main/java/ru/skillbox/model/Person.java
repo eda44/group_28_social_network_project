@@ -86,7 +86,7 @@ public class Person {
     private List<PostComment> postCommentList;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "setting_id")
     private SettingsNotification settingsNotification;
 
     @OneToMany(mappedBy = "owner")

@@ -29,7 +29,6 @@
             <column name="last_online_time" type="bigint"/>
             <column name="is_blocked" type="boolean"/>
             <column name="is_online" type="boolean"/>
-            <column name="setting_id" type="bigint"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
