@@ -1,29 +1,44 @@
+image: maven:3-openjdk-18-slim
+
 stages:
   - build
   - test
   - deploy
 
-build-job:     
+build-job:
   stage: build
   script:
     - echo "Compiling the code..."
+    - mvn clean package
     - echo "Compile complete."
+  artifacts:
+    paths:
+      - impl/target
   tags:
     - check
 
 Unit-tests:
   stage: test
-  script: 
+  script:
     - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
+    - sleep 10
     - echo "Code coverage is 90%"
   tags:
     - test
 
 deploy-job:
+  image: docker:19.03.12
   stage: deploy
+  before_script:
+    - docker logout
+    - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
   script:
-     - echo "Deploying application..."
-     - echo "Application successfully deployed."
+    - docker build -t typuctroot/sn28 .
+    - echo "Deploying application..."
+    - docker push typuctroot/sn28
+    - echo "Application successfully deployed."
+  artifacts:
+    paths:
+      - impl/target/impl-0.0.1-SNAPSHOT.jar
   tags:
     - push
