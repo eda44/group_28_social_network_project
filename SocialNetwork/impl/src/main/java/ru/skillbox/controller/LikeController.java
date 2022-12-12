@@ -6,12 +6,12 @@ import ru.skillbox.service.LikeService;
 
 @RestController
 @RequestMapping("/api/v1/post/{id}")
-public class PostLikeController {
+public class LikeController {
 
     private final LikeService likeService;
 
     @Autowired
-    public PostLikeController(LikeService likeService) {
+    public LikeController(LikeService likeService) {
         this.likeService = likeService;
     }
 

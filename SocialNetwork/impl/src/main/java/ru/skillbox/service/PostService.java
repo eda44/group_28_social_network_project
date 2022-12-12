@@ -14,8 +14,6 @@ import ru.skillbox.repository.PostRepository;
 import ru.skillbox.request.PostAddRequest;
 import ru.skillbox.response.post.PostResponse;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -80,6 +78,7 @@ public class PostService {
         post.setPostText(request.getPostText());
         post.setTags(convertStringToTag(request.getTags()));
         post.setIsBlocked(request.getIsBlocked());
+        post.setIsDelete(false);
         post.setPerson(personService.getCurrentPerson());
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
         postFile.ifPresent(file -> post.setPostFiles(List.of(file)));
@@ -90,11 +89,8 @@ public class PostService {
             post.setType(Type.POSTED);
         }
         switch (post.getType()) {
-            case POSTED:
-                post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-                break;
-            case QUEUED:
-                post.setTime(request.getPublishDate());
+            case POSTED -> post.setTime(new Date().getTime());
+            case QUEUED -> post.setTime(request.getPublishDate());
         }
         savePost(post);
         logger.info("saving post № " + post.getId());

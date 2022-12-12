@@ -33,6 +33,10 @@ public class LikeService {
         this.postCommentService = postCommentService;
     }
 
+    public PostLike getLikeByPostIdAndPersonId(Long postId, Long personId) {
+        return postLikeRepository.findByPostIdAndPersonId(postId, personId).get();
+    }
+
     public void addPostLike(String id) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostLike postLike = new PostLike();
@@ -40,7 +44,7 @@ public class LikeService {
         postLike.setPost(post == null ? new Post() : post);
         postLike.setPerson(personService.getCurrentPerson() == null ? new Person() : personService.getCurrentPerson());
         Objects.requireNonNull(post).setPostLikes(List.of(postLike));
-        postLikeRepository.save(postLike);
+        postLikeRepository.saveAndFlush(postLike);
         logger.info("saving postLike");
     }
 
@@ -53,7 +57,7 @@ public class LikeService {
             commentLike.setPerson(personService.getCurrentPerson() == null ?
                     new Person() : personService.getCurrentPerson());
             commentLike.setTime(new Date().getTime());
-            commentLikeRepository.save(commentLike);
+            commentLikeRepository.saveAndFlush(commentLike);
             postService.savePost(post);
             logger.info("saving commentLike");
         }
@@ -86,14 +90,14 @@ public class LikeService {
 
     public Boolean isLiked(Long id, LikeType type) {
         switch (type) {
-            case POST: {
+            case POST -> {
                 Post post = postService.getPostById(id);
                 for (PostLike postLike : post.getPostLikes()) {
                     return postLikeRepository.findAll().contains(postLike);
                 }
                 break;
             }
-            case COMMENT: {
+            case COMMENT -> {
                 PostComment postComment = postCommentService.getPostCommentById(id);
                 for (CommentLike commentLike : postComment.getCommentLikes()) {
                     return commentLikeRepository.findAll().contains(commentLike);

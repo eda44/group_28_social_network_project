@@ -4,15 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.request.CommentAddRequest;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.util.Date;
 
 @Service
 public class PostCommentService {
@@ -34,12 +31,13 @@ public class PostCommentService {
 
     public void addComment(String id, CommentAddRequest request) {
         Post post = postService.getPostById(Long.parseLong(id));
-        logger.info("getting post by id " + id);
         PostComment postComment = new PostComment();
         postComment.setCommentText(request.getCommentText());
         postComment.setPerson(personService.getCurrentPerson());
+        postComment.setParentId(0L);
         postComment.setPost(post);
-        postComment.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        postComment.setTime(new Date().getTime());
+        postComment.setIsDelete(false);
         postComment.setIsBlocked(false);
         postCommentRepository.save(postComment);
         logger.info("saving comment № " + postComment.getId());
@@ -53,12 +51,10 @@ public class PostCommentService {
             logger.info("deleting comment № " + postComment.getId());
             post.getPostCommentList().remove(postComment);
             postService.savePost(post);
-
         }
     }
 
-    public void updateComment(@RequestBody CommentAddRequest request,
-                              @PathVariable String id, @PathVariable String commentId) {
+    public void updateComment(CommentAddRequest request, String id, String commentId) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = getPostCommentById(Long.parseLong(commentId));
         if (!post.getPostCommentList().isEmpty()) {
@@ -67,6 +63,7 @@ public class PostCommentService {
             postComment.setPost(post);
             postComment.setTime(request.getTime());
             postComment.setIsBlocked(request.getIsBlocked());
+            postComment.setIsDelete(false);
             postCommentRepository.save(postComment);
             logger.info("updating comment № " + postComment.getId());
         }
