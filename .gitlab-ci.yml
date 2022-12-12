@@ -1,4 +1,4 @@
-image: maven:3-openjdk-18-slim
+iimage: maven:3-openjdk-18-slim
 
 stages:
   - build
@@ -9,11 +9,11 @@ build-job:
   stage: build
   script:
     - echo "Compiling the code..."
-    - mvn clean package
+#    - mvn clean package
     - echo "Compile complete."
   artifacts:
     paths:
-      - SocialNetwork/impl/target
+      - impl/target
   tags:
     - check
 
@@ -33,12 +33,12 @@ deploy-job:
     - docker logout
     - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
   script:
-    - docker build -t typuctroot/sn28 .
+#    - docker build -t typuctroot/sn28 .
     - echo "Deploying application..."
-    - docker push typuctroot/sn28
+#    - docker push typuctroot/sn28
     - echo "Application successfully deployed."
   artifacts:
     paths:
-      - SocialNetwork/impl/target/impl-0.0.1-SNAPSHOT.jar
+      - impl/target/impl-0.0.1-SNAPSHOT.jar
   tags:
     - push
