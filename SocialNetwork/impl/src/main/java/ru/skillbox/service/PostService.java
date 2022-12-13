@@ -1,31 +1,21 @@
 package ru.skillbox.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skillbox.config.CloudinaryConfig;
-import ru.skillbox.dto.PostSearchDto;
 import ru.skillbox.dto.enums.Type;
-import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostFile;
 import ru.skillbox.model.Tag;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.request.PostAddRequest;
-import ru.skillbox.response.post.PagePostDto;
 import ru.skillbox.response.post.PostResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +26,7 @@ public class PostService {
     private final PostFileService postFileService;
     private final PersonService personService;
     private final CloudinaryConfig cloudinaryConfig;
+    private static final Logger logger = LogManager.getLogger(PostService.class);
 
     @Autowired
     public PostService(PostRepository postRepository, PostFileService postFileService,
@@ -58,10 +49,6 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public Page<Post> findAll(Pageable pageable) {
-        return postRepository.findAll(pageable);
-    }
-
     public List<Tag> convertStringToTag(List<String> tagsFromRequest) {
         List<Tag> tagList = new ArrayList<>();
         for (String tagString : tagsFromRequest) {
@@ -70,10 +57,6 @@ public class PostService {
             tagList.add(tag);
         }
         return tagList;
-    }
-
-    public List<Post> getPostsByIds(List<Long> ids) {
-        return postRepository.findAllById(ids);
     }
 
     public List<String> convertTagToString(List<Tag> tagList) {
@@ -85,98 +68,40 @@ public class PostService {
     }
 
     public void deletePost(Post post) {
-        post.setIsDelete(true);
-        post.setTimeChanged(LocalDateTime.now()
-                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
-        postRepository.saveAndFlush(post);
+        postRepository.delete(post);
+        logger.info("deleting post № " + post.getId());
     }
 
-    public ResponseEntity<PagePostDto> getPostsAll(@RequestParam PostSearchDto searchDto,
-                                                   @RequestParam(name = "page", defaultValue = "0") int page,
-                                                   @RequestParam(name = "size", defaultValue = "1") int size,
-                                                   @RequestParam(name = "sort", defaultValue = "time") String[] sort) {
-
-        PagePostDto pageResponse = new PagePostDto();
-        PostResponse postResponse = new PostResponse();
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
-        Page<Post> postPage = postRepository.findAll(pageable);
-        List<Post> pageContent = postPage.getContent();
-        postResponse.setPostText(searchDto.getPostText());
-        postResponse.setPublishDate(searchDto.getDateTo());
-        postResponse.setTime(searchDto.getDateFrom());
-        postResponse.setTitle(searchDto.getTitle());
-        postResponse.setTags(searchDto.getTags());
-        postResponse.setLikeAmount(1); //todo
-        postResponse.setType(Type.POSTED); //todo
-        postResponse.setIsBlocked(searchDto.getBlockedIds().isEmpty()); //todo
-        postResponse.setCommentsCount(1); //todo
-        List<Post> posts = getPostsByIds(searchDto.getIds());
-        for (Post post : posts) {
-            postResponse.setTags(convertTagToString(post.getTags()));
-        }
-        postResponse.setIsDelete(false); //todo
-        postResponse.setMyLike(true); //todo
-        postResponse.setImagePath(postFileService.getPostFileById(0L).getPath()); //todo
-        postResponse.setAuthorId(searchDto.getAccountIds().get(0)); //todo
-        pageResponse.setSize(size);
-        pageResponse.setEmpty(pageContent.size() > 0);
-        pageResponse.setNumberOfElements(pageContent.size());
-        pageResponse.setTotalPages(sort.length);
-        pageResponse.setPageable(pageable);
-        pageResponse.setFirst(pageContent.size() == 1);
-        pageResponse.setNumber(1); //todo
-        pageResponse.setLast(true); //todo
-        pageResponse.setSort(new ru.skillbox.dto.Sort()); //todo
-        pageResponse.setContent(List.of(postResponse)); //todo
-
-        return ResponseEntity.ok(pageResponse);
-    }
-
-    public void mmm(List<Post> posts) {
-        for (Post post : posts) {
-
-        }
-    }
-
-    public void setPost(PostAddRequest request, HttpServletRequest httpServletRequest) throws UserNotFoundException {
+    public void addPost(PostAddRequest request) {
         Post post = new Post();
-
         post.setTitle(request.getTitle());
         post.setPostText(request.getPostText());
         post.setTags(convertStringToTag(request.getTags()));
         post.setIsBlocked(request.getIsBlocked());
-        post.setPerson(personService.getCurrentPerson());
-        post.setIsBlocked(false);
         post.setIsDelete(false);
+        post.setPerson(personService.getCurrentPerson());
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
-        if(postFile.isPresent()){
-             post.setPostFiles(List.of(postFile.get()));
-        }
+        postFile.ifPresent(file -> post.setPostFiles(List.of(file)));
 
-        String publishDateString = httpServletRequest.getParameter("publishDate");
-
-
-        if (publishDateString != null) {
+        if (request.getPublishDate() != null) {
             post.setType(Type.QUEUED);
         } else {
             post.setType(Type.POSTED);
         }
         switch (post.getType()) {
-            case POSTED:
-                post.setTime(LocalDateTime.now()
-                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
-                break;
-            case QUEUED:
-                post.setTime(Long.parseLong(publishDateString));
+            case POSTED -> post.setTime(new Date().getTime());
+            case QUEUED -> post.setTime(request.getPublishDate());
         }
         savePost(post);
+        logger.info("saving post № " + post.getId());
     }
 
     public PostFile uploadImage(MultipartFile multipartFile) {
-       return postFileService.savePostFile(cloudinaryConfig.uploadImage(multipartFile));
+        logger.info("uploading file " + multipartFile.getOriginalFilename());
+        return postFileService.savePostFile(cloudinaryConfig.uploadImage(multipartFile));
     }
 
-    public PostResponse setPostResponse(String id) {
+    public PostResponse addPostResponse(String id) {
         Post post = getPostById(Long.parseLong(id));
         PostResponse response = new PostResponse();
         response.setPostText(post.getPostText());
@@ -191,45 +116,22 @@ public class PostService {
         return response;
     }
 
-    public PostFile setPostFile(Post post, String name, String path) {
-        PostFile postFile = new PostFile();
-        postFile.setPost(post);
-        postFile.setName(name);
-        postFile.setPath(path);
-        return postFile;
-    }
-
-    public void updatePost(PostAddRequest request, HttpServletRequest httpServletRequest,String id) {
+    public void updatePost(PostAddRequest request, String id) {
         Post post = getPostById(Long.parseLong(id));
         post.setTitle(request.getTitle());
-        if(request.getTime()!=null) {
-            post.setTime(request.getTime());
-        }
-        post.setTimeChanged(LocalDateTime.now()
-                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+        post.setTime(request.getTime());
+        post.setTimeChanged((new Date()).getTime());
         post.setPostText(request.getPostText());
         post.setPerson(personService.getCurrentPerson());
-        if(convertStringToTag(request.getTags())!=null) {
-            post.setTags(convertStringToTag(request.getTags()));
-        }
+        post.setIsDelete(request.getIsDelete());
+        post.setIsBlocked(request.getIsBlocked());
+        post.setType(request.getType());
+        post.setIsBlocked(request.getIsBlocked());
+        post.setTags(convertStringToTag(request.getTags()));
+        post.setTime(request.getTime());
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
-        if(postFile.isPresent()){
-            post.setPostFiles(new ArrayList<>(List.of(postFile.get())));
-        }
-        String publishDateString = httpServletRequest.getParameter("publishDate");
-        if (publishDateString != null) {
-            post.setType(Type.QUEUED);
-        } else {
-            post.setType(Type.POSTED);
-        }
-        switch (post.getType()) {
-            case POSTED:
-                post.setTime(LocalDateTime.now()
-                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
-                break;
-            case QUEUED:
-                post.setTime(Long.parseLong(publishDateString));
-        }
+        postFile.ifPresent(file -> post.setPostFiles(new ArrayList<>(List.of(file))));
         savePost(post);
+        logger.info("updating post № " + post.getId());
     }
 }

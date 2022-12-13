@@ -1,7 +1,6 @@
 package ru.skillbox.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.enums.LikeType;
 import ru.skillbox.model.CommentLike;
@@ -43,10 +42,8 @@ public class PostLikeService {
     }
 
 
-
-    public PostLike getLikeByPostIdAndPersonId(Long postId, Long personId)
-    {
-        return postLikeRepository.findByPostIdAndPersonId(postId,personId).get();
+    public PostLike getLikeByPostIdAndPersonId(Long postId, Long personId) {
+        return postLikeRepository.findByPostIdAndPersonId(postId, personId).get();
     }
 
     public PostLike getLikeByCommentId(long id) {
@@ -124,6 +121,6 @@ public class PostLikeService {
     }
 
     public CommentLike getLikeByCommentIdAndPersonId(Long commentId, Long personId) {
-        return commentLikeRepository.findByCommentIdAndPersonId(commentId,personId).get();
+        return commentLikeRepository.findByCommentIdAndPersonId(commentId, personId).get();
     }
 }

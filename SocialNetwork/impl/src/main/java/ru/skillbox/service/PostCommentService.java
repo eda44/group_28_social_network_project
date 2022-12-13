@@ -1,21 +1,22 @@
 package ru.skillbox.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.skillbox.dto.CommentDto;
+import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostCommentRepository;
+import ru.skillbox.request.CommentAddRequest;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Date;
 
 @Service
 public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostService postService;
     private final PersonService personService;
+    private static final Logger logger = LogManager.getLogger(PostCommentService.class);
 
     @Autowired
     public PostCommentService(PostCommentRepository postCommentRepository, PostService postService, PersonService personService) {
@@ -28,58 +29,43 @@ public class PostCommentService {
         return postCommentRepository.findById(id).get();
     }
 
-    public void savePostComment(PostComment postComment) {
+    public void addComment(String id, CommentAddRequest request) {
+        Post post = postService.getPostById(Long.parseLong(id));
+        PostComment postComment = new PostComment();
+        postComment.setCommentText(request.getCommentText());
+        postComment.setPerson(personService.getCurrentPerson());
+        postComment.setParentId(0L);
+        postComment.setPost(post);
+        postComment.setTime(new Date().getTime());
+        postComment.setIsDelete(false);
+        postComment.setIsBlocked(false);
         postCommentRepository.save(postComment);
+        logger.info("saving comment № " + postComment.getId());
     }
 
-    public void deletePostComment(PostComment postComment) {
-        postComment.setIsDelete(true);
-        postComment.setTimeChanged(LocalDateTime.now()
-                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
-        postCommentRepository.saveAndFlush(postComment);
-        if(postComment.getParentId()==null || postComment.getParentId().equals(0L)) {
-            List<PostComment> postComments = postCommentRepository.findAll()
-                    .stream().filter(p -> p.getParentId()!=null &&
-                            p.getParentId().equals(postComment.getId()))
-                    .collect(Collectors.toList());
-            postComments.forEach(p -> {
-                p.setIsDelete(true);
-                p.setTimeChanged(LocalDateTime.now()
-                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
-                postCommentRepository.saveAndFlush(p);
-            });
+    public void deleteComment(String id, String commentId) {
+        Post post = postService.getPostById(Long.parseLong(id));
+        PostComment postComment = getPostCommentById(Long.parseLong(commentId));
+        if (post.getPostCommentList().contains(postComment)) {
+            postCommentRepository.delete(postComment);
+            logger.info("deleting comment № " + postComment.getId());
+            post.getPostCommentList().remove(postComment);
+            postService.savePost(post);
         }
     }
 
-    public CommentDto setPostCommentDto(List<PostComment> postComments) {
-        CommentDto commentDto = new CommentDto();
-        for (PostComment postComment : postComments) {
-            commentDto.setCommentsCount(postComments.size());
-            commentDto.setCommentText(postComment.getCommentText());
-            commentDto.setAuthorId(postComment.getPerson().getId());
-            commentDto.setPostId(postComment.getPost().getId());
-            commentDto.setIsBlocked(postComment.getIsBlocked());
-            commentDto.setIsDelete(postComment.getIsDelete());
-            commentDto.setLikeAmount(postComment.getCommentLikes().size());
-            commentDto.setParentId(postComment.getParentId());
-            commentDto.setTime(postComment.getTime());
+    public void updateComment(CommentAddRequest request, String id, String commentId) {
+        Post post = postService.getPostById(Long.parseLong(id));
+        PostComment postComment = getPostCommentById(Long.parseLong(commentId));
+        if (!post.getPostCommentList().isEmpty()) {
+            postComment.setCommentText(request.getCommentText());
+            postComment.setPerson(personService.getCurrentPerson());
+            postComment.setPost(post);
+            postComment.setTime(request.getTime());
+            postComment.setIsBlocked(request.getIsBlocked());
+            postComment.setIsDelete(false);
+            postCommentRepository.save(postComment);
+            logger.info("updating comment № " + postComment.getId());
         }
-        return commentDto;
-    }
-
-    public CommentDto setPostCommentDto(PostComment postComment) {
-        CommentDto commentDto = new CommentDto();
-        commentDto.setCommentText(postComment.getCommentText());
-        commentDto.setAuthorId(postComment.getPerson().getId());
-        commentDto.setPostId(postComment.getPost().getId());
-        commentDto.setIsBlocked(postComment.getIsBlocked());
-        commentDto.setLikeAmount(postComment.getCommentLikes().size());
-        if(postComment.getParentId()!=null) {
-            commentDto.setParentId(postComment.getParentId());
-        } else {
-            commentDto.setParentId(0L);
-        }
-        commentDto.setTime(postComment.getTime());
-        return commentDto;
     }
 }

@@ -25,7 +25,7 @@ public class PostComment {
 
     private Boolean isDelete;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", referencedColumnName = "id")
     private List<CommentFile> commentFiles;
 
@@ -48,7 +48,7 @@ public class PostComment {
 
     private Long time;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", referencedColumnName = "id")
     private List<CommentLike> commentLikes;
 }
