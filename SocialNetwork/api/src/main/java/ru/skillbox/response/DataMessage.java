@@ -11,4 +11,5 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataMessage {
     private String message;
+    private Integer count;
 }

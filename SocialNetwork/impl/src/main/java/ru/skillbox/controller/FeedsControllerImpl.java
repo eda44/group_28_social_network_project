@@ -134,7 +134,7 @@ public class FeedsControllerImpl implements FeedsInterface {
 
 
     //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере
-    @GetMapping("/api/v1/dialogs/unreaded")
+    /*@GetMapping("/api/v1/dialogs/unreaded")
     public  String uneaded(){
         return "{\n" +
                 "  \"error\": \"Неверный запрос\",\n" +
@@ -144,7 +144,7 @@ public class FeedsControllerImpl implements FeedsInterface {
                 "  },\n" +
                 "  \"error_description\": \"Неверный код авторизации\"\n" +
                 "}";
-    }
+    }*/
 
 
     //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере

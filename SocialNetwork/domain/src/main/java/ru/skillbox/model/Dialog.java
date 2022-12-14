@@ -2,7 +2,6 @@ package ru.skillbox.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.MessageDto;
 
 import javax.persistence.*;
 import java.util.List;
@@ -32,6 +31,6 @@ public class Dialog {
     List<Message> messages;
 
     @Transient
-    private MessageDto lastMessage;
+    private Message lastMessage;
 
 }
