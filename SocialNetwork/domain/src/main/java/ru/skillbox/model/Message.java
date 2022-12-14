@@ -2,6 +2,7 @@ package ru.skillbox.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.skillbox.dto.enums.Status;
 
 import javax.persistence.*;
 
@@ -16,7 +17,9 @@ public class Message {
     private Long id;
 
     private Long time;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @Column(name = "message_text")
     private String messageText;

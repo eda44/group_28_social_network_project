@@ -57,8 +57,8 @@ public class FeedsRequest {
     private String getAuthor(HttpServletRequest httpServletRequest){
         String authorString = httpServletRequest.getParameter("author");
         if(authorString != null) {
-            log.debug("author={}",authorString.trim().replaceAll("[\s]{2,}","\s"));
-          return authorString.trim().replaceAll("[\s]{2,}","\s");
+            log.debug("author={}",authorString.trim().replaceAll("[\\s]{2,}","\\s"));
+          return authorString.trim().replaceAll("[\\s]{2,}","\\s");
         }
         return null;
     }
@@ -88,10 +88,10 @@ public class FeedsRequest {
         String text = httpServletRequest.getParameter("text");
         if(text!=null){
             String textOnlyBooksAndDigits = text
-                    .toLowerCase(Locale.ROOT).replaceAll("[^0-9А-яA-z\s]+","");
-            String textWithoutDoubleSpaces = textOnlyBooksAndDigits.replaceAll("[\s]{2,}","\s");
+                    .toLowerCase(Locale.ROOT).replaceAll("[^0-9А-яA-z\\s]+","");
+            String textWithoutDoubleSpaces = textOnlyBooksAndDigits.replaceAll("[\\s]{2,}","\\s");
             log.debug("Only Books in String: " + textOnlyBooksAndDigits);
-            String[] textWords = textWithoutDoubleSpaces.trim().split("\s");
+            String[] textWords = textWithoutDoubleSpaces.trim().split("\\s");
             log.debug("Words number: {}",textWords.length);
             return Arrays.stream(textWords).collect(Collectors.toList());
         }

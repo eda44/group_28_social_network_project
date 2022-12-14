@@ -1,11 +1,10 @@
 package ru.skillbox.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.MessageDto;
+import ru.skillbox.response.data.MessageDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ public class DialogRs {
     public static DialogRs getMessageRs(Long id, Integer offset, Integer itemPerPage) {
         List<MessageDto> messageDtoList = new ArrayList<>();
 
-        messageDtoList.add(MessageDto.builder()
+        /*messageDtoList.add(MessageDto.builder()
                 .id(1L)
                 .authorId(id)
                 .time(System.currentTimeMillis())
@@ -42,7 +41,7 @@ public class DialogRs {
                 .time(System.currentTimeMillis() + 1000L)
                 .messageText("Из окна видишь ты")
                 .build()
-        );
+        );*/
 
         return DialogRs.builder()
                 .timestamp(System.currentTimeMillis())

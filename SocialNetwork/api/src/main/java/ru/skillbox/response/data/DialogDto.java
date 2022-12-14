@@ -1,8 +1,9 @@
-package ru.skillbox.dto;
+package ru.skillbox.response.data;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import ru.skillbox.dto.AccountDto;
 
 @Getter
 @Setter
