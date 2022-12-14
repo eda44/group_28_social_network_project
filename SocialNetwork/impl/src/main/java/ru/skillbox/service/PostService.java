@@ -11,11 +11,14 @@ import ru.skillbox.model.Post;
 import ru.skillbox.model.PostFile;
 import ru.skillbox.model.Tag;
 import ru.skillbox.repository.PostRepository;
+import ru.skillbox.repository.TagRepository;
 import ru.skillbox.request.PostAddRequest;
 import ru.skillbox.response.post.PostResponse;
 
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +26,8 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
+
+    private final TagRepository tagRepository;
     private final PostFileService postFileService;
     private final PersonService personService;
     private final CloudinaryConfig cloudinaryConfig;
@@ -30,11 +35,13 @@ public class PostService {
 
     @Autowired
     public PostService(PostRepository postRepository, PostFileService postFileService,
-                       PersonService personService, CloudinaryConfig cloudinaryConfig) {
+                       PersonService personService, CloudinaryConfig cloudinaryConfig,
+                       TagRepository tagRepository) {
         this.postRepository = postRepository;
         this.postFileService = postFileService;
         this.personService = personService;
         this.cloudinaryConfig = cloudinaryConfig;
+        this.tagRepository = tagRepository;
     }
 
     public List<Post> getAllPosts() {
@@ -68,11 +75,12 @@ public class PostService {
     }
 
     public void deletePost(Post post) {
-        postRepository.delete(post);
+        post.setIsDelete(true);
+        postRepository.saveAndFlush(post);
         logger.info("deleting post № " + post.getId());
     }
 
-    public void addPost(PostAddRequest request) {
+    public void addPost(PostAddRequest request, HttpServletRequest httpServletRequest) {
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setPostText(request.getPostText());
@@ -80,19 +88,29 @@ public class PostService {
         post.setIsBlocked(request.getIsBlocked());
         post.setIsDelete(false);
         post.setPerson(personService.getCurrentPerson());
-        Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
-        postFile.ifPresent(file -> post.setPostFiles(List.of(file)));
 
-        if (request.getPublishDate() != null) {
+
+
+        String publishDateString = httpServletRequest.getParameter("publishDate");
+
+        if (publishDateString != null) {
             post.setType(Type.QUEUED);
         } else {
             post.setType(Type.POSTED);
         }
         switch (post.getType()) {
-            case POSTED -> post.setTime(new Date().getTime());
-            case QUEUED -> post.setTime(request.getPublishDate());
+            case POSTED : { post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.systemDefault().getRules()
+                    .getOffset(LocalDateTime.now())));
+                break;
+            }
+            case QUEUED : { post.setTime(Long.parseLong(publishDateString));
+                break;
+            }
         }
+        Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
+        postFile.ifPresent(file -> post.setPostFiles(List.of(file)));
         savePost(post);
+
         logger.info("saving post № " + post.getId());
     }
 
@@ -116,21 +134,40 @@ public class PostService {
         return response;
     }
 
-    public void updatePost(PostAddRequest request, String id) {
+    public void updatePost(PostAddRequest request, HttpServletRequest httpServletRequest,
+                           String id) {
         Post post = getPostById(Long.parseLong(id));
         post.setTitle(request.getTitle());
-        post.setTime(request.getTime());
-        post.setTimeChanged((new Date()).getTime());
+        if(request.getTime()!=null) {
+            post.setTime(request.getTime());
+        }
+        post.setTimeChanged(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
         post.setPostText(request.getPostText());
         post.setPerson(personService.getCurrentPerson());
-        post.setIsDelete(request.getIsDelete());
-        post.setIsBlocked(request.getIsBlocked());
-        post.setType(request.getType());
-        post.setIsBlocked(request.getIsBlocked());
-        post.setTags(convertStringToTag(request.getTags()));
-        post.setTime(request.getTime());
+        if(convertStringToTag(request.getTags())!=null) {
+            post.setTags(convertStringToTag(request.getTags()));
+        }
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
-        postFile.ifPresent(file -> post.setPostFiles(new ArrayList<>(List.of(file))));
+        if(postFile.isPresent()){
+            post.setPostFiles(new ArrayList<>(List.of(postFile.get())));
+        }
+        String publishDateString = httpServletRequest.getParameter("publishDate");
+        if (publishDateString != null) {
+            post.setType(Type.QUEUED);
+        } else {
+            post.setType(Type.POSTED);
+        }
+        switch (post.getType()) {
+            case POSTED:
+                post.setTime(LocalDateTime.now()
+                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                break;
+            case QUEUED:
+                post.setTime(Long.parseLong(publishDateString));
+        }
+        savePost(post);
+
         savePost(post);
         logger.info("updating post № " + post.getId());
     }

@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,17 +16,20 @@ import ru.skillbox.mapper.PostCommentMapper;
 import ru.skillbox.mapper.PostMapper;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
+import ru.skillbox.model.Tag;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.repository.PostRepository;
+import ru.skillbox.repository.TagRepository;
+import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.*;
+import ru.skillbox.specification.PostSpecification;
+import ru.skillbox.specification.TagSpecification;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -32,16 +38,19 @@ public class FeedsService {
 
     private PostCommentRepository postCommentRepository;
 
+    private TagRepository tagRepository;
+
     private PersonService personService;
 
        @Autowired
     public FeedsService(PostRepository postRepository,
                         PostCommentRepository postCommentRepository,
-                        PersonService personService) {
+                        PersonService personService,
+                        TagRepository tagRepository) {
         this.postRepository = postRepository;
         this.personService = personService;
         this.postCommentRepository = postCommentRepository;
-
+        this.tagRepository = tagRepository;
     }
 
     public void updatePostType(){
@@ -56,32 +65,8 @@ public class FeedsService {
     }
 
 
-    public Page findByText(Pageable pageable,String text, boolean isTest){
-        Pageable newPageable = PageRequest.of(0,postRepository.findAll().size(),pageable.getSort());
-        Page<Post> pagedPosts = postRepository.findByIsDeleteAndType(false,Type.POSTED,newPageable);
-
-        List<Post> posts = pagedPosts.getContent()
-                .stream().filter(p -> near(p,text))
-                .collect(Collectors.toList());
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), posts.size());
-        Page<Post> page = null;
-        if(start <= end ) {
-            page = new PageImpl<>(posts.subList(start, end), pageable, posts.size());
-        } else  {
-            page = new PageImpl<>(posts.subList(
-                    Math.max(start - pageable.getPageSize(),0),
-                    end), pageable, posts.size());
-        }
-        if(posts.isEmpty()) {
-            page = new PageImpl<>(posts, pageable, 0);
-        }
-        return page;
-    }
-
-
-    @Transactional
-    public ResponseEntity<FeedsResponseOK> getObjectResponseEntity(Pageable pageable, String text,
+       @Transactional
+    public ResponseEntity<FeedsResponseOK> getObjectResponseEntity(FeedsRequest feedsRequest,
                                                                    boolean isTest)
             throws JsonProcessingException {
         long currentUserId;
@@ -92,34 +77,103 @@ public class FeedsService {
             currentUserId = personService.getCurrentPerson().getId();
         }
         updatePostType();
-        List<Post> posts;
-        Page<Post> pagedPosts;
+
+           Specification<Post> postSpec = generatePostSpecification(feedsRequest);
+           Page<Post> pagedPosts = postRepository.findAll(postSpec,feedsRequest.getPageable());
         log.debug("CurrentUserId={}",currentUserId);
 
-        if(text==null) {
-            pagedPosts = postRepository.findByIsDeleteAndType(false,Type.POSTED,pageable);
-        } else {
-            pagedPosts = findByText(pageable,text,false);
-        }
-        posts = pagedPosts.getContent();
-        log.debug("Find all posts from repository");
+        List<Post> posts = pagedPosts.getContent();
+        log.debug("Find all posts from repository with given Criteria");
         List<PostDto> postDtoList = new ArrayList<>();
         if(posts==null ||posts.size() == 0){
             getFeedsError();
         } else {
-            fillPostDtoList(text, currentUserId, posts, postDtoList);
+            fillPostDtoList(currentUserId, posts, postDtoList);
         }
-        FeedsResponseOK feedsResponse = getFeedsResponseOK(pageable, pagedPosts, postDtoList);
+        FeedsResponseOK feedsResponse = getFeedsResponseOK(feedsRequest.getPageable(), pagedPosts, postDtoList);
         return ResponseEntity.ok(feedsResponse);
     }
 
-    private void fillPostDtoList(String text, long currentUserId, List<Post> posts, List<PostDto> postDtoList) {
-        for(Post post : posts) {
-            if(text ==null || near(post, text)) {
-                    log.debug("Mapping post number " + post.getId());
-                    PostDto postDto = PostMapper.INSTANCE.postToPostDto(post, currentUserId);
-                    postDtoList.add(postDto);
+    private Specification<Post> generatePostSpecification(FeedsRequest feedsRequest) {
+        PostSpecification spec = new PostSpecification();
+        Specification<Post> postSpec = spec;
+        postSpec = getPostSpecificationByDate(feedsRequest, spec, postSpec);
+        postSpec = postSpec.and(spec.getPostsByIsDelete(feedsRequest.getIsDelete()));
+        postSpec = postSpec.and(spec.getPostsByType(Type.POSTED));
+        postSpec = getPostSpecificationByText(feedsRequest, spec, postSpec);
+        postSpec = getPostSpecificationByTags(feedsRequest, spec, postSpec);
+        postSpec = getPostSpecificationByAuthor(feedsRequest, spec, postSpec);
+        return postSpec;
+    }
+
+    private static Specification<Post> getPostSpecificationByAuthor(FeedsRequest feedsRequest, PostSpecification spec,
+                                                                    Specification<Post> postSpec) {
+        Specification<Post> authSpec = spec;
+           if(feedsRequest.getAuthor()!=null) {
+            String[] names = feedsRequest.getAuthor().split(" ");
+            if(names.length > 1){
+                authSpec = authSpec.or(spec.getPostsByTwoNames(names[0],names[1]));
+                authSpec = authSpec.or(spec.getPostsByTwoNames(names[1],names[0]));
+
+            } else {
+                authSpec = authSpec.or(spec.getPostsByFirstName(names[0]));
+                authSpec = authSpec.or(spec.getPostsByLastName(names[0]));
             }
+            postSpec = postSpec.and(authSpec);
+        }
+        return postSpec;
+    }
+
+    private Specification<Post> getPostSpecificationByTags(FeedsRequest feedsRequest, PostSpecification spec,
+                                                           Specification<Post> postSpec) {
+        Specification<Post> tagsSpec = spec;
+           if(feedsRequest.getTags()!=null){
+            List<Tag> tags = new ArrayList<>();
+            for(String tagString : feedsRequest.getTags()) {
+                TagSpecification tagSpec = new TagSpecification();
+                Specification<Tag> tagSpecification = tagSpec.getTagsByName(tagString);
+                tags.addAll(tagRepository.findAll(tagSpecification));
+            }
+            if(!tags.isEmpty()){
+                for(Tag tag : tags) {
+                    tagsSpec = tagsSpec.or(spec.getPostsByTag(tag));
+                }
+                postSpec = postSpec.and(tagsSpec);
+            }
+        }
+        return postSpec;
+    }
+
+    private static Specification<Post> getPostSpecificationByText(FeedsRequest feedsRequest, PostSpecification spec,
+                                                                  Specification<Post> postSpec) {
+        Specification<Post> wordSpec = spec;
+        if(feedsRequest.getWords()!=null){
+            for(String word : feedsRequest.getWords()){
+                wordSpec = wordSpec.or(spec.getPostsByTitleOrText(word));
+            }
+            postSpec = postSpec.and(wordSpec);
+        }
+        return postSpec;
+    }
+
+    private static Specification<Post> getPostSpecificationByDate(FeedsRequest feedsRequest, PostSpecification spec,
+                                                                  Specification<Post> postSpec) {
+        if(feedsRequest.getDateTo()!=null){
+            postSpec = postSpec.and(spec.getPostsByDateTo(feedsRequest.getDateTo()));
+            log.debug("DateTo={}",feedsRequest.getDateTo());
+        }
+        if(feedsRequest.getDateFrom()!=null){
+            postSpec = postSpec.and(spec.getPostsByDateFrom(feedsRequest.getDateFrom()));
+            log.debug("DateFrom={}",feedsRequest.getDateFrom());
+        }
+        return postSpec;
+    }
+
+    private void fillPostDtoList(long currentUserId, List<Post> posts, List<PostDto> postDtoList) {
+        for(Post post : posts) {
+            log.debug("Mapping post number " + post.getId());
+            PostDto postDto = PostMapper.INSTANCE.postToPostDto(post, currentUserId);
+            postDtoList.add(postDto);
         }
     }
 
@@ -131,7 +185,8 @@ public class FeedsService {
         log.debug(mapper.writeValueAsString(feedsResponseError));
     }
 
-    private static FeedsResponseOK getFeedsResponseOK(Pageable pageable, Page<Post> pagedPosts, List<PostDto> postDtoList) throws JsonProcessingException {
+    private static FeedsResponseOK getFeedsResponseOK(Pageable pageable, Page<Post> pagedPosts,
+                                                      List<PostDto> postDtoList) throws JsonProcessingException {
         FeedsResponseOK feedsResponse = new FeedsResponseOK();
         log.debug("Generating feeds response!");
         feedsResponse.setContent(postDtoList);
@@ -150,63 +205,16 @@ public class FeedsService {
         return feedsResponse;
     }
 
-    private boolean near(Post post, String text) {
-           String textOnlyBooks = text.toLowerCase(Locale.ROOT).replaceAll("[^А-яA-z\s]+","");
-           String textWithoutDoubleSpaces = textOnlyBooks.replaceAll("[\s]{2,}","\s");
-           log.debug("Only Books in String: " + textOnlyBooks);
-           String[] textWords = textWithoutDoubleSpaces.trim().split("\s");
-           log.debug("Words number: {}",textWords.length);
-           for(String word : textWords){
-               if(post.getTitle().toLowerCase(Locale.ROOT).contains(word) ||
-               post.getPostText().toLowerCase(Locale.ROOT).contains(word)) {
-                   return  true;
-               }
-           }
-           return false;
-    }
-
-
-    public Pageable generatePageableObjectByServlet(HttpServletRequest httpServletRequest){
-        String pageString = httpServletRequest.getParameter("page");
-        int page = pageString!=null?Integer.parseInt(pageString):0;
-        log.debug("page= " + page);
-        String sizeString = httpServletRequest.getParameter("size");
-        int size = sizeString!=null?Integer.parseInt(sizeString):1;
-        log.debug("size= " + size);
-        String sort = httpServletRequest.getParameter("sort");
-        if(page < 0){
-            page = 0;
-        }
-        Pageable pageable;
-        if(sort!=null){
-            String[] words = sort.split(",");
-            if(words.length >= 2 && words[1].equals("desc")) {
-                pageable = PageRequest.of(page, size, Sort.by(
-                        Sort.Order.desc(words[0])
-                        ));
-            } else {
-                pageable = PageRequest.of(page, size, Sort.by(
-                        Sort.Order.asc(words[0])
-                        ));
-            }
-        }
-        else {
-            pageable = PageRequest.of(page, size, Sort.by(
-                    Sort.Order.asc("time")
-            ));
-        }
-        return pageable;
-    }
 
     @Transactional
-    public ResponseEntity<CommentResponse> getComments(long id, Pageable pageable, boolean isTest)
+    public ResponseEntity<CommentResponse> getComments(long id, FeedsRequest feedsRequest, boolean isTest)
             throws JsonProcessingException {
         Post post = postRepository.findById(id).get();
         Page<PostComment> postCommentPage = postCommentRepository.findByPostAndIsDeleteAndParentId(
-                post,false,0L,pageable);
+                post,false,0L,feedsRequest.getPageable());
 
 
-        CommentResponse commentResponse = getCommentResponse(pageable, id, postCommentPage, isTest);
+        CommentResponse commentResponse = getCommentResponse(feedsRequest.getPageable(), id, postCommentPage, isTest);
 
         return ResponseEntity.ok(commentResponse);
     }
@@ -215,14 +223,7 @@ public class FeedsService {
                                                boolean isTest)
             throws JsonProcessingException {
         log.debug("Generating comment response!");
-        CommentResponse commentResponse = new CommentResponse();
-        commentResponse.setSize(pageable.getPageSize());
-        commentResponse.setEmpty(pages.isEmpty());
-        commentResponse.setSort(pages.getSort());
-        commentResponse.setFirst(pages.isFirst());
-        commentResponse.setLast(pages.isLast());
-        commentResponse.setNumber(pages.getNumber());
-        commentResponse.setPageable(pageable);
+
         List<PostComment> comments =  pages.getContent();
 
         List<PostCommentDto> postCommentDtoList = new ArrayList<>();
@@ -233,38 +234,46 @@ public class FeedsService {
         } else {
             currentUserId = personService.getCurrentPerson().getId();
         }
-
-
         for(PostComment comment : comments) {
             log.debug("Mapping comment number " + comment.getId());
             PostCommentDto postCommentDtoDto = PostCommentMapper.
                     INSTANCE.postCommentToPostCommentDto(comment, currentUserId,postCommentRepository);
             postCommentDtoList.add(postCommentDtoDto);
         }
-
-
-        commentResponse.setTotalElements(pages.getTotalElements());
-        commentResponse.setNumberOfElements(pages.getNumberOfElements());
-        commentResponse.setTotalPages(pages.getTotalPages());
-        commentResponse.setContent(postCommentDtoList);
-
+        CommentResponse commentResponse = fillCommentResponse(pageable, pages, postCommentDtoList);
         ObjectMapper mapper = new ObjectMapper();
         log.debug(mapper.writeValueAsString(commentResponse));
         return commentResponse;
     }
 
+    private static CommentResponse fillCommentResponse(Pageable pageable, Page<PostComment> pages,
+                                                       List<PostCommentDto> postCommentDtoList) {
+        CommentResponse commentResponse = new CommentResponse();
+        commentResponse.setSize(pageable.getPageSize());
+        commentResponse.setEmpty(pages.isEmpty());
+        commentResponse.setSort(pages.getSort());
+        commentResponse.setFirst(pages.isFirst());
+        commentResponse.setLast(pages.isLast());
+        commentResponse.setNumber(pages.getNumber());
+        commentResponse.setPageable(pageable);
+        commentResponse.setTotalElements(pages.getTotalElements());
+        commentResponse.setNumberOfElements(pages.getNumberOfElements());
+        commentResponse.setTotalPages(pages.getTotalPages());
+        commentResponse.setContent(postCommentDtoList);
+        return commentResponse;
+    }
+
     @Transactional
-    public ResponseEntity<CommentResponse> getSubComments(long id, long commentId, Pageable pageable,
+    public ResponseEntity<CommentResponse> getSubComments(long id, long commentId, FeedsRequest feedsRequest,
     boolean isTest)
             throws JsonProcessingException {
         Pageable subCommentsPageable = PageRequest.of(0,
-                postCommentRepository.findAll().size(),pageable.getSort());
+                postCommentRepository.findAll().size(),feedsRequest.getPageable().getSort());
         Post post = postRepository.findById(id).get();
         Page<PostComment> postCommentPage = postCommentRepository.findByPostAndIsDeleteAndParentId(
                 post,false,commentId,subCommentsPageable);
 
         CommentResponse commentResponse = getCommentResponse(subCommentsPageable, id, postCommentPage, isTest);
-
         return ResponseEntity.ok(commentResponse);
     }
 

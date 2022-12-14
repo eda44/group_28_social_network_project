@@ -24,4 +24,7 @@
             <column name="tag_id" type="bigint"/>
         </createTable>
     </changeSet>
+    <changeSet id="add AutoIncr post2tag" author="Andrey Glushko">
+        <addAutoIncrement tableName="post2tag" columnName="id"/>
+    </changeSet>
 </databaseChangeLog>

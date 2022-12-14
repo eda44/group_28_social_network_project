@@ -19,6 +19,7 @@ import ru.skillbox.repository.CountryRepository;
 import ru.skillbox.repository.FriendsRepository;
 import ru.skillbox.repository.PersonRepository;
 import ru.skillbox.repository.PostRepository;
+import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponseOK;
 import ru.skillbox.service.FeedsService;
@@ -78,10 +79,11 @@ public class FeedsControllerImpl implements FeedsInterface {
     )
             throws  IOException {
 
-        Pageable pageable = feedsService.generatePageableObjectByServlet(httpServletRequest);
+        FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
+        Pageable pageable = feedsRequest.getPageable();
         String text = feedsService.getText(httpServletRequest);
 
-        return feedsService.getObjectResponseEntity(pageable, text, isTestString.equals("{true}"));
+        return feedsService.getObjectResponseEntity(feedsRequest, isTestString.equals("{true}"));
     }
 
 
@@ -164,15 +166,17 @@ public class FeedsControllerImpl implements FeedsInterface {
     public ResponseEntity<CommentResponse> getAllCommentsToPost(@PathVariable long id,
                                                                 HttpServletRequest httpServletRequest)
             throws JsonProcessingException {
-        Pageable pageable = feedsService.generatePageableObjectByServlet(httpServletRequest);
-        return  feedsService.getComments(id,pageable,isTestString.equals("{true}"));
+        FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
+        Pageable pageable = feedsRequest.getPageable();
+        return  feedsService.getComments(id,feedsRequest,isTestString.equals("{true}"));
     }
 
     @GetMapping("/api/v1/post/{id}/comment/{commentId}/subcomment")
     public ResponseEntity<CommentResponse> getAllSubComments(@PathVariable long id, @PathVariable long commentId,
                                                     HttpServletRequest httpServletRequest)
             throws JsonProcessingException {
-        Pageable pageable = feedsService.generatePageableObjectByServlet(httpServletRequest);
-        return feedsService.getSubComments(id,commentId,pageable, isTestString.equals("{true}"));
+        FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
+        Pageable pageable = feedsRequest.getPageable();
+        return feedsService.getSubComments(id,commentId,feedsRequest, isTestString.equals("{true}"));
     }
 }
