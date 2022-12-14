@@ -27,6 +27,7 @@ import ru.skillbox.repository.PersonRepository;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.repository.TagRepository;
+import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponseOK;
 import ru.skillbox.service.FeedsService;
@@ -67,7 +68,7 @@ public class FeedsServiceTest extends TestCase {
 
     @Before
     @Override
-    public void setUp() throws Exception {
+    public void setUp() {
 
         Person person = new Person();
 
@@ -116,7 +117,7 @@ public class FeedsServiceTest extends TestCase {
 
     @After
     @Override
-    public void tearDown() throws Exception {
+    public void tearDown() {
         postRepository.deleteAll();
         postRepository.flush();
         personRepository.deleteAll();
@@ -132,8 +133,8 @@ public class FeedsServiceTest extends TestCase {
             Long postId = postRepository.findAll().get(0).getId();
             String timeString = AdditionalFunctions.getTimeString();
             Pageable pageable = PageRequest.of(0, 5, Sort.by("time").descending());
-
-            ResponseEntity<FeedsResponseOK> response = feedsService.getObjectResponseEntity(pageable,null,
+            FeedsRequest feedsRequest = new FeedsRequest(pageable);
+            ResponseEntity<FeedsResponseOK> response = feedsService.getObjectResponseEntity(feedsRequest,
                     isTestString.equals("{true}"));
             FeedsResponseOK responseBody = AdditionalFunctions.correctContent(response.getBody(),timeString);
 
@@ -154,8 +155,9 @@ public class FeedsServiceTest extends TestCase {
                 .collect(Collectors.toList()).get(0).getId();
         String timeString = AdditionalFunctions.getTimeString();
         Pageable pageable = PageRequest.of(0, 5, Sort.by("time").descending());
+        FeedsRequest feedsRequest = new FeedsRequest(pageable);
         ResponseEntity<CommentResponse> response = feedsService
-                .getComments(postId,pageable,isTestString.equals("{true}"));
+                .getComments(postId,feedsRequest,isTestString.equals("{true}"));
         CommentResponse responseBody = AdditionalFunctions.correctCommentContent(response.getBody(),timeString);
         JSONParser parser = new JSONParser();
         ObjectMapper mapper = new ObjectMapper();
@@ -177,8 +179,8 @@ public class FeedsServiceTest extends TestCase {
         Long subCommentId = postCommentRepository.findAll().stream()
                 .filter(postComment -> postComment.getParentId()!=0)
                 .collect(Collectors.toList()).get(0).getId();
-
-        ResponseEntity<CommentResponse> response = feedsService.getSubComments(postId,postCommentId,pageable,
+        FeedsRequest feedsRequest = new FeedsRequest(pageable);
+        ResponseEntity<CommentResponse> response = feedsService.getSubComments(postId,postCommentId,feedsRequest,
                 isTestString.equals("{true}"));
         CommentResponse responseBody = AdditionalFunctions.correctCommentContent(response.getBody(),timeString);
         JSONParser parser = new JSONParser();

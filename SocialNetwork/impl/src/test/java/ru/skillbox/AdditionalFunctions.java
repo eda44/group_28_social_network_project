@@ -148,7 +148,7 @@ public class AdditionalFunctions {
                 "  \"totalElements\": 1," +
                 "  \"totalPages\": 1," +
                 "  \"number\": 0," +
-                "  \"size\": 5," +
+                "  \"size\": 2," +
                 "  \"content\": [" +
                 "    {" +
                 "      \"id\": " + subCommentId + "," +
@@ -182,7 +182,7 @@ public class AdditionalFunctions {
                 "      \"unsorted\": false," +
                 "      \"sorted\": true" +
                 "    }," +
-                "    \"pageSize\": 5," +
+                "    \"pageSize\": 2," +
                 "    \"pageNumber\": 0," +
                 "    \"paged\": true," +
                 "    \"unpaged\": false" +

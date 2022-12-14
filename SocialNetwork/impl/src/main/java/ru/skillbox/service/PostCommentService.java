@@ -9,7 +9,8 @@ import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.request.CommentAddRequest;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class PostCommentService {
@@ -34,9 +35,14 @@ public class PostCommentService {
         PostComment postComment = new PostComment();
         postComment.setCommentText(request.getCommentText());
         postComment.setPerson(personService.getCurrentPerson());
-        postComment.setParentId(0L);
+        if(request.getParentId()!=null) {
+            postComment.setParentId(request.getParentId());
+        } else {
+            postComment.setParentId(0L);
+        }
         postComment.setPost(post);
-        postComment.setTime(new Date().getTime());
+        postComment.setTime(LocalDateTime.now()
+                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
         postComment.setIsDelete(false);
         postComment.setIsBlocked(false);
         postCommentRepository.save(postComment);
@@ -47,10 +53,9 @@ public class PostCommentService {
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = getPostCommentById(Long.parseLong(commentId));
         if (post.getPostCommentList().contains(postComment)) {
-            postCommentRepository.delete(postComment);
+            postComment.setIsDelete(true);
+            postCommentRepository.saveAndFlush(postComment);
             logger.info("deleting comment № " + postComment.getId());
-            post.getPostCommentList().remove(postComment);
-            postService.savePost(post);
         }
     }
 
@@ -61,8 +66,12 @@ public class PostCommentService {
             postComment.setCommentText(request.getCommentText());
             postComment.setPerson(personService.getCurrentPerson());
             postComment.setPost(post);
-            postComment.setTime(request.getTime());
-            postComment.setIsBlocked(request.getIsBlocked());
+            if(request.getTime()!=null) {
+                postComment.setTime(request.getTime());
+            }
+            if(request.getIsBlocked()!=null) {
+                postComment.setIsBlocked(request.getIsBlocked());
+            }
             postComment.setIsDelete(false);
             postCommentRepository.save(postComment);
             logger.info("updating comment № " + postComment.getId());
