@@ -9,8 +9,8 @@ public enum PersonSpecificationRoot {
     LAST_NAME("lastName"),
     BIRTH_DATE("birthDate"),
     IS_ENABLED("isEnabled"),
-    COUNTRY_ID("countryId"),
-    CITY_ID("cityId");
+    COUNTRY("country"),
+    CITY("city");
     private final String value;
 
     PersonSpecificationRoot(String value) {

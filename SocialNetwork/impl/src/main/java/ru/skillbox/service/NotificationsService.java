@@ -1,24 +1,24 @@
 package ru.skillbox.service;
 
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.AccountDto;
 import ru.skillbox.dto.enums.NameNotification;
+import ru.skillbox.mapper.AccountMapper;
 import ru.skillbox.model.Person;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.request.settings.NotificationInputDto;
 import ru.skillbox.response.settings.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NotificationsService {
 
-    @Autowired
     private final PersonService personService;
 
     public NotificationSentDto getNotifications(){
@@ -48,7 +48,7 @@ public class NotificationsService {
                         post.getTitle(),
                         post.getTime().toString(),
                         NameNotification.POST,
-                        AccountDto.getBase(person)));
+                        AccountMapper.INSTANCE.personToAccountDto(person)));
             }
         }
         if (person.getSettingsNotification().isPostComment()) {
@@ -57,7 +57,7 @@ public class NotificationsService {
                         postComment.getCommentText(),
                         postComment.getTime().toString(),
                         NameNotification.POST_COMMENT,
-                        AccountDto.getBase(person)));
+                        AccountMapper.INSTANCE.personToAccountDto(person)));
             }
         }
 

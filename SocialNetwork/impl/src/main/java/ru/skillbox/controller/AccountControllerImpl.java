@@ -3,20 +3,14 @@ package ru.skillbox.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.skillbox.dto.AbstractDto;
 import ru.skillbox.exception.UserNotFoundException;
+import ru.skillbox.mapper.AccountMapper;
+import ru.skillbox.model.Account;
 import ru.skillbox.request.account.AccountEditRq;
 import ru.skillbox.request.account.AccountRecoveryRequest;
 import ru.skillbox.response.account.RecoveryAccountRs;
-import ru.skillbox.model.Account;
 import ru.skillbox.service.AccountService;
 import ru.skillbox.service.PersonService;
 import ru.skillbox.service.SearchPersonService;
@@ -84,10 +78,10 @@ public class AccountControllerImpl implements Account {
     }
 
     @Override
-    @GetMapping("account/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable long id) {
         try {
-            return ResponseEntity.ok(searchService.getPersonById(id));
+            return ResponseEntity.ok(AccountMapper.INSTANCE.personToAccountDto(personService.getPersonById(id)));
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body("");//TODO: исправить
         }

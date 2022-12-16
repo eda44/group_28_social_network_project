@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.config.CloudinaryConfig;
-import ru.skillbox.dto.CityDto;
-import ru.skillbox.dto.CountryDto;
 import ru.skillbox.dto.enums.StatusCode;
-import ru.skillbox.model.*;
+import ru.skillbox.model.FeedsInterface;
+import ru.skillbox.model.Friendship;
 import ru.skillbox.repository.CountryRepository;
 import ru.skillbox.repository.FriendsRepository;
 import ru.skillbox.repository.PersonRepository;
@@ -23,7 +22,6 @@ import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponseOK;
 import ru.skillbox.service.FeedsService;
-import ru.skillbox.service.GeoService;
 import ru.skillbox.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,8 +34,6 @@ public class FeedsControllerImpl implements FeedsInterface {
 
 
     private final FeedsService feedsService;
-
-    private final GeoService geoService;
 
     private PostRepository postRepository;
 
@@ -60,8 +56,7 @@ public class FeedsControllerImpl implements FeedsInterface {
                                CountryRepository countryRepository, FriendsRepository friendsRepository,
                                UserService userService,
                                CloudinaryConfig config,
-                               PersonRepository personRepository,
-                               GeoService geoService) {
+                               PersonRepository personRepository) {
         this.postRepository = postRepository;
         this.userService = userService;
         this.feedsService = feedsService;
@@ -69,7 +64,6 @@ public class FeedsControllerImpl implements FeedsInterface {
         this.friendsRepository = friendsRepository;
         this.config = config;
         this.personRepository = personRepository;
-        this.geoService = geoService;
     }
 
     @Override
@@ -86,68 +80,6 @@ public class FeedsControllerImpl implements FeedsInterface {
         return feedsService.getObjectResponseEntity(feedsRequest, isTestString.equals("{true}"));
     }
 
-
-    @GetMapping("/api/v1/geo/countries")
-    public ResponseEntity<List<CountryDto>> getCountries(){
-        return geoService.getCountries();
-    }
-
-
-    @GetMapping("api/v1/geo/cities/{countryId}")
-    public ResponseEntity<List<CityDto>> getCities(@PathVariable long countryId){
-        return geoService.getCities(countryId);
-    }
-
-
-    //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере
-    @GetMapping("/api/v1/account/{id}")
-    public ResponseEntity<Object> getOne(@PathVariable long id){
-        Person person = personRepository.findById(id).get();
-        return
-                ResponseEntity.ok("{\n" +
-                "  \"id\": " + person.getId() + ",\n" +
-                "  \"email\": \"" + person.getEmail() + "\",\n" +
-                "  \"phone\": \"" + person.getPhone() + "\",\n" +
-                "  \"photo\": \"\",\n" +
-                "  \"about\": \"" + person.getAbout() + "\",\n" +
-                "  \"city\": \"string\",\n" +
-                "  \"country\": \"string\",\n" +
-                "  \"token\": \"string\",\n" +
-                "  \"statusCode\": \"FRIEND\",\n" +
-                "  \"firstName\": \"" + person.getFirstName() +  "\",\n" +
-                "  \"lastName\": \"" + person.getLastName() + "\",\n" +
-                "  \"regDate\": \"2022-11-16T05:00:33.669Z\",\n" +
-                "  \"birthDate\": \"2022-11-16T05:00:33.669Z\",\n" +
-                "  \"messagePermission\": \"string\",\n" +
-                "  \"lastOnlineTime\": \"2022-11-16T05:00:33.669Z\",\n" +
-                "  \"isOnline\": true,\n" +
-                "  \"isBlocked\": false,\n" +
-                "  \"isDeleted\": false,\n" +
-                "  \"photoId\": \"string\",\n" +
-                "  \"photoName\": \"string\",\n" +
-                "  \"role\": \"USER\",\n" +
-                "  \"createdOn\": \"2022-11-16T05:00:33.669Z\",\n" +
-                "  \"updatedOn\": \"2022-11-16T05:00:33.669Z\",\n" +
-                "  \"password\": \"string\"\n" +
-                "}");
-    }
-
-
-    //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере
-    /*@GetMapping("/api/v1/dialogs/unreaded")
-    public  String uneaded(){
-        return "{\n" +
-                "  \"error\": \"Неверный запрос\",\n" +
-                "  \"timestamp\": 1644234125,\n" +
-                "  \"data\": {\n" +
-                "    \"count\": 10\n" +
-                "  },\n" +
-                "  \"error_description\": \"Неверный код авторизации\"\n" +
-                "}";
-    }*/
-
-
-    //FixMe: Убрать, когда будет написан код в соответствующем сервисе/контроллере
     @GetMapping("/api/v1/friends/count")
     public ResponseEntity countF(){
         Long myId = userService.getCurrentUser().getId();

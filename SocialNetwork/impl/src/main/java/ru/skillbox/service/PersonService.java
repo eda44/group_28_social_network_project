@@ -1,7 +1,6 @@
 package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import ru.skillbox.model.Person;
 import ru.skillbox.model.SettingsNotification;
 import ru.skillbox.model.User;
 import ru.skillbox.repository.PersonRepository;
-
 import ru.skillbox.repository.SettingNotificationRepository;
 import ru.skillbox.request.RegistrationRequest;
 
@@ -22,10 +20,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PersonService {
 
-    @Autowired
     private final PersonRepository personRepository;
 
-    @Autowired
     private final SettingNotificationRepository repositorySettings;
 
 
@@ -42,20 +38,23 @@ public class PersonService {
         person.setId(user.getId());
         person.setEmail(user.getEmail());
         person.setRegDate(new Date().getTime());
-        person.setFirstName(request.getFirstName());
-        person.setLastName(request.getLastName());
+        person.setFirstName(request.getFirstName().trim());
+        person.setLastName(request.getLastName().trim());
         person.setIsEnabled(true);
         person.setIsBlocked(false);
         person.setIsApproved(true);
         person.setMessagePermission(MessagePermission.ALL);
         person.setLastOnlineTime(new Date().getTime());
-        person.setSettingsNotification(myMetod(person.getId()));
+        person.setSettingsNotification(setSettings(person.getId()));
         personRepository.save(person);
     }
 
     public Person getCurrentPerson() {
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return getPersonByEmail(email);
+        Person current = getPersonByEmail(email);
+        current.setLastOnlineTime(new Date().getTime());
+        savePerson(current);
+        return current;
     }
 
     public void savePerson(Person person) {
@@ -70,24 +69,7 @@ public class PersonService {
         return person.get();
     }
 
-    public Person setPerson() {
-        Person person = new Person();
-        person.setPhoto("my_image.png");
-        person.setPhone("9999999999");
-        person.setMessagePermission(MessagePermission.ALL);
-        person.setEmail("email");
-        person.setAbout("about");
-        person.setLastName("last");
-        person.setIsBlocked(false);
-        person.setIsApproved(true);
-        person.setFirstName("first");
-        person.setConfirmationCode("1111");
-        person.setRegDate(48485151L);
-        person.setBirthDate(55454615L);
-        return person;
-    }
-
-    public SettingsNotification myMetod(Long personId) {
+    public SettingsNotification setSettings(Long personId) {
         SettingsNotification setting = new SettingsNotification();
         setting.setId(personId);
         setting.setFriendRequest(true);

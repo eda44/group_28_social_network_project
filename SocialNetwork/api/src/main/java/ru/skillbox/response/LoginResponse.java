@@ -1,27 +1,24 @@
 package ru.skillbox.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
-import ru.skillbox.dto.AccountDto;
-import ru.skillbox.model.Person;
 
 import java.util.Date;
 @Builder
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginResponse {
     private String error;
     private Long timestamp;
-    private AccountDto data;
     @JsonProperty("error_description")
     private String errorDescription;
     private String accessToken;
     private String tokenType;
 
-    public static LoginResponse getOkResponse(Person person, String token){
+    public static LoginResponse getOkResponse(String token){
         return LoginResponse.builder()
-                .timestamp(new Date().getTime())
-                .data(AccountDto.getCorrectRsLogin(person))
                 .accessToken(token)
                 .tokenType("Bearer")
                 .build();
