@@ -29,9 +29,7 @@ import java.util.List;
 public class AuthService {
     private final UserService userService;
     private final EmailService emailService;
-    private final PersonService personService;
     private final AuthenticationManager authenticationManager;
-
     private final JwtTokenProvider jwtTokenProvider;
 
     public LoginResponse login(LoginRequest request) throws UsernameNotFoundException {
@@ -45,7 +43,7 @@ public class AuthService {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(authentication);
         String jwt = jwtTokenProvider.createToken(authentication.getName(), "ROLE_USER");
-        return LoginResponse.getOkResponse(personService.getPersonByEmail(request.getEmail()), jwt);
+        return LoginResponse.getOkResponse(jwt);
     }
 
     public PasswordRecoveryResponse passwordRecovery(PasswordRecoveryRequest request) throws EmailNotFoundException {

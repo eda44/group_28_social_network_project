@@ -1,6 +1,5 @@
 package ru.skillbox.dto;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,5 +9,4 @@ public class CountryDto {
 
     private Integer id;
     private String title;
-//    private CityDto[] cities;
 }

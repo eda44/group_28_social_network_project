@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
                 .csrf().disable()
-                //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 //.and()
                 .authorizeRequests()
                 .antMatchers("/**").permitAll()

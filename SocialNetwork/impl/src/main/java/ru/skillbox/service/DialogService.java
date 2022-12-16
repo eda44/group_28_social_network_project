@@ -60,8 +60,10 @@ public class DialogService {
             /*MessageDto messageDto = !messages.isEmpty()
                     ? dialogMapper.toDto(messages.get(messages.size() - 1))
                     : MessageDto.builder().build();*/
+            if (!messages.isEmpty()){
+                dialog.setLastMessage(messages.get(messages.size() - 1));//TODO заглушка
+            }
 
-            dialog.setLastMessage(messages.get(messages.size() - 1));//TODO заглушка
 
             dialogDtoList.add(dialogMapper.DialogToDto(dialog));
         }
