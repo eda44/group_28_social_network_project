@@ -18,4 +18,18 @@ public class NotificationDataRs {
     @JsonProperty(value = "notificationType")
     private NameNotification notificationType;
     private String sentTime;
+
+    public static NotificationDataRs setNotificationDataRs(Long id,
+                                                           AccountDto accountDto,
+                                                           String content,
+                                                           NameNotification nameNotification,
+                                                           String sentTime){
+        NotificationDataRs notificationDataRs = new NotificationDataRs();
+        notificationDataRs.setId(id);
+        notificationDataRs.setAuthor(accountDto);
+        notificationDataRs.setContent(content);
+        notificationDataRs.setNotificationType(nameNotification);
+        notificationDataRs.setSentTime(sentTime);
+        return notificationDataRs;
+    }
 }
