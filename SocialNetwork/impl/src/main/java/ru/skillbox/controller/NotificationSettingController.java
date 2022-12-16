@@ -7,10 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.request.settings.NotificationInputDto;
 import ru.skillbox.request.settings.SettingRq;
-import ru.skillbox.response.settings.NotificationSentDto;
-import ru.skillbox.response.settings.DefaultRs;
-import ru.skillbox.response.settings.NotificationSettingsDto;
-import ru.skillbox.response.settings.SettingsDto;
+import ru.skillbox.response.settings.*;
 import ru.skillbox.service.NotificationsService;
 import ru.skillbox.service.SettingService;
 
@@ -66,26 +63,17 @@ public class NotificationSettingController {
         logger.info("getNotification " + notificationsService
                 .getNotifications()
                 .getTimeStamp());
-        logger.info("проверка " + settingService.getSetting().getUserId());
+//        logger.info("проверка " + settingService.getSetting().getUserId());
         return ResponseEntity.ok(notificationsService.getNotifications());
     }
 
     @PostMapping("/notifications")
     public ResponseEntity<?> createNotification(@RequestBody NotificationInputDto notif){
-        return ResponseEntity.ok("{\n" +
-                "  \"userId\": 4,\n" +
-                "  \"nameNotification\": \"FRIEND_REQUEST\",\n" +
-                "  \"content\": \"что-то пришло\"\n" +
-                "}");
+        return ResponseEntity.ok(notificationsService.getNotification(notif));
     }
 
     @GetMapping("/notifications/count")
-    public ResponseEntity<Object> getNotificationCount(){
-        return ResponseEntity.ok("{\n" +
-                "  \"timestamp\": 1,\n" +
-                "  \"data\": {\n" +
-                "    \"count\": 1\n" +
-                "  }\n" +
-                "}");
+    public ResponseEntity<NotificationCountRs> getNotificationCount(){
+        return ResponseEntity.ok(notificationsService.notificationCount());
     }
 }
