@@ -1,136 +1,110 @@
 package ru.skillbox.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+import ru.skillbox.model.FriendsController;
+import ru.skillbox.model.User;
+import ru.skillbox.response.FriendshipResponse;
+import ru.skillbox.response.MakeFriendResponse;
+import ru.skillbox.service.FriendshipService;
+import ru.skillbox.service.UserService;
 
+import java.util.ArrayList;
+
+@AllArgsConstructor
 @RestController
-@RequestMapping("/api/v1")
-public class FriendsControllerImpl {
+@Slf4j
+public class FriendsControllerImpl implements FriendsController {
+    private FriendshipService friendshipService;
+    private final UserService userService;
 
-    @GetMapping("/friends")
-    public ResponseEntity<String> getAllFriends() {
+//    @Override
+//    public FriendshipResponse getFriends(String name, Integer offset, Integer itemPerPage) {
+//        String currentUser = userService.getCurrentUser().getEmail();
+//        return friendshipService.searchFriends(currentUser, name, offset, itemPerPage);
+//    }
 
-        return createResponse();
+    @Override
+    public ResponseEntity<Page<FriendshipResponse>> getFriends() {
+        ArrayList<FriendshipResponse> list = new ArrayList<>();
+//        list.add(MyTest.builder()
+//                .id(2L)
+//                .photo("some photo url")
+//                .statusCode("FRIEND")
+//                .firstName("Second")
+//                .lastName("Last2")
+//                .city("City")
+//                .country("Country")
+//                .birthDate(1671180995432L)
+//                .isOnline(true)
+//                .build()
+//        );
+//        list.add(MyTest.builder()
+//                .id(3L)
+//                .photo("some photo url")
+//                .statusCode("FRIEND")
+//                .firstName("3")
+//                .lastName("Last3")
+//                .city("City")
+//                .country("Country")
+//                .birthDate(1671180995432L)
+//                .isOnline(true)
+//                .build()
+//        );
+//
+//        list.add(MyTest.builder()
+//                .id(4L)
+//                .photo("some photo url")
+//                .statusCode("FRIEND")
+//                .firstName("4")
+//                .lastName("Last4")
+//                .city("City")
+//                .country("Country")
+//                .birthDate(1671180995432L)
+//                .isOnline(true)
+//                .build()
+//        );
+
+        Page<FriendshipResponse> page = new PageImpl<>(list);
+        return ResponseEntity.ok(page);
     }
 
-    @GetMapping("/all.my.friends/{id}")
-    public ResponseEntity<String> getAllMyFriendship(@PathVariable String id) {
-        return ResponseEntity.ok("{\n" +
-                "  \"destPersonId\" : 1,\n" +
-                "  \"statusId\" : 5,\n" +
-                "  \"srcPersonId\" : 6,\n" +
-                "  \"id\" : 0,\n" +
-                "  \"status\" : {\n" +
-                "    \"code\" : \"FRIEND\",\n" +
-                "    \"id\" : 5,\n" +
-                "    \"time\" : 2\n" +
-                "  },\n" +
-                "  \"previousStatus\" : \"previousStatus\"\n" +
-                "}, {\n" +
-                "  \"destPersonId\" : 1,\n" +
-                "  \"statusId\" : 5,\n" +
-                "  \"srcPersonId\" : 6,\n" +
-                "  \"id\" : 0,\n" +
-                "  \"status\" : {\n" +
-                "    \"code\" : \"FRIEND\",\n" +
-                "    \"id\" : 5,\n" +
-                "    \"time\" : 2\n" +
-                "  },\n" +
-                "  \"previousStatus\" : \"previousStatus\"\n" +
-                "}");
-    }
-    @GetMapping("/friends/recommendations")
-    public ResponseEntity<String> getByRecommendation() {
-        return createResponse();
+    @Override
+    public MakeFriendResponse makeFriend(Long id) throws JsonProcessingException {
+
+        User currentUser = userService.getCurrentUser();
+        return friendshipService.makeFriend(currentUser.getId(), id);
     }
 
-    @PostMapping("/friends/subscribe/{id}")
-    public ResponseEntity<String> subscribe(@PathVariable String id){
-        return createAbstractResponse();
+    @Override
+    public MakeFriendResponse deleteFriend(Long id) throws JsonProcessingException {
+        User currentUser = userService.getCurrentUser();
+        return friendshipService.deleteFriend(currentUser, id);
     }
 
-    @PostMapping("/friends/{id}")
-    public ResponseEntity<String> addUserAsFriend(@PathVariable String id){
-        return createAbstractResponse();
+    @Override
+    public MakeFriendResponse subscribe(@PathVariable Long id) throws JsonProcessingException {
+        User currentUser = userService.getCurrentUser();
+        return friendshipService.subscribe(currentUser, id);
     }
 
-    @PutMapping("/friends/block/{id}")
-    public ResponseEntity<String> blockById(@PathVariable String id){
-        return createAbstractResponse();
+    @Override
+    public MakeFriendResponse block(Long id) throws JsonProcessingException {
+        User currentUser = userService.getCurrentUser();
+        return friendshipService.blockFriend(currentUser, id);
     }
 
-    @DeleteMapping("/friends/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable String id){
-        return ResponseEntity.ok("{\n" +
-                "  \"data\" : {\n" +
-                "    \"message\" : \"Ок\"\n" +
-                "  },\n" +
-                "  \"timestamp\" : 1644234125000\n" +
-                "}");
+    @Override
+    public FriendshipResponse recommendations(Integer offset, Integer itemPerPage) {
+//        User currentUser = userService.getCurrentUser();
+//        return friendshipService.searchRecommendations(currentUser, offset, itemPerPage);
+        return null;
     }
-
-    private ResponseEntity<String> createResponse(){
-        return ResponseEntity.ok("{\n" +
-                "  \"data\" : [ {\n" +
-                "    \"country\" : {\n" +
-                "      \"id\" : 1,\n" +
-                "      \"title\" : \"United States\"\n" +
-                "    },\n" +
-                "    \"city\" : {\n" +
-                "      \"id\" : 1,\n" +
-                "      \"title\" : \"Suchy Dab\"\n" +
-                "    },\n" +
-                "    \"birth_date\" : 702565308000,\n" +
-                "    \"about\" : \"Maecenas tristique...\",\n" +
-                "    \"photo\" : \"data:image/png;base64...\",\n" +
-                "    \"last_name\" : \"Siegertsz\",\n" +
-                "    \"reg_date\" : 1618070680000,\n" +
-                "    \"is_blocked\" : false,\n" +
-                "    \"message_permission\" : \"ALL\",\n" +
-                "    \"last_online_time\" : 1644234125000,\n" +
-                "    \"phone\" : \"+7 645 943 5082\",\n" +
-                "    \"id\" : 1,\n" +
-                "    \"is_online\" : true,\n" +
-                "    \"first_name\" : \"Davida\",\n" +
-                "    \"email\" : \"dsiegertsz0@fc2.com\",\n" +
-                "    \"statusCode\" : \"FRIEND\"\n" +
-                "  }, {\n" +
-                "    \"country\" : {\n" +
-                "      \"id\" : 1,\n" +
-                "      \"title\" : \"United States\"\n" +
-                "    },\n" +
-                "    \"city\" : {\n" +
-                "      \"id\" : 1,\n" +
-                "      \"title\" : \"Suchy Dab\"\n" +
-                "    },\n" +
-                "    \"birth_date\" : 702565308000,\n" +
-                "    \"about\" : \"Maecenas tristique...\",\n" +
-                "    \"photo\" : \"data:image/png;base64...\",\n" +
-                "    \"last_name\" : \"Siegertsz\",\n" +
-                "    \"reg_date\" : 1618070680000,\n" +
-                "    \"is_blocked\" : false,\n" +
-                "    \"message_permission\" : \"ALL\",\n" +
-                "    \"last_online_time\" : 1644234125000,\n" +
-                "    \"phone\" : \"+7 645 943 5082\",\n" +
-                "    \"id\" : 1,\n" +
-                "    \"is_online\" : true,\n" +
-                "    \"first_name\" : \"Davida\",\n" +
-                "    \"email\" : \"dsiegertsz0@fc2.com\",\n" +
-                "    \"statusCode\" : \"FRIEND\"\n" +
-                "  } ],\n" +
-                "  \"error_description\" : \"Неверные учетные данные\",\n" +
-                "  \"error\" : \"Неверный запрос\",\n" +
-                "  \"timestamp\" : 1644234125000\n" +
-                "}");
-    }
-
-    private ResponseEntity<String> createAbstractResponse(){
-        return ResponseEntity.ok("{\n" +
-                "  \"data\" : {\n" +
-                "    \"message\" : \"Ок\"\n" +
-                "  },\n" +
-                "  \"timestamp\" : 1644234125000\n" +
-                "}");
-    }
-
 }

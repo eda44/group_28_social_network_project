@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.config.CloudinaryConfig;
-import ru.skillbox.dto.enums.StatusCode;
 import ru.skillbox.model.FeedsInterface;
-import ru.skillbox.model.Friendship;
 import ru.skillbox.repository.CountryRepository;
 import ru.skillbox.repository.FriendsRepository;
 import ru.skillbox.repository.PersonRepository;
@@ -26,7 +24,6 @@ import ru.skillbox.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 
 @Log4j2
 @RestController
@@ -78,20 +75,6 @@ public class FeedsControllerImpl implements FeedsInterface {
         String text = feedsService.getText(httpServletRequest);
 
         return feedsService.getObjectResponseEntity(feedsRequest, isTestString.equals("{true}"));
-    }
-
-    @GetMapping("/api/v1/friends/count")
-    public ResponseEntity countF(){
-        Long myId = userService.getCurrentUser().getId();
-        List<Friendship> friendshipList = friendsRepository.findAll();
-        int count = 0;
-        for(Friendship friendship : friendshipList){
-            if (friendship.getDestPersonId().getId()==myId && friendship.getCode().equals(StatusCode.FRIEND)){
-                count++;
-            }
-        }
-
-        return ResponseEntity.ok(count);
     }
 
     @GetMapping("/api/v1/post/{id}/comment")
