@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class LikeService {
@@ -34,29 +35,30 @@ public class LikeService {
         this.postCommentService = postCommentService;
     }
 
-    public PostLike getLikeByPostIdAndPersonId(Long postId, Long personId) {
-        return postLikeRepository.findByPostIdAndPersonId(postId, personId).get();
+    public Optional<PostLike> getLikeByPostIdAndPersonId(Long postId, Long personId) {
+        return postLikeRepository.findByPostIdAndPersonId(postId, personId);
     }
 
-    public CommentLike getLikeByCommentIdAndPersonId(Long commentId, Long personId) {
-        return commentLikeRepository.findByCommentIdAndPersonId(commentId, personId).get();
+    public Optional<CommentLike> getLikeByCommentIdAndPersonId(Long commentId, Long personId) {
+        return commentLikeRepository.findByCommentIdAndPersonId(commentId, personId);
     }
 
     public void addPostLike(String id) {
         Post post = postService.getPostById(Long.parseLong(id));
-        if(isLiked(post.getId(),LikeType.POST)){
-            PostLike postLike = getLikeByPostIdAndPersonId(post.getId(),personService.getCurrentPerson().getId());
+        Optional<PostLike> postLikeOptional = getLikeByPostIdAndPersonId(post.getId(),
+                personService.getCurrentPerson().getId());
+        if(postLikeOptional.isPresent()){
+            PostLike postLike = postLikeOptional.get();
             postLike.setIsDelete(!postLike.getIsDelete());
             postLikeRepository.saveAndFlush(postLike);
             logger.info("saving postLike");
         } else {
             PostLike postLike = new PostLike();
             postLike.setTime(LocalDateTime.now()
-                    .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                    .toEpochSecond(ZoneOffset.UTC));
             postLike.setPost(post == null ? new Post() : post);
             postLike.setPerson(personService.getCurrentPerson() == null ? new Person() :
                     personService.getCurrentPerson());
-            Objects.requireNonNull(post).setPostLikes(List.of(postLike));
             postLike.setIsDelete(false);
             postLikeRepository.saveAndFlush(postLike);
             logger.info("saving postLike");
@@ -66,9 +68,10 @@ public class LikeService {
     public void addCommentLike(String id, String commentId) {
         Post post = postService.getPostById(Long.parseLong(id));
         PostComment postComment = postCommentService.getPostCommentById(Long.parseLong(commentId));
-        if(isLiked(postComment.getId(),LikeType.COMMENT)){
-            CommentLike commentLike = getLikeByCommentIdAndPersonId(postComment.getId(),
+        Optional<CommentLike> commentLikeOptional = getLikeByCommentIdAndPersonId(postComment.getId(),
                 personService.getCurrentPerson().getId());
+        if(commentLikeOptional.isPresent()){
+            CommentLike commentLike = commentLikeOptional.get();
             commentLike.setIsDelete(!commentLike.getIsDelete());
             commentLikeRepository.saveAndFlush(commentLike);
             logger.info("saving commentLike");
@@ -78,7 +81,7 @@ public class LikeService {
             commentLike.setPerson(personService.getCurrentPerson() == null ?
                     new Person() : personService.getCurrentPerson());
             commentLike.setTime(LocalDateTime.now()
-                    .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                    .toEpochSecond(ZoneOffset.UTC));
             commentLike.setIsDelete(false);
             commentLikeRepository.saveAndFlush(commentLike);
             postService.savePost(post);
@@ -88,26 +91,25 @@ public class LikeService {
 
     public void deletePostLike(String id) {
         Post post = postService.getPostById(Long.parseLong(id));
-        List<PostLike> postLikes = post.getPostLikes();
-        if (!postLikes.isEmpty() && isLiked(Long.valueOf(id), LikeType.POST)) {
-            for (PostLike postLike : postLikes) {
+        Optional<PostLike> postLikeOptional = getLikeByPostIdAndPersonId(post.getId(),
+                personService.getCurrentPerson().getId());
+        if (postLikeOptional.isPresent()) {
+                PostLike postLike = postLikeOptional.get();
                 postLike.setIsDelete(!postLike.getIsDelete());
                 postLikeRepository.saveAndFlush(postLike);
                 logger.info("deleting postLike");
-            }
         }
     }
 
     public void deleteCommentLike(String id, String commentId) {
-        Post post = postService.getPostById(Long.parseLong(id));
         PostComment comment = postCommentService.getPostCommentById(Long.parseLong(commentId));
-        logger.info(post.getPostCommentList().size());
-        if (post.getPostCommentList().contains(comment) && isLiked(Long.valueOf(commentId), LikeType.COMMENT)) {
-            for (CommentLike commentLike : comment.getCommentLikes()) {
+        Optional<CommentLike> commentLikeOptional = getLikeByCommentIdAndPersonId(comment.getId(),
+                personService.getCurrentPerson().getId());
+        if (commentLikeOptional.isPresent()) {
+                CommentLike commentLike = commentLikeOptional.get();
                 commentLike.setIsDelete(!commentLike.getIsDelete());
                 commentLikeRepository.saveAndFlush(commentLike);
                 logger.info("deleting commentLike");
-            }
         }
     }
 
