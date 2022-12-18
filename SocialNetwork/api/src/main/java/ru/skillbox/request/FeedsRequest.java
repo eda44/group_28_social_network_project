@@ -25,6 +25,10 @@ public class FeedsRequest {
     private String author;
     private Pageable pageable;
 
+    private Boolean withFriends;
+
+    private Long accountId;
+
     private HttpServletRequest httpServletRequest;
 
 
@@ -37,6 +41,24 @@ public class FeedsRequest {
         this.isDelete = getIsDelete(httpServletRequest);
         this.author = getAuthor(httpServletRequest);
         this.tags = getTags(httpServletRequest);
+        this.withFriends = getWithFriends(httpServletRequest);
+        this.accountId = getAccountId(httpServletRequest);
+    }
+
+    private Long getAccountId(HttpServletRequest httpServletRequest) {
+        String accountIdString = httpServletRequest.getParameter("accountIds");
+        if(accountIdString != null){
+            return Long.parseLong(accountIdString);
+        }
+        return null;
+    }
+
+    private Boolean getWithFriends(HttpServletRequest httpServletRequest) {
+        String withFriendsString = httpServletRequest.getParameter("withFriends");
+        if(withFriendsString != null) {
+            return  Boolean.parseBoolean(withFriendsString);
+        }
+        return null;
     }
 
     public FeedsRequest(Pageable pageable) {
@@ -77,7 +99,7 @@ public class FeedsRequest {
     private boolean getIsDelete(HttpServletRequest httpServletRequest) {
         String isDeleteString = httpServletRequest.getParameter("isDelete");
         if(isDeleteString != null) {
-            return  Boolean.getBoolean(isDeleteString);
+            return  Boolean.parseBoolean(isDeleteString);
         }
         return false;
     }

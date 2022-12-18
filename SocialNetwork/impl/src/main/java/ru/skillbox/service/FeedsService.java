@@ -14,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.dto.enums.Type;
 import ru.skillbox.mapper.PostCommentMapper;
 import ru.skillbox.mapper.PostMapper;
+import ru.skillbox.model.Person;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.model.Tag;
+import ru.skillbox.repository.PersonRepository;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.repository.TagRepository;
@@ -36,6 +38,8 @@ import java.util.List;
 public class FeedsService {
     private PostRepository postRepository;
 
+    private PersonRepository personRepository;
+
     private PostCommentRepository postCommentRepository;
 
     private TagRepository tagRepository;
@@ -46,11 +50,13 @@ public class FeedsService {
     public FeedsService(PostRepository postRepository,
                         PostCommentRepository postCommentRepository,
                         PersonService personService,
-                        TagRepository tagRepository) {
+                        TagRepository tagRepository,
+                        PersonRepository personRepository) {
         this.postRepository = postRepository;
         this.personService = personService;
         this.postCommentRepository = postCommentRepository;
         this.tagRepository = tagRepository;
+        this.personRepository = personRepository;
     }
 
     public void updatePostType(){
@@ -96,36 +102,65 @@ public class FeedsService {
 
     private Specification<Post> generatePostSpecification(FeedsRequest feedsRequest) {
         PostSpecification spec = new PostSpecification();
-        Specification<Post> postSpec = spec;
-        postSpec = getPostSpecificationByDate(feedsRequest, spec, postSpec);
-        postSpec = postSpec.and(spec.getPostsByIsDelete(feedsRequest.getIsDelete()));
-        postSpec = postSpec.and(spec.getPostsByType(Type.POSTED));
-        postSpec = getPostSpecificationByText(feedsRequest, spec, postSpec);
-        postSpec = getPostSpecificationByTags(feedsRequest, spec, postSpec);
-        postSpec = getPostSpecificationByAuthor(feedsRequest, spec, postSpec);
-        return postSpec;
+        return getPostSpecificationByDate(feedsRequest, spec)
+                .and(spec.getPostsByIsDelete(feedsRequest.getIsDelete()))
+                .and(spec.getPostsByType(Type.POSTED))
+                .and(getPostSpecificationByAccountId(feedsRequest, spec))
+                .and(getPostSpecificationByFriends(feedsRequest,spec))
+                .and(getPostSpecificationByText(feedsRequest, spec))
+                .and(getPostSpecificationByTags(feedsRequest, spec))
+                .and(getPostSpecificationByAuthor(feedsRequest, spec));
     }
 
-    private static Specification<Post> getPostSpecificationByAuthor(FeedsRequest feedsRequest, PostSpecification spec,
-                                                                    Specification<Post> postSpec) {
+    private static Specification<Post> getPostSpecificationByAccountId(FeedsRequest feedsRequest,
+                                                                       PostSpecification spec) {
+        Specification<Post> accountSpec = spec;
+        if(feedsRequest.getAccountId()!=null) {
+            accountSpec = accountSpec.and(spec.getPostsByPersonId(feedsRequest.getAccountId()));
+        }
+        return accountSpec;
+    }
+
+
+
+    private Specification<Post> getPostSpecificationByFriends(FeedsRequest feedsRequest,
+                                                                      PostSpecification spec) {
+           Specification<Post> result = spec;
+           if(feedsRequest.getWithFriends()!=null && feedsRequest.getWithFriends().equals(true)){
+               //FixMe: Заменить репозиторий на сервис, возвращающий друзей
+               List<Long> friendIds = getFriendIds(personRepository);
+               result = result.and(spec.getPostsByPersonIds(friendIds));
+           }
+           return result;
+    }
+
+    //FixMe: Заменить репозиторий на сервис, возвращающий друзей. Подкорректировать логику получения id
+    private static List<Long> getFriendIds(PersonRepository personRepository) {
+           List<Long> ids = new ArrayList<>();
+           List<Person> people = personRepository.findAll();
+           for(Person person : people){
+               ids.add(person.getId());
+           }
+        return ids;
+    }
+
+    private static Specification<Post> getPostSpecificationByAuthor(FeedsRequest feedsRequest, PostSpecification spec) {
         Specification<Post> authSpec = spec;
            if(feedsRequest.getAuthor()!=null) {
             String[] names = feedsRequest.getAuthor().split(" ");
             if(names.length > 1){
-                authSpec = authSpec.or(spec.getPostsByTwoNames(names[0],names[1]));
-                authSpec = authSpec.or(spec.getPostsByTwoNames(names[1],names[0]));
+                authSpec = authSpec.or(spec.getPostsByTwoNames(names[0],names[1]))
+                                    .or(spec.getPostsByTwoNames(names[1],names[0]));
 
             } else {
-                authSpec = authSpec.or(spec.getPostsByFirstName(names[0]));
-                authSpec = authSpec.or(spec.getPostsByLastName(names[0]));
+                authSpec = authSpec.or(spec.getPostsByFirstName(names[0]))
+                                    .or(spec.getPostsByLastName(names[0]));
             }
-            postSpec = postSpec.and(authSpec);
         }
-        return postSpec;
+        return authSpec;
     }
 
-    private Specification<Post> getPostSpecificationByTags(FeedsRequest feedsRequest, PostSpecification spec,
-                                                           Specification<Post> postSpec) {
+    private Specification<Post> getPostSpecificationByTags(FeedsRequest feedsRequest, PostSpecification spec) {
         Specification<Post> tagsSpec = spec;
            if(feedsRequest.getTags()!=null){
             List<Tag> tags = new ArrayList<>();
@@ -138,35 +173,33 @@ public class FeedsService {
                 for(Tag tag : tags) {
                     tagsSpec = tagsSpec.or(spec.getPostsByTag(tag));
                 }
-                postSpec = postSpec.and(tagsSpec);
             }
         }
-        return postSpec;
+        return tagsSpec;
     }
 
-    private static Specification<Post> getPostSpecificationByText(FeedsRequest feedsRequest, PostSpecification spec,
-                                                                  Specification<Post> postSpec) {
+    private static Specification<Post> getPostSpecificationByText(FeedsRequest feedsRequest, PostSpecification spec) {
         Specification<Post> wordSpec = spec;
         if(feedsRequest.getWords()!=null){
             for(String word : feedsRequest.getWords()){
                 wordSpec = wordSpec.or(spec.getPostsByTitleOrText(word));
             }
-            postSpec = postSpec.and(wordSpec);
+
         }
-        return postSpec;
+        return wordSpec;
     }
 
-    private static Specification<Post> getPostSpecificationByDate(FeedsRequest feedsRequest, PostSpecification spec,
-                                                                  Specification<Post> postSpec) {
+    private static Specification<Post> getPostSpecificationByDate(FeedsRequest feedsRequest, PostSpecification spec) {
+           Specification<Post> result = spec;
         if(feedsRequest.getDateTo()!=null){
-            postSpec = postSpec.and(spec.getPostsByDateTo(feedsRequest.getDateTo()));
+            result = result.and(spec.getPostsByDateTo(feedsRequest.getDateTo()));
             log.debug("DateTo={}",feedsRequest.getDateTo());
         }
         if(feedsRequest.getDateFrom()!=null){
-            postSpec = postSpec.and(spec.getPostsByDateFrom(feedsRequest.getDateFrom()));
+            result = result.and(spec.getPostsByDateFrom(feedsRequest.getDateFrom()));
             log.debug("DateFrom={}",feedsRequest.getDateFrom());
         }
-        return postSpec;
+        return result;
     }
 
     private void fillPostDtoList(long currentUserId, List<Post> posts, List<PostDto> postDtoList) {

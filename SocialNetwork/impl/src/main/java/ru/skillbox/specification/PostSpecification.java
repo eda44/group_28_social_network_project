@@ -9,6 +9,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.List;
 
 
 public class PostSpecification implements Specification<Post>{
@@ -41,6 +42,18 @@ public class PostSpecification implements Specification<Post>{
 
     public Specification<Post> getPostsByLastName(String lastName){
         return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person").get("lastName"),lastName));
+    }
+
+    public Specification<Post> getPostsByPersonId(Long id){
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person").get("id"),id));
+    }
+
+    public Specification<Post> getPostsByPersonIds(List<Long> ids){
+        Specification<Post> specification = new PostSpecification();
+        for(Long id : ids){
+            specification = specification.or(getPostsByPersonId(id));
+        }
+       return specification;
     }
 
     public Specification<Post> getPostsByTwoNames(String first, String last){
