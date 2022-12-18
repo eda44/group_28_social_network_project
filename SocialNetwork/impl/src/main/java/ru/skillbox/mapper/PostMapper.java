@@ -10,6 +10,7 @@ import ru.skillbox.response.PostDto;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Mapper
 public interface PostMapper {
+    public static final int MILLISECONDS_IN_SECONDS = 1000;
 
 
     PostMapper INSTANCE = Mappers.getMapper( PostMapper.class );
@@ -36,9 +38,9 @@ public interface PostMapper {
     @Named("mapTime")
     default String mapTime(Long time){
 
-        LocalDateTime localDateTime = LocalDateTime.now();
 
-        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+
+        return mapPublishDate(time);
     }
 
 
@@ -90,13 +92,22 @@ public interface PostMapper {
         return false;
     }
 
+    static  Timestamp correctionTime(Long time){
+        Long timeUTC = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+        Long timeSystem = LocalDateTime.now().
+                toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now()));
+        return new Timestamp((time + timeSystem - timeUTC)*MILLISECONDS_IN_SECONDS);
+    }
+
 
 
     @Named("mapPublishDate")
     default String mapPublishDate(Long time){
         if(time!=null) {
-            Timestamp timestamp = new Timestamp(time);
+            Timestamp timestamp = correctionTime(time);
+
             LocalDateTime localDateTime = timestamp.toLocalDateTime();
+
 
             return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
         }

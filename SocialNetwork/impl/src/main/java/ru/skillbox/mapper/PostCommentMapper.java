@@ -9,6 +9,7 @@ import ru.skillbox.model.*;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.response.PostCommentDto;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -33,10 +34,14 @@ public interface PostCommentMapper {
 
     @Named("mapTime")
     default String mapTime(Long time) {
+        if(time!=null) {
+            Timestamp timestamp = PostMapper.correctionTime(time);
 
-        LocalDateTime localDateTime = LocalDateTime.now();
+            LocalDateTime localDateTime = timestamp.toLocalDateTime();
 
-        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+            return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+        }
+        return "";
     }
 
 

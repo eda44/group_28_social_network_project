@@ -42,7 +42,7 @@ public class PostCommentService {
         }
         postComment.setPost(post);
         postComment.setTime(LocalDateTime.now()
-                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                .toEpochSecond(ZoneOffset.UTC));
         postComment.setIsDelete(false);
         postComment.setIsBlocked(false);
         postCommentRepository.save(postComment);

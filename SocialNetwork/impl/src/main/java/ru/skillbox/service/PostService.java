@@ -99,8 +99,7 @@ public class PostService {
             post.setType(Type.POSTED);
         }
         switch (post.getType()) {
-            case POSTED : { post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.systemDefault().getRules()
-                    .getOffset(LocalDateTime.now())));
+            case POSTED : { post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
                 break;
             }
             case QUEUED : { post.setTime(Long.parseLong(publishDateString));
@@ -142,7 +141,7 @@ public class PostService {
             post.setTime(request.getTime());
         }
         post.setTimeChanged(LocalDateTime.now()
-                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                .toEpochSecond(ZoneOffset.UTC));
         post.setPostText(request.getPostText());
         post.setPerson(personService.getCurrentPerson());
         if(convertStringToTag(request.getTags())!=null) {
@@ -161,7 +160,7 @@ public class PostService {
         switch (post.getType()) {
             case POSTED:
                 post.setTime(LocalDateTime.now()
-                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                        .toEpochSecond(ZoneOffset.UTC));
                 break;
             case QUEUED:
                 post.setTime(Long.parseLong(publishDateString));
