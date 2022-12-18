@@ -1,41 +1,34 @@
 package ru.skillbox.model;
 
+import com.sun.istack.NotNull;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
-import ru.skillbox.dto.enums.StatusCode;
-//import ru.skillbox.model.api.response.FriendshipApi;
+import ru.skillbox.dto.enums.FriendshipCode;
 
 import javax.persistence.*;
 
-@Entity
-@Setter
 @Getter
+@Setter
+@Entity
 @Table(name = "friendship")
 public class Friendship {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    //@ManyToOne(fetch = FetchType.EAGER)
-    //@JoinColumn(name = "src_person_id", nullable = false)
-    //private FriendshipApi srcPersonId;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "dst_person_id", nullable = false)
-    private Friendship destPersonId;
-
+    private Long id;
+    @Column(name = "status")
     @Enumerated(EnumType.STRING)
-   // @Column(name = "code", columnDefinition = "ENUM(" +
-   //         " 'FRIEND' ," +
-   //         " 'REQUEST_TO' ," +
-   //         " 'REQUEST_FROM' ," +
-   //         " 'BLOCKED' ," +
-   //         " 'REJECTING' ," +
-   //         " 'DECLINED' ," +
-   //         " 'SUBSCRIBED' ," +
-   //         " 'NONE' ," +
-   //         " 'WATCHING')")
-   // @NonNull
-    private StatusCode code;
+    private FriendshipCode statusCode;
+
+    @Column(name = "previous_status")
+    private String previousStatus;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "src_person_id")
+    private Person srcPerson;
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "dst_person_id")
+    private Person dstPerson;
 }

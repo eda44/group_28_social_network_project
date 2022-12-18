@@ -14,7 +14,8 @@
             </column>
             <column name="src_person_id" type="bigint"/>
             <column name="dst_person_id" type="bigint"/>
-            <column name="code" type="varchar(255)"/>
+            <column name="status" type="varchar(255)"/>
+            <column name="previous_status" type="varchar(255)"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
