@@ -55,7 +55,7 @@ public class LikeService {
         } else {
             PostLike postLike = new PostLike();
             postLike.setTime(LocalDateTime.now()
-                    .toEpochSecond(ZoneOffset.UTC));
+                    .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
             postLike.setPost(post == null ? new Post() : post);
             postLike.setPerson(personService.getCurrentPerson() == null ? new Person() :
                     personService.getCurrentPerson());
@@ -81,7 +81,7 @@ public class LikeService {
             commentLike.setPerson(personService.getCurrentPerson() == null ?
                     new Person() : personService.getCurrentPerson());
             commentLike.setTime(LocalDateTime.now()
-                    .toEpochSecond(ZoneOffset.UTC));
+                    .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
             commentLike.setIsDelete(false);
             commentLikeRepository.saveAndFlush(commentLike);
             postService.savePost(post);
