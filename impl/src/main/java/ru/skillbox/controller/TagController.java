@@ -39,7 +39,8 @@ public class TagController implements TagInterface {
         response.setPerPage(itemPerPage);
         response.setDataPosts(postService.getAllPosts());
         response.setData(List.of(tag));
-        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset
+                .systemDefault().getRules().getOffset(LocalDateTime.now())));
         return ResponseEntity.ok(response);
     }
 
@@ -57,7 +58,8 @@ public class TagController implements TagInterface {
         PostTagResponse response = new PostTagResponse();
         response.setData(tagList);
         response.setTotal(6);
-        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.systemDefault()
+                .getRules().getOffset(LocalDateTime.now())));
         response.setOffset(1);
         response.setPerPage(5);
         response.setDataPosts(List.of(post));
@@ -68,7 +70,8 @@ public class TagController implements TagInterface {
     public ResponseEntity<TagResponse> deleteTag(@PathVariable String postId, @PathVariable String tagId) {
         TagResponse response = new TagResponse();
         response.setMessage("ok");
-        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        response.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset
+                .systemDefault().getRules().getOffset(LocalDateTime.now())));
         Post post = postService.getPostById(Long.parseLong(postId));
         if (post.getTags().contains(tagService.findTagById(Long.parseLong(tagId))))
             tagService.deleteTagById(Long.parseLong(tagId));

@@ -14,14 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.dto.enums.Type;
 import ru.skillbox.mapper.PostCommentMapper;
 import ru.skillbox.mapper.PostMapper;
-import ru.skillbox.model.Person;
-import ru.skillbox.model.Post;
-import ru.skillbox.model.PostComment;
-import ru.skillbox.model.Tag;
-import ru.skillbox.repository.PersonRepository;
-import ru.skillbox.repository.PostCommentRepository;
-import ru.skillbox.repository.PostRepository;
-import ru.skillbox.repository.TagRepository;
+import ru.skillbox.model.*;
+import ru.skillbox.repository.*;
 import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.*;
 import ru.skillbox.specification.PostSpecification;
@@ -30,8 +24,8 @@ import ru.skillbox.specification.TagSpecification;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -46,17 +40,21 @@ public class FeedsService {
 
     private PersonService personService;
 
+    private FriendsRepository friendsRepository;
+
        @Autowired
     public FeedsService(PostRepository postRepository,
                         PostCommentRepository postCommentRepository,
                         PersonService personService,
                         TagRepository tagRepository,
-                        PersonRepository personRepository) {
+                        PersonRepository personRepository,
+                        FriendsRepository friendsRepository) {
         this.postRepository = postRepository;
         this.personService = personService;
         this.postCommentRepository = postCommentRepository;
         this.tagRepository = tagRepository;
         this.personRepository = personRepository;
+        this.friendsRepository = friendsRepository;
     }
 
     public void updatePostType(){
@@ -104,7 +102,7 @@ public class FeedsService {
         PostSpecification spec = new PostSpecification();
         return getPostSpecificationByDate(feedsRequest, spec)
                 .and(spec.getPostsByIsDelete(feedsRequest.getIsDelete()))
-                .and(spec.getPostsByType(Type.POSTED))
+
                 .and(getPostSpecificationByAccountId(feedsRequest, spec))
                 .and(getPostSpecificationByFriends(feedsRequest,spec))
                 .and(getPostSpecificationByText(feedsRequest, spec))
@@ -117,6 +115,8 @@ public class FeedsService {
         Specification<Post> accountSpec = spec;
         if(feedsRequest.getAccountId()!=null) {
             accountSpec = accountSpec.and(spec.getPostsByPersonId(feedsRequest.getAccountId()));
+        } else {
+            accountSpec = accountSpec.and(spec.getPostsByType(Type.POSTED));
         }
         return accountSpec;
     }
@@ -127,21 +127,36 @@ public class FeedsService {
                                                                       PostSpecification spec) {
            Specification<Post> result = spec;
            if(feedsRequest.getWithFriends()!=null && feedsRequest.getWithFriends().equals(true)){
-               //FixMe: Заменить репозиторий на сервис, возвращающий друзей
-               List<Long> friendIds = getFriendIds(personRepository);
+               List<Long> friendIds = getFriendIds(friendsRepository,personService);
                result = result.and(spec.getPostsByPersonIds(friendIds));
            }
            return result;
     }
 
-    //FixMe: Заменить репозиторий на сервис, возвращающий друзей. Подкорректировать логику получения id
-    private static List<Long> getFriendIds(PersonRepository personRepository) {
-           List<Long> ids = new ArrayList<>();
-           List<Person> people = personRepository.findAll();
-           for(Person person : people){
-               ids.add(person.getId());
-           }
-        return ids;
+//
+//    private static List<Long> getFriendIds(PersonRepository personRepository) {
+//           List<Long> ids = new ArrayList<>();
+//           List<Person> people = personRepository.findAll();
+//           for(Person person : people){
+//               ids.add(person.getId());
+//           }
+//        return ids;
+//    }
+
+    private  List<Long> getFriendIds(FriendsRepository friendsRepository,PersonService personService) {
+           long id = personService.getCurrentPerson().getId();
+        Optional<List<Friendship>> setOptional = friendsRepository
+                .findAllBySrcPersonIdOrDstPersonId(id,id);
+        Set<Long> ids = new HashSet<>();
+        ids.add(id);
+        if(setOptional.isPresent()){
+            List<Friendship> friendshipList = setOptional.get();
+            for(Friendship friendship : friendshipList){
+                ids.add(friendship.getDstPerson().getId());
+                ids.add(friendship.getSrcPerson().getId());
+            }
+        }
+        return ids.stream().collect(Collectors.toList());
     }
 
     private static Specification<Post> getPostSpecificationByAuthor(FeedsRequest feedsRequest, PostSpecification spec) {

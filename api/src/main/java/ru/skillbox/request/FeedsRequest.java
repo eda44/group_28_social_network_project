@@ -136,17 +136,17 @@ public class FeedsRequest {
             String[] words = sort.split(",");
             if(words.length >= 2 && words[1].equals("desc")) {
                 pageable = PageRequest.of(page, size, Sort.by(
-                        Sort.Order.desc(words[0])
+                        words[0]).descending().and(Sort.by("id").descending()
                 ));
             } else {
                 pageable = PageRequest.of(page, size, Sort.by(
-                        Sort.Order.asc(words[0])
+                        words[0]).ascending().and(Sort.by("id").ascending()
                 ));
             }
         }
         else {
             pageable = PageRequest.of(page, size, Sort.by(
-                    Sort.Order.asc("time")
+                    "time").descending().and(Sort.by("id").descending()
             ));
         }
         return pageable;
