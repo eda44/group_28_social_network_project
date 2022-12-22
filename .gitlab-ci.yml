@@ -23,6 +23,16 @@ deploy-job:
     - echo "Deploying application..."
     - docker push skillgroup28/server
     - echo "Application successfully deployed."
+    - DOCKERID=$(docker ps --filter "ancestor=skillgroup28/server" -q);
+    - echo "ID=$DOCKERID";
+    - docker stop $DOCKERID;
+    - echo "stopped"
+    - docker pull skillgroup28/server
+    - echo "pulled"
+    - docker run -d -p 8090:8080 skillgroup28/server
+    - echo "started"
+  rules:
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
   artifacts:
     paths:
       - impl/target/impl-0.0.1-SNAPSHOT.jar
