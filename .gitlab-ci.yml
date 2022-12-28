@@ -2,6 +2,9 @@ image: maven:3-openjdk-18-slim
 
 build-job:
   stage: build
+  before_script:
+    - docker logout
+    - docker login -u skillgroup28 -p $PASS
   script:
     - echo "Compiling the code..."
     - mvn clean package
