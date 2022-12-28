@@ -12,8 +12,7 @@ build-job:
   tags:
     - check
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE != "merge_request_event"'
-      when: always   
+    - when: always   
 
 deploy-job:
   image: docker:19.03.12-dind
@@ -21,6 +20,7 @@ deploy-job:
   before_script:
     - docker logout
     - docker login -u skillgroup28 -p $PASS
+    - docker stop server || true
   script:
     - docker rm -f server || true
     - echo "Server stopped"
