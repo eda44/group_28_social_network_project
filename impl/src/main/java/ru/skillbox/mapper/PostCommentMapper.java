@@ -57,7 +57,8 @@ public interface PostCommentMapper {
 
         List<PostComment> filteredPostCommentList = postCommentList.stream().filter(p ->
                     p.getParentId()!=null &&p.getParentId().equals(postComment.getId())
-                && p.getIsDelete().equals(false)
+                && p.getIsDelete().equals(false) &&
+                            p.getPerson().getIsEnabled().equals(true)
         ).collect(Collectors.toList());
         return filteredPostCommentList.size();
 
@@ -77,6 +78,7 @@ public interface PostCommentMapper {
             return 0;
         }
         return likes.stream().filter(p -> p.getIsDelete().equals(false))
+                .filter(p->p.getPerson().getIsEnabled().equals(true))
                 .collect(Collectors.toList()).size();
     }
 

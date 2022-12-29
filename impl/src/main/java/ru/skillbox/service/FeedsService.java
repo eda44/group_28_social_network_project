@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skillbox.dto.enums.FriendshipCode;
 import ru.skillbox.dto.enums.Type;
 import ru.skillbox.mapper.PostCommentMapper;
 import ru.skillbox.mapper.PostMapper;
@@ -18,6 +19,7 @@ import ru.skillbox.model.*;
 import ru.skillbox.repository.*;
 import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.*;
+import ru.skillbox.specification.PostCommentSpecification;
 import ru.skillbox.specification.PostSpecification;
 import ru.skillbox.specification.TagSpecification;
 
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Log4j2
 @Service
@@ -68,7 +71,6 @@ public class FeedsService {
        }
     }
 
-
        @Transactional
     public ResponseEntity<FeedsResponseOK> getObjectResponseEntity(FeedsRequest feedsRequest,
                                                                    boolean isTest)
@@ -89,9 +91,7 @@ public class FeedsService {
         List<Post> posts = pagedPosts.getContent();
         log.debug("Find all posts from repository with given Criteria");
         List<PostDto> postDtoList = new ArrayList<>();
-        if(posts==null ||posts.size() == 0){
-            getFeedsError();
-        } else {
+        if(posts!=null  && posts.size() != 0){
             fillPostDtoList(currentUserId, posts, postDtoList);
         }
         FeedsResponseOK feedsResponse = getFeedsResponseOK(feedsRequest.getPageable(), pagedPosts, postDtoList);
@@ -110,17 +110,27 @@ public class FeedsService {
                 .and(getPostSpecificationByAuthor(feedsRequest, spec));
     }
 
-    private static Specification<Post> getPostSpecificationByAccountId(FeedsRequest feedsRequest,
+    private  Specification<Post> getPostSpecificationByAccountId(FeedsRequest feedsRequest,
                                                                        PostSpecification spec) {
         Specification<Post> accountSpec = spec;
         if(feedsRequest.getAccountId()!=null) {
-            accountSpec = accountSpec.and(spec.getPostsByPersonId(feedsRequest.getAccountId()));
+            accountSpec = accountSpec.and(spec.getPostsByPersonId(feedsRequest.getAccountId()))
+                    .and(spec.getPostsNotIsDeletePerson())
+                    .and(getPostedForNotCurrentPerson(feedsRequest, spec));
         } else {
-            accountSpec = accountSpec.and(spec.getPostsByType(Type.POSTED));
+            accountSpec = accountSpec.and(spec.getPostsByType(Type.POSTED))
+                    .and(spec.getPostsNotIsDeletePerson());
         }
         return accountSpec;
     }
 
+    private Specification<Post> getPostedForNotCurrentPerson(FeedsRequest feedsRequest, PostSpecification spec) {
+        Specification<Post> accountSpec = new PostSpecification();
+        if(feedsRequest.getAccountId()!= personService.getCurrentPerson().getId()){
+            accountSpec = accountSpec.and(spec.getPostsByType(Type.POSTED));
+        }
+        return accountSpec;
+    }
 
 
     private Specification<Post> getPostSpecificationByFriends(FeedsRequest feedsRequest,
@@ -133,16 +143,6 @@ public class FeedsService {
            return result;
     }
 
-//
-//    private static List<Long> getFriendIds(PersonRepository personRepository) {
-//           List<Long> ids = new ArrayList<>();
-//           List<Person> people = personRepository.findAll();
-//           for(Person person : people){
-//               ids.add(person.getId());
-//           }
-//        return ids;
-//    }
-
     private  List<Long> getFriendIds(FriendsRepository friendsRepository,PersonService personService) {
            long id = personService.getCurrentPerson().getId();
         Optional<List<Friendship>> setOptional = friendsRepository
@@ -152,8 +152,10 @@ public class FeedsService {
         if(setOptional.isPresent()){
             List<Friendship> friendshipList = setOptional.get();
             for(Friendship friendship : friendshipList){
-                ids.add(friendship.getDstPerson().getId());
-                ids.add(friendship.getSrcPerson().getId());
+                if(friendship.getStatusCode().equals(FriendshipCode.FRIEND)) {
+                    ids.add(friendship.getDstPerson().getId());
+                    ids.add(friendship.getSrcPerson().getId());
+                }
             }
         }
         return ids.stream().collect(Collectors.toList());
@@ -225,14 +227,6 @@ public class FeedsService {
         }
     }
 
-    private static void getFeedsError() throws JsonProcessingException {
-        FeedsResponseError feedsResponseError = new FeedsResponseError();
-        feedsResponseError.setError("No posts!");
-        feedsResponseError.setErrorDescription("No posts found. Please fill your database!");
-        ObjectMapper mapper = new ObjectMapper();
-        log.debug(mapper.writeValueAsString(feedsResponseError));
-    }
-
     private static FeedsResponseOK getFeedsResponseOK(Pageable pageable, Page<Post> pagedPosts,
                                                       List<PostDto> postDtoList) throws JsonProcessingException {
         FeedsResponseOK feedsResponse = new FeedsResponseOK();
@@ -258,16 +252,27 @@ public class FeedsService {
     public ResponseEntity<CommentResponse> getComments(long id, FeedsRequest feedsRequest, boolean isTest)
             throws JsonProcessingException {
         Post post = postRepository.findById(id).get();
-        Page<PostComment> postCommentPage = postCommentRepository.findByPostAndIsDeleteAndParentId(
-                post,false,0L,feedsRequest.getPageable());
+        Specification<PostComment> specification = getPostCommentSpecification(post,0L);
+        Page<PostComment> postCommentPage = postCommentRepository.findAll(specification,feedsRequest.getPageable());
 
 
-        CommentResponse commentResponse = getCommentResponse(feedsRequest.getPageable(), id, postCommentPage, isTest);
+        CommentResponse commentResponse = getCommentResponse(feedsRequest.getPageable(), postCommentPage, isTest);
 
         return ResponseEntity.ok(commentResponse);
     }
 
-    private CommentResponse getCommentResponse(Pageable pageable, Long id, Page<PostComment> pages,
+    private  Specification<PostComment> getPostCommentSpecification(Post post, Long parentId) {
+        Specification<PostComment> specification = new PostCommentSpecification();
+        PostCommentSpecification commentSpecification = new PostCommentSpecification();
+        specification = specification
+                .and(commentSpecification.getCommentsByPostId(post.getId()))
+                .and(commentSpecification.getCommentsByAuthorIsNotDelete())
+                .and(commentSpecification.getCommentsByIsDelete())
+                .and(commentSpecification.getCommentsByParentId(parentId));
+        return specification;
+    }
+
+    private CommentResponse getCommentResponse(Pageable pageable,  Page<PostComment> pages,
                                                boolean isTest)
             throws JsonProcessingException {
         log.debug("Generating comment response!");
@@ -318,10 +323,10 @@ public class FeedsService {
         Pageable subCommentsPageable = PageRequest.of(0,
                 postCommentRepository.findAll().size(),feedsRequest.getPageable().getSort());
         Post post = postRepository.findById(id).get();
-        Page<PostComment> postCommentPage = postCommentRepository.findByPostAndIsDeleteAndParentId(
-                post,false,commentId,subCommentsPageable);
+        Specification<PostComment> specification = getPostCommentSpecification(post,commentId);
+        Page<PostComment> postCommentPage = postCommentRepository.findAll(specification,subCommentsPageable);
 
-        CommentResponse commentResponse = getCommentResponse(subCommentsPageable, id, postCommentPage, isTest);
+        CommentResponse commentResponse = getCommentResponse(subCommentsPageable, postCommentPage, isTest);
         return ResponseEntity.ok(commentResponse);
     }
 

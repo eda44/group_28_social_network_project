@@ -54,6 +54,7 @@ public interface PostMapper {
         if(postCommentList!=null) {
             return postCommentList.stream()
                     .filter(p-> p.getIsDelete().equals(false))
+                    .filter(p -> p.getPerson().getIsEnabled().equals(true))
                     .collect(Collectors.toList())
                     .size();
         }
@@ -75,6 +76,7 @@ public interface PostMapper {
         }
 
         return likes.stream().filter(p->p.getIsDelete().equals(false))
+                .filter(p->p.getPerson().getIsEnabled().equals(true))
                 .collect(Collectors.toList()).size();
     }
 

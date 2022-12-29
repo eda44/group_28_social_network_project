@@ -48,10 +48,15 @@ public class PostSpecification implements Specification<Post>{
         return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person").get("id"),id));
     }
 
+    public Specification<Post> getPostsNotIsDeletePerson(){
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person")
+                .get("isEnabled"),true));
+    }
+
     public Specification<Post> getPostsByPersonIds(List<Long> ids){
         Specification<Post> specification = new PostSpecification();
         for(Long id : ids){
-            specification = specification.or(getPostsByPersonId(id));
+            specification = specification.or(getPostsByPersonId(id)).and(getPostsNotIsDeletePerson());
         }
        return specification;
     }
