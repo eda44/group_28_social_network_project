@@ -74,6 +74,7 @@ public class FeedsServiceTest extends TestCase {
 
         person.setFirstName("T");
         person.setLastName("L");
+        person.setIsEnabled(true);
 
         personRepository.saveAndFlush(person);
 

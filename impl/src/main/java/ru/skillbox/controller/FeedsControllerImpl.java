@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.config.CloudinaryConfig;
-import ru.skillbox.model.FeedsInterface;
+import ru.skillbox.model.FeedsController;
 import ru.skillbox.repository.CountryRepository;
 import ru.skillbox.repository.FriendsRepository;
 import ru.skillbox.repository.PersonRepository;
@@ -27,7 +27,7 @@ import java.io.IOException;
 
 @Log4j2
 @RestController
-public class FeedsControllerImpl implements FeedsInterface {
+public class FeedsControllerImpl implements FeedsController {
 
 
     private final FeedsService feedsService;
