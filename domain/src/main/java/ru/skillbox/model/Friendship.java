@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import ru.skillbox.dto.enums.FriendshipCode;
+import ru.skillbox.dto.enums.StatusCode;
 
 import javax.persistence.*;
 
@@ -18,10 +19,11 @@ public class Friendship {
     private Long id;
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private FriendshipCode statusCode;
+    private StatusCode statusCode;
 
     @Column(name = "previous_status")
-    private String previousStatus;
+    @Enumerated(EnumType.STRING)
+    private StatusCode previousStatus;
 
     @NotNull
     @ManyToOne
