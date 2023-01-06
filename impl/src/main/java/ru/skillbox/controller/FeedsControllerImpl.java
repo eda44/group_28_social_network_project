@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,9 +70,6 @@ public class FeedsControllerImpl implements FeedsController {
             throws  IOException {
 
         FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
-        Pageable pageable = feedsRequest.getPageable();
-        String text = feedsService.getText(httpServletRequest);
-
         return feedsService.getObjectResponseEntity(feedsRequest, isTestString.equals("{true}"));
     }
 
@@ -82,7 +78,6 @@ public class FeedsControllerImpl implements FeedsController {
                                                                 HttpServletRequest httpServletRequest)
             throws JsonProcessingException {
         FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
-        Pageable pageable = feedsRequest.getPageable();
         return  feedsService.getComments(id,feedsRequest,isTestString.equals("{true}"));
     }
 
@@ -91,7 +86,6 @@ public class FeedsControllerImpl implements FeedsController {
                                                     HttpServletRequest httpServletRequest)
             throws JsonProcessingException {
         FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
-        Pageable pageable = feedsRequest.getPageable();
         return feedsService.getSubComments(id,commentId,feedsRequest, isTestString.equals("{true}"));
     }
 }

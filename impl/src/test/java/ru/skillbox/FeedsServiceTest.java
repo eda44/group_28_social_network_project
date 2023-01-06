@@ -119,12 +119,12 @@ public class FeedsServiceTest extends TestCase {
     @After
     @Override
     public void tearDown() {
+        postCommentRepository.deleteAll();
+        postCommentRepository.flush();
         postRepository.deleteAll();
         postRepository.flush();
         personRepository.deleteAll();
         personRepository.flush();
-        postCommentRepository.deleteAll();
-        postCommentRepository.flush();
     }
 
 
