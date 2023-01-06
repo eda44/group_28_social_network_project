@@ -15,15 +15,20 @@ import ru.skillbox.dto.enums.FriendshipCode;
 import ru.skillbox.dto.enums.Type;
 import ru.skillbox.mapper.PostCommentMapper;
 import ru.skillbox.mapper.PostMapper;
-import ru.skillbox.model.*;
+import ru.skillbox.model.Friendship;
+import ru.skillbox.model.Post;
+import ru.skillbox.model.PostComment;
+import ru.skillbox.model.Tag;
 import ru.skillbox.repository.*;
 import ru.skillbox.request.FeedsRequest;
-import ru.skillbox.response.*;
+import ru.skillbox.response.CommentResponse;
+import ru.skillbox.response.FeedsResponseOK;
+import ru.skillbox.response.PostCommentDto;
+import ru.skillbox.response.PostDto;
 import ru.skillbox.specification.PostCommentSpecification;
 import ru.skillbox.specification.PostSpecification;
 import ru.skillbox.specification.TagSpecification;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -137,28 +142,35 @@ public class FeedsService {
                                                                       PostSpecification spec) {
            Specification<Post> result = spec;
            if(feedsRequest.getWithFriends()!=null && feedsRequest.getWithFriends().equals(true)){
-               List<Long> friendIds = getFriendIds(friendsRepository,personService);
-               result = result.and(spec.getPostsByPersonIds(friendIds));
+               List<Long> friendOrSubscriptionIds = getFriendOrSubscriptionIds(friendsRepository,personService);
+               result = result.and(spec.getPostsByPersonIds(friendOrSubscriptionIds));
            }
            return result;
     }
 
-    private  List<Long> getFriendIds(FriendsRepository friendsRepository,PersonService personService) {
+    private  List<Long> getFriendOrSubscriptionIds(FriendsRepository friendsRepository, PersonService personService) {
            long id = personService.getCurrentPerson().getId();
-        Optional<List<Friendship>> setOptional = friendsRepository
-                .findAllBySrcPersonIdOrDstPersonId(id,id);
         Set<Long> ids = new HashSet<>();
         ids.add(id);
+        addFriendsOrSubscriptions(id, id, FriendshipCode.FRIEND, ids);
+        addFriendsOrSubscriptions(id,0L,FriendshipCode.SUBSCRIBED,ids);
+        return ids.stream().collect(Collectors.toList());
+    }
+
+    private  void addFriendsOrSubscriptions(long id, long id1,
+                                            FriendshipCode code,
+                                            Set<Long> ids) {
+        Optional<List<Friendship>> setOptional = friendsRepository
+                .findAllBySrcPersonIdOrDstPersonId(id, id1);
         if(setOptional.isPresent()){
             List<Friendship> friendshipList = setOptional.get();
             for(Friendship friendship : friendshipList){
-                if(friendship.getStatusCode().equals(FriendshipCode.FRIEND)) {
+                if(friendship.getStatusCode().equals(code)) {
                     ids.add(friendship.getDstPerson().getId());
                     ids.add(friendship.getSrcPerson().getId());
                 }
             }
         }
-        return ids.stream().collect(Collectors.toList());
     }
 
     private static Specification<Post> getPostSpecificationByAuthor(FeedsRequest feedsRequest, PostSpecification spec) {
@@ -328,9 +340,5 @@ public class FeedsService {
 
         CommentResponse commentResponse = getCommentResponse(subCommentsPageable, postCommentPage, isTest);
         return ResponseEntity.ok(commentResponse);
-    }
-
-    public String getText(HttpServletRequest httpServletRequest) {
-         return  httpServletRequest.getParameter("text");
     }
 }
