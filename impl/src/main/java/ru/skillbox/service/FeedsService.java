@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.dto.enums.FriendshipCode;
+import ru.skillbox.dto.enums.StatusCode;
 import ru.skillbox.dto.enums.Type;
 import ru.skillbox.mapper.PostCommentMapper;
 import ru.skillbox.mapper.PostMapper;
@@ -152,24 +153,17 @@ public class FeedsService {
            long id = personService.getCurrentPerson().getId();
         Set<Long> ids = new HashSet<>();
         ids.add(id);
-        addFriendsOrSubscriptions(id, id, FriendshipCode.FRIEND, ids);
-        addFriendsOrSubscriptions(id,0L,FriendshipCode.SUBSCRIBED,ids);
+        addFriendsOrSubscriptions(id, StatusCode.FRIEND, ids);
+        addFriendsOrSubscriptions(id,StatusCode.REQUEST_TO,ids);
         return ids.stream().collect(Collectors.toList());
     }
 
-    private  void addFriendsOrSubscriptions(long id, long id1,
-                                            FriendshipCode code,
+    private  void addFriendsOrSubscriptions(long id,
+                                            StatusCode code,
                                             Set<Long> ids) {
-        Optional<List<Friendship>> setOptional = friendsRepository
-                .findAllBySrcPersonIdOrDstPersonId(id, id1);
+        Optional<List<Friendship>> setOptional = friendsRepository.findAllByStatusCodeAndSrcPersonId(code,id);
         if(setOptional.isPresent()){
-            List<Friendship> friendshipList = setOptional.get();
-            for(Friendship friendship : friendshipList){
-                if(friendship.getStatusCode().equals(code)) {
-                    ids.add(friendship.getDstPerson().getId());
-                    ids.add(friendship.getSrcPerson().getId());
-                }
-            }
+            setOptional.get().forEach(f ->ids.add(f.getDstPerson().getId()));
         }
     }
 
