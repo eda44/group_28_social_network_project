@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SettingsNotification {
+public class Settings {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
