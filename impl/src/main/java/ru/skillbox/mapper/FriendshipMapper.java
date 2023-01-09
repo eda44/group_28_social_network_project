@@ -1,8 +1,12 @@
 package ru.skillbox.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.ReportingPolicy;
+import ru.skillbox.dto.enums.StatusCode;
+import ru.skillbox.model.Person;
+import ru.skillbox.response.data.PersonDto;
 
 @Mapper(componentModel = "spring",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
@@ -10,17 +14,15 @@ import org.mapstruct.ReportingPolicy;
 public interface FriendshipMapper {
 
 //    @Mapping(target = "id", source = "id")
+//    @Mapping(target = "photo", source = "photo")
+//    //@Mapping(target = "statusCode", source = "statusCode")
 //    @Mapping(target = "firstName", source = "firstName")
 //    @Mapping(target = "lastName", source = "lastName")
-//    @Mapping(target = "birthDate", source = "birthDate", qualifiedByName = "convertDateToLong")
-//    @Mapping(target = "email", source = "email")
-//    @Mapping(target = "phone", source = "phone")
-//    @Mapping(target = "photo", source = "photo")
 //    @Mapping(target = "city", source = "city")
 //    @Mapping(target = "country", source = "country")
-//    @Mapping(target = "lastOnlineTime", source = "lastOnlineTime", qualifiedByName = "convertDateToLong")
-//    @Mapping(target = "isBlocked", source = "isBlocked")
-//    @Mapping(target = "friendshipStatus", source = "code")
+//    @Mapping(target = "isOnline", source = "isOnline")
+//    @Mapping(target = "birthDate", source = "birthDate")
 //
-//    FriendshipResponseDto personToFriendship(Person person, FriendshipCodeDto code);
+//
+//    PersonDto personToFriendship(Person person, StatusCode code);
 }
