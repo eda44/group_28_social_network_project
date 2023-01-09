@@ -25,4 +25,5 @@
         <include file="changesets/users.xml"/>
         <include file="changesets/isDeleteTolikes.xml"/>
         <include file="changesets/setting_id.xml"/>
+        <include file="changesets/notification.xml"/>
 </databaseChangeLog>

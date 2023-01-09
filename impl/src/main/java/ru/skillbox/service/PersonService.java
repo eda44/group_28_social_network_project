@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import ru.skillbox.dto.enums.MessagePermission;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Person;
-import ru.skillbox.model.SettingsNotification;
+import ru.skillbox.model.Settings;
 import ru.skillbox.model.User;
 import ru.skillbox.repository.PersonRepository;
-import ru.skillbox.repository.SettingNotificationRepository;
+import ru.skillbox.repository.SettingRepository;
 import ru.skillbox.request.RegistrationRequest;
 
 import java.util.Date;
@@ -22,7 +22,7 @@ public class PersonService {
 
     private final PersonRepository personRepository;
 
-    private final SettingNotificationRepository repositorySettings;
+    private final SettingRepository repositorySettings;
 
 
     public Person getPersonByEmail(String email) {
@@ -45,7 +45,7 @@ public class PersonService {
         person.setIsApproved(true);
         person.setMessagePermission(MessagePermission.ALL);
         person.setLastOnlineTime(new Date().getTime());
-        person.setSettingsNotification(setSettings(person.getId()));
+        person.setSettings(setSettings(person.getId()));
         personRepository.save(person);
     }
 
@@ -69,8 +69,8 @@ public class PersonService {
         return person.get();
     }
 
-    public SettingsNotification setSettings(Long personId) {
-        SettingsNotification setting = new SettingsNotification();
+    public Settings setSettings(Long personId) {
+        Settings setting = new Settings();
         setting.setId(personId);
         setting.setFriendRequest(true);
         setting.setFriendBirthday(true);

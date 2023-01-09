@@ -1,10 +1,7 @@
 package ru.skillbox.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,10 +23,16 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "person_id")
+    private Long personId;
+
+    @Column(name = "author_id")
     private Long authorId;
 
     private String content;
 
+    @Column(name = "name_notification")
+    @Enumerated(EnumType.STRING)
     private NameNotification nameNotification;
 
     private boolean read;
