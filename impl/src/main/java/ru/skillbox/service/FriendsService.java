@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.skillbox.dto.enums.StatusCode;
+import ru.skillbox.exception.BadRequestException;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Friendship;
 import ru.skillbox.model.Person;
+import ru.skillbox.model.User;
 import ru.skillbox.repository.FriendsRepository;
 import ru.skillbox.response.data.PersonDto;
 
@@ -18,7 +20,6 @@ import java.util.*;
 public class FriendsService {
     private final FriendsRepository friendsRepository;
     private final PersonService personService;
-
 
     //For Andrew
     public List<Long> getByCodePersonIdsForCurrentUser(StatusCode code) {
@@ -74,9 +75,8 @@ public class FriendsService {
     public String sendFriendRequest(Long currentUser, Long otherPersonId) throws UserNotFoundException {
         Optional<Friendship> friendship =
                 friendsRepository.findBySrcPersonIdAndDstPersonId(currentUser, otherPersonId);
-        System.out.println(" ==> in sendFriendRequest ");
-        if (friendship.isPresent()) {
-            System.out.println("friendship.isPresent()");
+        if (friendship.isPresent() && friendship.get().getStatusCode() == StatusCode.FRIEND) {
+
             log.debug("friendship already exists {}", friendship.get());
         } else {
             Optional<Friendship> requestedFriendship = friendsRepository
@@ -85,8 +85,6 @@ public class FriendsService {
             Person currentPerson = personService.getPersonById(currentUser);
             if (requestedFriendship
                     .isEmpty()) {
-                System.out.println("else if requestedFriendship" +
-                        "                            .isEmpty()");
                 Friendship f = new Friendship();
                 f.setDstPerson(otherPerson);
                 f.setSrcPerson(currentPerson);
@@ -101,7 +99,6 @@ public class FriendsService {
 
                 log.debug("friendship saved {}", fr);
             } else {
-                System.out.println("else");
 
             }
         }
@@ -109,10 +106,18 @@ public class FriendsService {
     }
 
     public int getFriendsRequestsCountFor(Long personId) {
-        return 5;
+        Optional<List<Friendship>> optionalList = friendsRepository
+                .findAllByStatusCodeLikeAndDstPersonId(StatusCode.REQUEST_TO, personId);
+        if (optionalList.isPresent()) {
+            return optionalList.get().size();
+        } else {
+            return 0;
+        }
+
+
     }
 
-    public String approveFriends(Long currentUser, Long otherPersonId) throws UserNotFoundException{
+    public String approveFriends(Long currentUser, Long otherPersonId) throws UserNotFoundException {
         Optional<Friendship> requestedFriendship = friendsRepository
                 .findByDstPersonIdAndSrcPersonIdAndStatusCodeIs(currentUser, otherPersonId, StatusCode.REQUEST_TO);
         Optional<Friendship> alternativeFriendship = friendsRepository
@@ -163,5 +168,50 @@ public class FriendsService {
         f.setStatusCode(StatusCode.SUBSCRIBED);
         friendsRepository.save(f);
         return "Ok";
+    }
+
+    public String blockFriend(Long currentUserId, Long otherPersonId) throws UserNotFoundException {
+        log.info("start blockFriend: currentUser={}, to block={}", currentUserId, otherPersonId);
+
+        if (currentUserId.equals(otherPersonId)) {
+            throw new BadRequestException("Friendship cannot be formed");
+        }
+        Optional<Friendship> blockFriends1 = friendsRepository
+                .findBySrcPersonIdAndDstPersonId(currentUserId, otherPersonId);
+        Optional<Friendship> blockFriends2 = friendsRepository
+                .findBySrcPersonIdAndDstPersonId(otherPersonId, currentUserId);
+
+        if (blockFriends1.isPresent() && blockFriends2.isPresent()) {
+            Friendship friendshipDirect = blockFriends1.get();
+            if (friendshipDirect.getStatusCode() != StatusCode.BLOCKED) {
+                friendshipDirect.setPreviousStatus(friendshipDirect.getStatusCode());
+                friendshipDirect.setStatusCode(StatusCode.BLOCKED);
+
+            } else {
+                friendshipDirect.setPreviousStatus(friendshipDirect.getStatusCode());
+                friendshipDirect.setStatusCode(StatusCode.NONE);
+            }
+            friendsRepository.save(friendshipDirect);
+            Friendship friendshipReverse = blockFriends2.get();
+            log.info("User {} blocks user {}", currentUserId, otherPersonId);
+
+            friendshipReverse.setPreviousStatus(friendshipReverse.getStatusCode());
+            friendshipReverse.setStatusCode(StatusCode.NONE);
+            friendsRepository.save(friendshipReverse);
+
+            log.info("finish blockFriend: currentUser={}, to block={}", currentUserId, otherPersonId);
+
+        }
+        return "Ok";
+    }
+
+    public Object searchRecommendations(User currentUser) {
+        log.info("start searchRecommendations");
+
+
+        log.info("finish searchRecommendations");
+
+        return null;
+
     }
 }

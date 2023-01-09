@@ -11,6 +11,5 @@ public class Friendship {
     private Long srcPersonId;
     private Long destPersonId;
     private Long statusId;
-    private FriendshipStatus status;
     private String previousStatus;
 }

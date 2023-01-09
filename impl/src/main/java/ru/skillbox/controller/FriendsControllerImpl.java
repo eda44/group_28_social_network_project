@@ -1,6 +1,5 @@
 package ru.skillbox.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,8 +12,6 @@ import ru.skillbox.dto.enums.StatusCode;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.FriendsController;
 import ru.skillbox.model.User;
-import ru.skillbox.response.FriendshipResponse;
-import ru.skillbox.response.MakeFriendResponse;
 import ru.skillbox.response.data.PersonDto;
 import ru.skillbox.service.FriendsService;
 import ru.skillbox.service.UserService;
@@ -98,16 +95,21 @@ public class FriendsControllerImpl implements FriendsController {
     }
 
     @Override
-    public MakeFriendResponse block(Long id) throws JsonProcessingException {
+    public ResponseEntity<String> block(Long id) {
         User currentUser = userService.getCurrentUser();
-        return null;//friendshipService.blockFriend(currentUser, id);
+        try {
+        return ResponseEntity.ok(friendsService.blockFriend(currentUser.getId(), id));
+        } catch (UserNotFoundException e) {
+            log.info("block {}", e.getMessage());
+            return ResponseEntity.ok("Ok");
+        }
     }
 
     @Override
-    public FriendshipResponse recommendations(Integer offset, Integer itemPerPage) {
-//        User currentUser = userService.getCurrentUser();
-//        return friendshipService.searchRecommendations(currentUser, offset, itemPerPage);
-        return null;
+    public ResponseEntity<Object> recommendations() {
+        User currentUser = userService.getCurrentUser();
+        return ResponseEntity.ok(friendsService.searchRecommendations(currentUser));
+
     }
 
     @Override
