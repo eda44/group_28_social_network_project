@@ -1,17 +1,16 @@
 package ru.skillbox.service;
 
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import ru.skillbox.config.CloudinaryConfig;
 import ru.skillbox.dto.enums.Type;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostFile;
 import ru.skillbox.model.Tag;
 import ru.skillbox.repository.PostRepository;
-import ru.skillbox.repository.TagRepository;
 import ru.skillbox.request.PostAddRequest;
 import ru.skillbox.response.post.PostResponse;
 
@@ -27,25 +26,17 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    private final TagRepository tagRepository;
     private final PostFileService postFileService;
     private final PersonService personService;
-    private final CloudinaryConfig cloudinaryConfig;
     private static final Logger logger = LogManager.getLogger(PostService.class);
 
     @Autowired
     public PostService(PostRepository postRepository, PostFileService postFileService,
-                       PersonService personService, CloudinaryConfig cloudinaryConfig,
-                       TagRepository tagRepository) {
+                       PersonService personService, MeterRegistry meterRegistry) {
         this.postRepository = postRepository;
         this.postFileService = postFileService;
         this.personService = personService;
-        this.cloudinaryConfig = cloudinaryConfig;
-        this.tagRepository = tagRepository;
-    }
-
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+        meterRegistry.gauge("postsCount", postRepository.findAll().size());
     }
 
     public Post getPostById(long id) {
@@ -80,6 +71,7 @@ public class PostService {
         logger.info("deleting post № " + post.getId());
     }
 
+    @Timed("gettingNewPostsCount")
     public void addPost(PostAddRequest request, HttpServletRequest httpServletRequest) {
         Post post = new Post();
         post.setTitle(request.getTitle());
@@ -90,7 +82,6 @@ public class PostService {
         post.setPerson(personService.getCurrentPerson());
 
 
-
         String publishDateString = httpServletRequest.getParameter("publishDate");
 
         if (publishDateString != null) {
@@ -99,24 +90,21 @@ public class PostService {
             post.setType(Type.POSTED);
         }
         switch (post.getType()) {
-            case POSTED : { post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.systemDefault()
-                    .getRules().getOffset(LocalDateTime.now())));
+            case POSTED: {
+                post.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
                 break;
             }
-            case QUEUED : { post.setTime(Long.parseLong(publishDateString));
+            case QUEUED: {
+                assert publishDateString != null;
+                post.setTime(Long.parseLong(publishDateString));
                 break;
             }
         }
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
         postFile.ifPresent(file -> post.setPostFiles(List.of(file)));
-        savePost(post);
+        postRepository.save(post);
 
         logger.info("saving post № " + post.getId());
-    }
-
-    public PostFile uploadImage(MultipartFile multipartFile) {
-        logger.info("uploading file " + multipartFile.getOriginalFilename());
-        return postFileService.savePostFile(cloudinaryConfig.uploadImage(multipartFile));
     }
 
     public PostResponse addPostResponse(String id) {
@@ -138,20 +126,18 @@ public class PostService {
                            String id) {
         Post post = getPostById(Long.parseLong(id));
         post.setTitle(request.getTitle());
-        if(request.getTime()!=null) {
+        if (request.getTime() != null) {
             post.setTime(request.getTime());
         }
         post.setTimeChanged(LocalDateTime.now()
-                .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                .toEpochSecond(ZoneOffset.UTC));
         post.setPostText(request.getPostText());
         post.setPerson(personService.getCurrentPerson());
-        if(convertStringToTag(request.getTags())!=null) {
+        if (convertStringToTag(request.getTags()) != null) {
             post.setTags(convertStringToTag(request.getTags()));
         }
         Optional<PostFile> postFile = postFileService.getPostFileByPath(request.getImagePath());
-        if(postFile.isPresent()){
-            post.setPostFiles(new ArrayList<>(List.of(postFile.get())));
-        }
+        postFile.ifPresent(file -> post.setPostFiles(new ArrayList<>(List.of(file))));
         String publishDateString = httpServletRequest.getParameter("publishDate");
         if (publishDateString != null) {
             post.setType(Type.QUEUED);
@@ -161,14 +147,13 @@ public class PostService {
         switch (post.getType()) {
             case POSTED:
                 post.setTime(LocalDateTime.now()
-                        .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
+                        .toEpochSecond(ZoneOffset.UTC));
                 break;
             case QUEUED:
+                assert publishDateString != null;
                 post.setTime(Long.parseLong(publishDateString));
         }
-        savePost(post);
-
-        savePost(post);
+        postRepository.save(post);
         logger.info("updating post № " + post.getId());
     }
 }

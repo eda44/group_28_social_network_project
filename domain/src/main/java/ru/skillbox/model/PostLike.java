@@ -22,6 +22,6 @@ public class PostLike {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @Column(name="is_delete")
+    @Column(name = "is_delete")
     private Boolean isDelete;
 }

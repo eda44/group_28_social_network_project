@@ -18,7 +18,6 @@ public class PostFile {
 
     private String name;
 
-    @Column(name = "path")
     private String path;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

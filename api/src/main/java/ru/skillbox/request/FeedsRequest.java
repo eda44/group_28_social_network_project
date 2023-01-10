@@ -21,9 +21,9 @@ public class FeedsRequest {
     private List<String> tags;
     private Long dateFrom;
     private Long dateTo;
-    private Boolean isDelete;
+    private final Boolean isDelete;
     private String author;
-    private Pageable pageable;
+    private final Pageable pageable;
 
     private Boolean withFriends;
 
@@ -36,8 +36,8 @@ public class FeedsRequest {
         this.httpServletRequest = httpServletRequest;
         this.pageable = generatePageableObjectByServlet(httpServletRequest);
         this.words = getWords(httpServletRequest);
-        this.dateFrom = getDate(httpServletRequest,"dateFrom");
-        this.dateTo = getDate(httpServletRequest,"dateTo");
+        this.dateFrom = getDate(httpServletRequest, "dateFrom");
+        this.dateTo = getDate(httpServletRequest, "dateTo");
         this.isDelete = getIsDelete(httpServletRequest);
         this.author = getAuthor(httpServletRequest);
         this.tags = getTags(httpServletRequest);
@@ -47,7 +47,7 @@ public class FeedsRequest {
 
     private Long getAccountId(HttpServletRequest httpServletRequest) {
         String accountIdString = httpServletRequest.getParameter("accountIds");
-        if(accountIdString != null){
+        if (accountIdString != null) {
             return Long.parseLong(accountIdString);
         }
         return null;
@@ -55,8 +55,8 @@ public class FeedsRequest {
 
     private Boolean getWithFriends(HttpServletRequest httpServletRequest) {
         String withFriendsString = httpServletRequest.getParameter("withFriends");
-        if(withFriendsString != null) {
-            return  Boolean.parseBoolean(withFriendsString);
+        if (withFriendsString != null) {
+            return Boolean.parseBoolean(withFriendsString);
         }
         return null;
     }
@@ -66,75 +66,74 @@ public class FeedsRequest {
         this.isDelete = false;
     }
 
-    private List<String> getTags(HttpServletRequest httpServletRequest){
+    private List<String> getTags(HttpServletRequest httpServletRequest) {
         String tagsString = httpServletRequest.getParameter("tags");
-        if(tagsString != null){
+        if (tagsString != null) {
             String[] tags = tagsString.split(",");
-            Arrays.stream(tags).collect(Collectors.toList()).forEach(t -> log.debug("tag={}",t));
+            Arrays.stream(tags).collect(Collectors.toList()).forEach(t -> log.debug("tag={}", t));
             return Arrays.stream(tags).collect(Collectors.toList());
         }
         return null;
     }
 
-    private String getAuthor(HttpServletRequest httpServletRequest){
+    private String getAuthor(HttpServletRequest httpServletRequest) {
         String authorString = httpServletRequest.getParameter("author");
-        if(authorString != null) {
-            log.debug("author={}",authorString.trim().replaceAll("[\\s]{2,}","\\s"));
-          return authorString.trim().replaceAll("[\\s]{2,}","\\s");
+        if (authorString != null) {
+            log.debug("author={}", authorString.trim().replaceAll("\\s{2,}", "\\s"));
+            return authorString.trim().replaceAll("\\s{2,}", "\\s");
         }
         return null;
     }
 
     private Long getDate(HttpServletRequest httpServletRequest, String name) {
         String dateString = httpServletRequest.getParameter(name);
-        if(dateString != null) {
+        if (dateString != null) {
             log.debug(name + " " + LocalDateTime.ofEpochSecond(Long.parseLong(dateString),
                     0, ZoneOffset.of("+03:00")));
             log.debug("Long " + name + " " + dateString);
-            return  Long.parseLong(dateString);
+            return Long.parseLong(dateString);
         }
         return null;
     }
 
     private boolean getIsDelete(HttpServletRequest httpServletRequest) {
         String isDeleteString = httpServletRequest.getParameter("isDelete");
-        if(isDeleteString != null) {
-            return  Boolean.parseBoolean(isDeleteString);
+        if (isDeleteString != null) {
+            return Boolean.parseBoolean(isDeleteString);
         }
         return false;
     }
 
 
-
-    private List<String> getWords(HttpServletRequest httpServletRequest){
+    private List<String> getWords(HttpServletRequest httpServletRequest) {
         String text = httpServletRequest.getParameter("text");
-        if(text!=null){
+        if (text != null) {
             String textOnlyBooksAndDigits = text
-                    .toLowerCase(Locale.ROOT).replaceAll("[^0-9А-яA-z\\s]+","");
-            String textWithoutDoubleSpaces = textOnlyBooksAndDigits.replaceAll("[\\s]{2,}","\\s");
+                    .toLowerCase(Locale.ROOT).replaceAll("[^0-9А-яA-z\\s]+", "");
+            String textWithoutDoubleSpaces = textOnlyBooksAndDigits.replaceAll("[\\s]{2,}", "\\s");
             log.debug("Only Books in String: " + textOnlyBooksAndDigits);
             String[] textWords = textWithoutDoubleSpaces.trim().split("\\s");
-            log.debug("Words number: {}",textWords.length);
+            log.debug("Words number: {}", textWords.length);
             return Arrays.stream(textWords).collect(Collectors.toList());
         }
-        return  null;
+        return null;
     }
 
-    private Pageable generatePageableObjectByServlet(HttpServletRequest httpServletRequest){
+    private Pageable generatePageableObjectByServlet(HttpServletRequest httpServletRequest) {
         String pageString = httpServletRequest.getParameter("page");
-        int page = pageString!=null?Integer.parseInt(pageString):0;
+        int page = pageString != null ? Integer.parseInt(pageString) : 0;
         log.debug("page= " + page);
         String sizeString = httpServletRequest.getParameter("size");
-        int size = sizeString!=null?Integer.parseInt(sizeString):1;
+        int size = sizeString != null ? Integer.parseInt(sizeString) : 1;
         log.debug("size= " + size);
         String sort = httpServletRequest.getParameter("sort");
-        if(page < 0){
+        if (page < 0) {
             page = 0;
         }
         Pageable pageable;
-        if(sort!=null){
+        if (sort != null) {
             String[] words = sort.split(",");
-            if(words.length >= 2 && words[1].equals("desc")) {
+            if (words.length >= 2 && words[1].equals("desc")) {
                 pageable = PageRequest.of(page, size, Sort.by(
                         words[0]).descending().and(Sort.by("id").descending()
                 ));
@@ -143,8 +142,7 @@ public class FeedsRequest {
                         words[0]).ascending().and(Sort.by("id").ascending()
                 ));
             }
-        }
-        else {
+        } else {
             pageable = PageRequest.of(page, size, Sort.by(
                     "time").descending().and(Sort.by("id").descending()
             ));

@@ -18,7 +18,7 @@ public class City {
     private String title;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id",referencedColumnName = "id", insertable = false,updatable = false)
+    @JoinColumn(name = "country_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Country country;
 }
 

@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import ru.skillbox.exception.UserNotAuthorized;
+import ru.skillbox.exception.NotAuthorizedException;
 import ru.skillbox.mapper.AccountMapper;
 import ru.skillbox.model.Person;
 import ru.skillbox.repository.PersonRepository;
@@ -25,10 +25,10 @@ public class SearchService {
     private final GeoService geoService;
 
     public SearchResponse search(SearchRequest request,
-                                 Integer size) throws UserNotAuthorized {
+                                 Integer size) throws NotAuthorizedException {
         Person person = personService.getCurrentPerson();
         Page<Person> people = searchFilter(request, person, size);
-        return SearchResponse.getOkResponse(AccountMapper.INSTANCE.ListPersonToListAccountDto(people.getContent()), people);
+        return new SearchResponse().getOkResponse(AccountMapper.INSTANCE.ListPersonToListAccountDto(people.getContent()), people);
     }
 
     private Page<Person> searchFilter(SearchRequest request, Person current, int size) {
@@ -73,11 +73,11 @@ public class SearchService {
 
     private Long getIdCountryByTitle(String title) {
         if (title == null) return null;
-        return geoService.getIdCountryByTitle(title);
+        return geoService.getCountryByTitle(title).getId();
     }
 
     private Long getIdCityByTitle(String title) {
         if (title == null) return null;
-        return geoService.getIdCityByTitle(title);
+        return geoService.getCityByTitle(title).getId();
     }
 }

@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import ru.skillbox.model.*;
-import ru.skillbox.response.PostDto;
+import ru.skillbox.response.post.PostDto;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

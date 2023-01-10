@@ -23,8 +23,9 @@ import ru.skillbox.repository.*;
 import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponseOK;
-import ru.skillbox.response.PostCommentDto;
-import ru.skillbox.response.PostDto;
+
+import ru.skillbox.response.post.PostCommentDto;
+import ru.skillbox.response.post.PostDto;
 import ru.skillbox.specification.PostCommentSpecification;
 import ru.skillbox.specification.PostSpecification;
 import ru.skillbox.specification.TagSpecification;

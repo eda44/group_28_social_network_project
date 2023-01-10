@@ -3,8 +3,6 @@ package ru.skillbox.response.settings;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.AccountByIdDto;
-import ru.skillbox.dto.enums.NameNotification;
 
 import java.util.List;
 

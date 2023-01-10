@@ -6,14 +6,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FriendshipResponse extends AbstractResponse{
+public class FriendshipResponse extends AbstractResponse {
 
-  private int id;
-  @JsonProperty("status_id")
-  private Integer statusId;
-  @JsonProperty("src_person_id")
-  private Integer srcPersonId;
-  @JsonProperty("dst_person_id")
-  private Integer dstPersonId;
+    private int id;
+    @JsonProperty("status_id")
+    private Integer statusId;
+    @JsonProperty("src_person_id")
+    private Integer srcPersonId;
+    @JsonProperty("dst_person_id")
+    private Integer dstPersonId;
 
 }

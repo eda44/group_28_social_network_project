@@ -3,7 +3,7 @@ package ru.skillbox.response.data;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.AccountDto;
+import ru.skillbox.common.SearchPersonDto;
 
 @Getter
 @Setter
@@ -11,7 +11,7 @@ import ru.skillbox.dto.AccountDto;
 public class DialogDto {
 
     private Long id;
-    private AccountDto conversationPartner;
+    private SearchPersonDto.AccountDto conversationPartner;
     private Long unreadCount;
     private MessageDto lastMessage;
 }

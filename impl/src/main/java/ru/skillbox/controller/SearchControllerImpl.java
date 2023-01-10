@@ -3,7 +3,7 @@ package ru.skillbox.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skillbox.exception.UserNotAuthorized;
+import ru.skillbox.exception.NotAuthorizedException;
 import ru.skillbox.model.SearchController;
 import ru.skillbox.request.SearchRequest;
 import ru.skillbox.response.SearchResponse;
@@ -28,7 +28,7 @@ public class SearchControllerImpl implements SearchController {
                     .country(country)
                     .build();
             return ResponseEntity.ok(searchService.search(request, size));
-        } catch (UserNotAuthorized ignore) {
+        } catch (NotAuthorizedException ignore) {
             return null;
         }
     }

@@ -3,7 +3,7 @@ package ru.skillbox.response;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.Sort;
-
+import ru.skillbox.response.post.PostDto;
 
 import java.util.List;
 

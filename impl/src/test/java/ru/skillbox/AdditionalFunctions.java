@@ -2,8 +2,8 @@ package ru.skillbox;
 
 import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponseOK;
-import ru.skillbox.response.PostCommentDto;
-import ru.skillbox.response.PostDto;
+import ru.skillbox.response.post.PostCommentDto;
+import ru.skillbox.response.post.PostDto;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -12,21 +12,19 @@ import java.util.Date;
 import java.util.List;
 
 public class AdditionalFunctions {
-    public static CommentResponse correctCommentContent(CommentResponse response, String timeString){
+    public static CommentResponse correctCommentContent(CommentResponse response, String timeString) {
         List<PostCommentDto> postCommentDtoList = response.getContent();
-        postCommentDtoList.forEach(p -> {
-            p.setTime(timeString);
-        });
+        postCommentDtoList.forEach(p -> p.setTime(timeString));
         response.setContent(postCommentDtoList);
         return response;
     }
 
-    public static FeedsResponseOK correctContent(FeedsResponseOK response, String timeString){
+    public static FeedsResponseOK correctContent(FeedsResponseOK response, String timeString) {
         List<PostDto> postDtoList = response.getContent();
-        postDtoList.forEach(p -> {
+        for (PostDto p : postDtoList) {
             p.setTime(timeString);
             p.setPublishDate("2022-11-23T14:00:02.169Z");
-        });
+        }
         response.setContent(postDtoList);
 
         return response;
@@ -36,8 +34,7 @@ public class AdditionalFunctions {
         long time = (new Date()).getTime();
         Timestamp timestamp = new Timestamp(time);
         LocalDateTime localDateTime = timestamp.toLocalDateTime();
-        String timeString = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-        return timeString;
+        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
     }
 
 
@@ -90,7 +87,7 @@ public class AdditionalFunctions {
                 "}";
     }
 
-    public static String generateExpectedResponseString(long personId, long postId, String timeString){
+    public static String generateExpectedResponseString(long personId, long postId, String timeString) {
         return "{" +
                 "\"totalElements\": 1, " +
                 "\"totalPages\": 1, " +
@@ -140,10 +137,10 @@ public class AdditionalFunctions {
     }
 
 
-    public static String generateExpectedSubCommentString(Long subCommentId,String timeString,
+    public static String generateExpectedSubCommentString(Long subCommentId, String timeString,
                                                           Long personId,
                                                           Long postCommentId,
-                                                          Long postId){
+                                                          Long postId) {
         return "{" +
                 "  \"totalElements\": 1," +
                 "  \"totalPages\": 1," +

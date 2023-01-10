@@ -1,7 +1,6 @@
 package ru.skillbox.request.settings;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import ru.skillbox.dto.enums.NameNotification;
@@ -14,7 +13,7 @@ public class SettingRq {
     private NameNotification notificationType;
     private boolean enable;
 
-    public static SettingRq getSettingRq(NameNotification name, boolean enable){
+    public static SettingRq getSettingRq(NameNotification name, boolean enable) {
         SettingRq settingRq = new SettingRq();
         settingRq.setNotificationType(name);
         settingRq.setEnable(enable);

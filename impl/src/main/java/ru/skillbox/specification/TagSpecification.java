@@ -1,7 +1,6 @@
 package ru.skillbox.specification;
 
 import org.springframework.data.jpa.domain.Specification;
-import ru.skillbox.model.Post;
 import ru.skillbox.model.Tag;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -11,8 +10,8 @@ import javax.persistence.criteria.Root;
 
 public class TagSpecification implements Specification<Tag> {
 
-    public Specification<Tag> getTagsByName(String tag){
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("tag"),tag));
+    public Specification<Tag> getTagsByName(String tag) {
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("tag"), tag));
     }
 
     @Override
@@ -24,6 +23,7 @@ public class TagSpecification implements Specification<Tag> {
     public Specification<Tag> or(Specification<Tag> other) {
         return Specification.super.or(other);
     }
+
     @Override
     public Predicate toPredicate(Root<Tag> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         return null;

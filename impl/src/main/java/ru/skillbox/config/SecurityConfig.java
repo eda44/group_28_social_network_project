@@ -43,6 +43,10 @@ public class SecurityConfig {
                 .anyRequest()
                 .authenticated()
                 .and()
+                .logout()
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .and()
                 .apply(jwtConfigurer)
         ;
 

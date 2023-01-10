@@ -20,7 +20,7 @@ public interface GeoMapper {
     CountryDto countryToCountryDto(Country country);
 
     @Named("mapCountry")
-    default Long mapCountry(Country country){
+    default Long mapCountry(Country country) {
         return country.getId();
     }
 }

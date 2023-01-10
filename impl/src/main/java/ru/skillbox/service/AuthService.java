@@ -1,6 +1,7 @@
 package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,7 +11,10 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ru.skillbox.dto.enums.Role;
+import ru.skillbox.exception.CaptchaException;
 import ru.skillbox.exception.EmailNotFoundException;
+import ru.skillbox.exception.InvalidCredentialsException;
 import ru.skillbox.exception.UserIsAlreadyRegisteredException;
 import ru.skillbox.jwt.JwtTokenProvider;
 import ru.skillbox.model.User;
@@ -19,7 +23,7 @@ import ru.skillbox.request.PasswordRecoveryRequest;
 import ru.skillbox.request.RegistrationRequest;
 import ru.skillbox.response.LoginResponse;
 import ru.skillbox.response.PasswordRecoveryResponse;
-import ru.skillbox.response.RegistrationResponse;
+import ru.skillbox.response.Responsable;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -31,35 +35,50 @@ public class AuthService {
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final CaptchaFileService captchaFileService;
 
-    public LoginResponse login(LoginRequest request) throws UsernameNotFoundException {
+    public Responsable login(LoginRequest request) throws UsernameNotFoundException {
         User user = userService.getUserByEmail(request.getEmail());
-        if (!userService.passwordCheck(user, request.getPassword())) {
-            throw new UsernameNotFoundException("User not found");
+        if (!userService.passwordCheck(request.getPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException();
         }
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");//TODO: справить
+        if (!user.isEnabled()) {
+            throw new InvalidCredentialsException();
+        }
+        if (!user.isAccountNonLocked()) {
+            throw new InvalidCredentialsException();
+        }
+        GrantedAuthority authority = new SimpleGrantedAuthority(Role.ROLE_USER.getValue());
         Authentication authenticationToken = new UsernamePasswordAuthenticationToken(user.getEmail(), null, List.of(authority));
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(authentication);
         String jwt = jwtTokenProvider.createToken(authentication.getName(), "ROLE_USER");
-        return LoginResponse.getOkResponse(jwt);
+        return new LoginResponse().getResponse(jwt);
     }
 
-    public PasswordRecoveryResponse passwordRecovery(PasswordRecoveryRequest request) throws EmailNotFoundException {
+    public Responsable passwordRecovery(PasswordRecoveryRequest request) throws EmailNotFoundException {
         String email = request.getEmail();
-        if (userService.getUserByEmail(email) == null) {
-            throw new EmailNotFoundException("Email not found");
-        }
+        User user = userService.getUserByEmail(email);
         String password = generateRandomPassword(8);
-        userService.setNewPassword(email, password);
+        userService.setNewPassword(user, password);
         emailService.passwordRecoveryMessage(email, password);
-        return PasswordRecoveryResponse.getOkResponse();
+        return new PasswordRecoveryResponse().getResponse("ok");
     }
 
-    public RegistrationResponse registration(RegistrationRequest request) throws UserIsAlreadyRegisteredException {
-        userService.saveUser(request);
-        return RegistrationResponse.getOkResponse();
+    public void registration(RegistrationRequest request) throws UserIsAlreadyRegisteredException {
+        if(captchaFileService.getCaptchaFileByName(request.getCode()).isEmpty()){
+            throw new CaptchaException();
+        }
+        userService.registration(request);
+    }
+
+    public void logout() {
+        GrantedAuthority authority = new SimpleGrantedAuthority(Role.ROLE_ANONYMOUS.getValue());
+        Authentication authenticationToken = new AnonymousAuthenticationToken("anonymousUser", "anonymousUser", List.of(authority));
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        securityContext.setAuthentication(authentication);
     }
 
     private String generateRandomPassword(int len) {

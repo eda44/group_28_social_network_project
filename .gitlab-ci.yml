@@ -12,7 +12,7 @@ build-job:
   tags:
     - check
   rules:
-    - when: always   
+    - when: always
 
 deploy-job:
   image: docker:19.03.12-dind

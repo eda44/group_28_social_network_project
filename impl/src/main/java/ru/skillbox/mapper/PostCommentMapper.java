@@ -5,9 +5,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import ru.skillbox.model.*;
+import ru.skillbox.model.CommentLike;
+import ru.skillbox.model.Person;
+import ru.skillbox.model.Post;
+import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostCommentRepository;
-import ru.skillbox.response.PostCommentDto;
+import ru.skillbox.response.post.PostCommentDto;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -23,7 +26,6 @@ public interface PostCommentMapper {
     @Mapping(target = "time", qualifiedByName = "mapTime")
     @Mapping(source = "person", target = "authorId", qualifiedByName = "mapAuthorId")
     @Mapping(source = "id", target = "commentsCount", qualifiedByName = "mapCommentsCount")
-    @Mapping(source = "commentFiles", target = "imagePath", qualifiedByName = "mapImagePath")
     @Mapping(source = "commentLikes", target = "likeAmount", qualifiedByName = "mapLikeAmount")
     @Mapping(source = "commentLikes", target = "myLike", qualifiedByName = "mapMyLike")
     @Mapping(source = "post", target = "postId", qualifiedByName = "mapPostId")
@@ -34,7 +36,7 @@ public interface PostCommentMapper {
 
     @Named("mapTime")
     default String mapTime(Long time) {
-        if(time!=null) {
+        if (time != null) {
             Timestamp timestamp = PostMapper.correctionTime(time);
 
             LocalDateTime localDateTime = timestamp.toLocalDateTime();
@@ -56,20 +58,11 @@ public interface PostCommentMapper {
         List<PostComment> postCommentList = postComment.getPost().getPostCommentList();
 
         List<PostComment> filteredPostCommentList = postCommentList.stream().filter(p ->
-                    p.getParentId()!=null &&p.getParentId().equals(postComment.getId())
-                && p.getIsDelete().equals(false) &&
-                            p.getPerson().getIsEnabled().equals(true)
+                p.getParentId() != null && p.getParentId().equals(postComment.getId())
+                        && p.getIsDelete().equals(false)
         ).collect(Collectors.toList());
         return filteredPostCommentList.size();
 
-    }
-
-    @Named("mapImagePath")
-    default String mapImagePath(List<CommentFile> commentFiles) {
-        if (commentFiles != null && !commentFiles.isEmpty()) {
-            return commentFiles.get(0).getPath();
-        }
-        return null;
     }
 
     @Named("mapLikeAmount")
@@ -77,9 +70,7 @@ public interface PostCommentMapper {
         if (likes == null || likes.isEmpty()) {
             return 0;
         }
-        return likes.stream().filter(p -> p.getIsDelete().equals(false))
-                .filter(p->p.getPerson().getIsEnabled().equals(true))
-                .collect(Collectors.toList()).size();
+        return (int) likes.stream().filter(p -> p.getIsDelete().equals(false)).count();
     }
 
     @Named("mapMyLike")
@@ -88,8 +79,8 @@ public interface PostCommentMapper {
             return null;
         }
         for (CommentLike like : likes) {
-            if (like.getPerson().getId().equals(currentUser)&&
-            like.getIsDelete().equals(false)) {
+            if (like.getPerson().getId().equals(currentUser) &&
+                    like.getIsDelete().equals(false)) {
                 return true;
             }
         }

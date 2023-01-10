@@ -3,17 +3,18 @@ package ru.skillbox.response.account;
 import lombok.Builder;
 import lombok.Data;
 import ru.skillbox.dto.AccountWithPhotoNameDto;
+//todo удалить если не используется
 
 @Data
 @Builder
 public class AccountEditRs {
 
-  private String error;
+    private String error;
 
-  private long timestamp;
+    private long timestamp;
 
-  private AccountWithPhotoNameDto data;
+    private AccountWithPhotoNameDto data;
 
-  private String errorDescription;
+    private String errorDescription;
 
 }

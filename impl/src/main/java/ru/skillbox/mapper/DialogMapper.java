@@ -3,7 +3,7 @@ package ru.skillbox.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import ru.skillbox.dto.AccountDto;
+import ru.skillbox.common.SearchPersonDto;
 import ru.skillbox.response.data.DialogDto;
 import ru.skillbox.response.data.MessageDto;
 import ru.skillbox.model.Dialog;
@@ -50,7 +50,7 @@ public interface DialogMapper {
     List<MessageDto> listMessageToDto(List<Message> messages);
 
     @Named("account")
-    default AccountDto account(Person person){
+    default SearchPersonDto.AccountDto account(Person person) {
         return AccountMapper.INSTANCE.personToAccountDto(person);
     }
 

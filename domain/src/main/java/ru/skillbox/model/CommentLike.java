@@ -23,6 +23,6 @@ public class CommentLike {
     @JoinColumn(name = "comment_id")
     private PostComment comment;
 
-    @Column(name="is_delete")
+    @Column(name = "is_delete")
     private Boolean isDelete;
 }
