@@ -3,9 +3,7 @@ package ru.skillbox.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skillbox.exception.EmailNotFoundException;
 import ru.skillbox.model.AuthController;
 import ru.skillbox.request.LoginRequest;
 import ru.skillbox.request.PasswordRecoveryRequest;
@@ -29,7 +27,7 @@ public class AuthControllerImpl implements AuthController {
         try {
             log.info("{} is login in", request.getEmail());
             return ResponseEntity.ok(authService.login(request));
-        } catch (UsernameNotFoundException e) {
+        } catch (RuntimeException e) {
             log.error("login attempt for {}", request.getEmail());
             return ResponseEntity.badRequest().body(new ErrorResponse().getResponse(e.getMessage()));
         }
@@ -50,7 +48,7 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<Responsable> passwordRecovery(PasswordRecoveryRequest request) {
         try {
             return ResponseEntity.ok(authService.passwordRecovery(request));
-        } catch (EmailNotFoundException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse().getResponse(e.getMessage()));
         }
     }
