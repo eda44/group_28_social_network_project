@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skillbox.config.CloudinaryConfig;
-import ru.skillbox.dto.FileUploadDto;
+import ru.skillbox.common.FileUploadDto;
 import ru.skillbox.model.Person;
 import ru.skillbox.model.ProfileFile;
 import ru.skillbox.repository.ProfileFileRepository;

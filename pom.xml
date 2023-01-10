@@ -162,9 +162,9 @@
             <version>1.10.2</version>
         </dependency>
         <dependency>
-            <groupId>cn.apiclub.tool</groupId>
-            <artifactId>simplecaptcha</artifactId>
-            <version>1.2.2</version>
+            <groupId>com.github.cage</groupId>
+            <artifactId>cage</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 

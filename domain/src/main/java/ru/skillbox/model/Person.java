@@ -1,7 +1,7 @@
 package ru.skillbox.model;
 
 import lombok.*;
-import ru.skillbox.dto.enums.MessagePermission;
+import ru.skillbox.enums.MessagePermission;
 
 import javax.persistence.*;
 import java.util.List;

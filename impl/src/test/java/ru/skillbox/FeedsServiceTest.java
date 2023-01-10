@@ -19,7 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import ru.skillbox.dto.enums.Type;
+import ru.skillbox.enums.Type;
 import ru.skillbox.model.Person;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;

@@ -1,12 +1,8 @@
 package ru.skillbox.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.ReportingPolicy;
-import ru.skillbox.dto.enums.StatusCode;
-import ru.skillbox.model.Person;
-import ru.skillbox.response.data.PersonDto;
 
 @Mapper(componentModel = "spring",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,

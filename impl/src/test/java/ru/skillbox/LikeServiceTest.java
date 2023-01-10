@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import ru.skillbox.dto.enums.Type;
+import ru.skillbox.enums.Type;
 import ru.skillbox.model.*;
 import ru.skillbox.repository.*;
 import ru.skillbox.service.LikeService;

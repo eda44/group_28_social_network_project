@@ -1,7 +1,7 @@
 package ru.skillbox.response;
 
 import lombok.Data;
-import ru.skillbox.dto.AbstractDto;
+import ru.skillbox.common.AbstractDto;
 
 @Data
 public class PasswordRecoveryResponse implements Responsable{

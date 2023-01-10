@@ -3,7 +3,7 @@ package ru.skillbox.response.data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.Status;
+import ru.skillbox.enums.Status;
 
 @Getter
 @Setter

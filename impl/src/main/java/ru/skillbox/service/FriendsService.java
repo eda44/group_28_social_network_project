@@ -3,7 +3,7 @@ package ru.skillbox.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.skillbox.dto.enums.StatusCode;
+import ru.skillbox.enums.StatusCode;
 import ru.skillbox.exception.BadRequestException;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Friendship;

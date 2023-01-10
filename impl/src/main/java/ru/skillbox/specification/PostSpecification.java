@@ -1,7 +1,7 @@
 package ru.skillbox.specification;
 
 import org.springframework.data.jpa.domain.Specification;
-import ru.skillbox.dto.enums.Type;
+import ru.skillbox.enums.Type;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.Tag;
 

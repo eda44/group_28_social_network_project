@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skillbox.dto.CityDto;
-import ru.skillbox.dto.CountryDto;
+import ru.skillbox.common.CityDto;
+import ru.skillbox.common.CountryDto;
 import ru.skillbox.service.GeoService;
 
 import java.util.List;

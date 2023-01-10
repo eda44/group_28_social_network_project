@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skillbox.config.CloudinaryConfig;
-import ru.skillbox.dto.PhotoDto;
+import ru.skillbox.common.PhotoDto;
 import ru.skillbox.model.Person;
 import ru.skillbox.model.PostFile;
 import ru.skillbox.repository.PostFileRepository;

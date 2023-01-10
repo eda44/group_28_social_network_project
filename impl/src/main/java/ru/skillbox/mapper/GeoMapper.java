@@ -4,8 +4,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import ru.skillbox.dto.CityDto;
-import ru.skillbox.dto.CountryDto;
+import ru.skillbox.common.CityDto;
+import ru.skillbox.common.CountryDto;
 import ru.skillbox.model.City;
 import ru.skillbox.model.Country;
 

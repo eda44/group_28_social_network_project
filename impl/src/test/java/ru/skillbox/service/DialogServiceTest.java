@@ -8,21 +8,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import ru.skillbox.dto.enums.Status;
+import ru.skillbox.enums.Status;
 import ru.skillbox.mapper.DialogMapper;
-import ru.skillbox.mapper.DialogMapperImpl;
 import ru.skillbox.model.Dialog;
 import ru.skillbox.model.Message;
 import ru.skillbox.model.Person;
 import ru.skillbox.repository.DialogRepository;
 import ru.skillbox.repository.MessageRepository;
-import ru.skillbox.response.DialogListResponse;
-import ru.skillbox.response.MessageRs;
 import ru.skillbox.response.Responsable;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -2,7 +2,7 @@ package ru.skillbox.response;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.FileUploadDto;
+import ru.skillbox.common.FileUploadDto;
 
 @Getter
 @Setter

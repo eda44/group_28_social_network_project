@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import ru.skillbox.common.SearchPersonDto;
-import ru.skillbox.dto.enums.NameNotification;
+import ru.skillbox.enums.NameNotification;
 
 @Getter
 @Setter

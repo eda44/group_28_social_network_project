@@ -2,7 +2,7 @@ package ru.skillbox.response.settings;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.NameNotification;
+import ru.skillbox.enums.NameNotification;
 
 @Getter
 @Setter

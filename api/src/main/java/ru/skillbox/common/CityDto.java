@@ -1,4 +1,4 @@
-package ru.skillbox.dto;
+package ru.skillbox.common;
 
 import lombok.*;
 
