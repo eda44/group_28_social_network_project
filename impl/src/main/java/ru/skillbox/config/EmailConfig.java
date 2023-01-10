@@ -6,7 +6,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
-//todo удалить если не используется
 
 @Configuration
 public class EmailConfig {

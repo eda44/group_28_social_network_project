@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.skillbox.response.Responsable;
 import ru.skillbox.response.SearchResponse;
 
 @RequestMapping("/api/v1/account")
@@ -33,14 +34,14 @@ public interface SearchController {
             )
     })
     @GetMapping("/search")
-    ResponseEntity<SearchResponse> search(@RequestParam(required = false) String author,
-                                          @RequestParam(required = false) String firstName,
-                                          @RequestParam(required = false) String lastName,
-                                          @RequestParam(required = false) Integer ageFrom,
-                                          @RequestParam(required = false) Integer ageTo,
-                                          @RequestParam(required = false) String city,
-                                          @RequestParam(required = false) String country,
-                                          @RequestParam(required = false, defaultValue = "20") Integer size);
+    ResponseEntity<Responsable> search(@RequestParam(required = false) String author,
+                                       @RequestParam(required = false) String firstName,
+                                       @RequestParam(required = false) String lastName,
+                                       @RequestParam(required = false) Integer ageFrom,
+                                       @RequestParam(required = false) Integer ageTo,
+                                       @RequestParam(required = false) String city,
+                                       @RequestParam(required = false) String country,
+                                       @RequestParam(required = false, defaultValue = "20") Integer size);
 
 }
 
