@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.skillbox.dto.enums.NameNotification;
+import ru.skillbox.enums.NameNotification;
 //todo удалить если не используется
 
 @Builder

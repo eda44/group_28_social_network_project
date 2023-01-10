@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.dto.enums.Status;
+import ru.skillbox.enums.Status;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.request.MessageRq;
 import ru.skillbox.mapper.DialogMapper;

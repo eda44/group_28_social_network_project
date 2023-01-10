@@ -2,7 +2,7 @@ package ru.skillbox.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.Type;
+import ru.skillbox.enums.Type;
 
 import javax.persistence.*;
 import java.util.List;

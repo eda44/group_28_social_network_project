@@ -7,7 +7,7 @@ import ru.skillbox.model.*;
 import ru.skillbox.request.settings.SettingRq;
 import ru.skillbox.response.settings.NotificationSettingsDto;
 import ru.skillbox.response.settings.SettingsDto;
-import ru.skillbox.dto.enums.NameNotification;
+import ru.skillbox.enums.NameNotification;
 import ru.skillbox.repository.SettingRepository;
 import java.util.Date;
 

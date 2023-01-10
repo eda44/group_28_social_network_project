@@ -3,8 +3,8 @@ package ru.skillbox.common;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.MessagePermission;
-import ru.skillbox.dto.enums.StatusCode;
+import ru.skillbox.enums.MessagePermission;
+import ru.skillbox.enums.StatusCode;
 import ru.skillbox.response.Responsable;
 
 

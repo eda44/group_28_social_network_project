@@ -3,7 +3,7 @@ package ru.skillbox.model;
 import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.StatusCode;
+import ru.skillbox.enums.StatusCode;
 
 import javax.persistence.*;
 

@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.skillbox.dto.enums.Role;
+import ru.skillbox.enums.Role;
 import ru.skillbox.exception.CaptchaException;
 import ru.skillbox.exception.EmailNotFoundException;
 import ru.skillbox.exception.InvalidCredentialsException;

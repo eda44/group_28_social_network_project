@@ -2,11 +2,10 @@ package ru.skillbox.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.Status;
+import ru.skillbox.enums.Status;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 
 @Setter
 @Getter

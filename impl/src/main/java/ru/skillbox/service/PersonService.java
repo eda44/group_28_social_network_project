@@ -5,7 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skillbox.common.SearchPersonDto;
-import ru.skillbox.dto.enums.MessagePermission;
+import ru.skillbox.enums.MessagePermission;
 import ru.skillbox.exception.NotAuthorizedException;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.mapper.AccountMapper;

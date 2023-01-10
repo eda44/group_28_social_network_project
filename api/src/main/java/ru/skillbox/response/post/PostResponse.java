@@ -2,7 +2,7 @@ package ru.skillbox.response.post;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.Type;
+import ru.skillbox.enums.Type;
 
 import java.util.List;
 

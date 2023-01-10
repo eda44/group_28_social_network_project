@@ -49,7 +49,7 @@ public interface AuthController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = RegistrationResponse.class))
+                                    schema = @Schema(implementation = Responsable.class))
                     }
             ),
             @ApiResponse(
@@ -58,7 +58,7 @@ public interface AuthController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = RegistrationResponse.class))
+                                    schema = @Schema(implementation = Responsable.class))
                     }
             )
     })

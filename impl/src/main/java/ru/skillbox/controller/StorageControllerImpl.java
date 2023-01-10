@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skillbox.dto.PhotoDto;
+import ru.skillbox.common.PhotoDto;
 import ru.skillbox.model.StorageController;
 import ru.skillbox.response.FileUploadResponse;
 import ru.skillbox.service.PostFileService;

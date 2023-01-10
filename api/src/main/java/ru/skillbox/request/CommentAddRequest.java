@@ -2,7 +2,7 @@ package ru.skillbox.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.LikeType;
+import ru.skillbox.enums.LikeType;
 
 @Getter
 @Setter

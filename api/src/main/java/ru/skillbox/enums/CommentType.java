@@ -1,4 +1,4 @@
-package ru.skillbox.dto.enums;
+package ru.skillbox.enums;
 //todo удалить если не используется
 
 public enum CommentType {

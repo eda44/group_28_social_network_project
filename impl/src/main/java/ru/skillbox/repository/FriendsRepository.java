@@ -3,9 +3,8 @@ package ru.skillbox.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-import ru.skillbox.dto.enums.StatusCode;
+import ru.skillbox.enums.StatusCode;
 import ru.skillbox.model.Friendship;
-import ru.skillbox.model.Person;
 
 import java.util.List;
 import java.util.Optional;

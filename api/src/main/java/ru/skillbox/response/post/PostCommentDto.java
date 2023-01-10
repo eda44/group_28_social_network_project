@@ -2,7 +2,7 @@ package ru.skillbox.response.post;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.dto.enums.CommentType;
+import ru.skillbox.enums.CommentType;
 
 @Getter
 @Setter

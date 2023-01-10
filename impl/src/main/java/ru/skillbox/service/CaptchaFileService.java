@@ -1,19 +1,17 @@
 package ru.skillbox.service;
 
-import cn.apiclub.captcha.Captcha;
+import com.github.cage.Cage;
+import com.github.cage.image.Painter;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
-import ru.skillbox.config.CaptchaConfig;
+import ru.skillbox.common.CaptchaDto;
 import ru.skillbox.config.CloudinaryConfig;
 import ru.skillbox.model.CaptchaFile;
 import ru.skillbox.repository.CaptchaFileRepository;
 import ru.skillbox.response.CaptchaResponse;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
@@ -30,6 +28,7 @@ public class CaptchaFileService {
     public Optional<CaptchaFile> getCaptchaFileByName(String name) {
         return captchaFileRepository.findByName(name);
     }
+
     public CaptchaResponse generateCaptchaResponse() {
         CaptchaResponse response = new CaptchaResponse();
         CaptchaFile captchaFile = makeCaptchaFile();
@@ -39,27 +38,20 @@ public class CaptchaFileService {
     }
 
     private CaptchaFile makeCaptchaFile() {
-        Captcha captcha = CaptchaConfig.generateCaptcha(120, 50);
         logger.info("uploading captcha file");
         CaptchaFile captchaFile = new CaptchaFile();
-        byte[] data =  getBytesFrom(captcha.getImage());
-        captchaFile.setPath(getCloudinaryUrl(data));
-        captchaFile.setName(captcha.getAnswer());
+        CaptchaDto captcha = generateCaptcha();
+        captchaFile.setPath(getCloudinaryUrl(captcha.getBytes()));
+        captchaFile.setName(captcha.getCode());
         return captchaFileRepository.save(captchaFile);
     }
 
-    private byte[] getBytesFrom(BufferedImage image){
-        byte[] bytes;
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(image, "png", baos);
-            baos.flush();
-            bytes = baos.toByteArray();
-            baos.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return bytes;
+    public CaptchaDto generateCaptcha() {
+        final Painter painter = new Painter(150, 70, null, null, null, null);
+        Cage cage = new Cage(painter, null, null, null, null, null, null);
+        String code = cage.getTokenGenerator().next().substring(0, 4);
+        CaptchaDto captcha = new CaptchaDto(code, cage.draw(code));
+        return captcha;
     }
 
     private String getCloudinaryUrl(byte[] bytes) {
