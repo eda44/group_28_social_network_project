@@ -12,6 +12,7 @@ public class SocialNetworkApplication {
         SpringApplication.run(SocialNetworkApplication.class, args);
     }
 
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
