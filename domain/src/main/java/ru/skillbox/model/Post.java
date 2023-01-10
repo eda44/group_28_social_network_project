@@ -20,12 +20,12 @@ public class Post {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "post2tag",
-        joinColumns = {@JoinColumn(name = "post_id")},
-        inverseJoinColumns = {@JoinColumn(name = "tag_id")}
+            joinColumns = {@JoinColumn(name = "post_id")},
+            inverseJoinColumns = {@JoinColumn(name = "tag_id")}
     )
     private List<Tag> tags;
     private String title;
-
+    @Column(name = "is_delete")
     private Boolean isDelete;
 
     private Long timeChanged;
@@ -42,7 +42,7 @@ public class Post {
     private Type type;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id",referencedColumnName = "id")
+    @JoinColumn(name = "author_id", referencedColumnName = "id")
     private Person person;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

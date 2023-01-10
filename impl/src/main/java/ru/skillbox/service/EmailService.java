@@ -19,7 +19,7 @@ public class EmailService {
         emailSender.send(message);
     }
 
-    public void passwordRecoveryMessage(String email,String password) {
+    public void passwordRecoveryMessage(String email, String password) {
         String text = "Your new password: " + password;
         String subject = "New password";
         sendSimpleMessage(email, subject, text);

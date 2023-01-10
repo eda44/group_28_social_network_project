@@ -8,18 +8,18 @@ import ru.skillbox.dto.AccountAndStatusByIdDto;
 @Builder
 public class SearchAccountRs {
 
-  private String error;
+    private String error;
 
-  private long timestamp;
+    private long timestamp;
 
-  private int total;
+    private int total;
 
-  private int page;
+    private int page;
 
-  private int size;
+    private int size;
 
-  private AccountAndStatusByIdDto data;
+    private AccountAndStatusByIdDto data;
 
-  private String errorDescription;
+    private String errorDescription;
 
 }

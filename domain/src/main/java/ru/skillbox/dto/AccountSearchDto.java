@@ -2,6 +2,7 @@ package ru.skillbox.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+//todo удалить если не используется
 
 @Getter
 @Setter
@@ -19,5 +20,5 @@ public class AccountSearchDto {
     private Long countryId;
     private Boolean isBlocked;
     private Boolean isDeleted;
-    private PageableObject page;
+//    private PageableObject page;
 }

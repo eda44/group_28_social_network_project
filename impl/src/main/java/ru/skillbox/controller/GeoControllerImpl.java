@@ -10,18 +10,20 @@ import ru.skillbox.dto.CountryDto;
 import ru.skillbox.service.GeoService;
 
 import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class GeoControllerImpl {
     private final GeoService geoService;
+
     @GetMapping("/api/v1/geo/countries")
-    public ResponseEntity<List<CountryDto>> getCountries(){
+    public ResponseEntity<List<CountryDto>> getCountries() {
         return geoService.getCountries();
     }
 
 
     @GetMapping("api/v1/geo/cities/{countryId}")
-    public ResponseEntity<List<CityDto>> getCities(@PathVariable long countryId){
+    public ResponseEntity<List<CityDto>> getCities(@PathVariable long countryId) {
         return geoService.getCities(countryId);
     }
 }

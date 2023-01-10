@@ -16,7 +16,7 @@ public enum NameNotification {
 
     private final String name;
 
-    NameNotification(String name){
+    NameNotification(String name) {
         this.name = name;
     }
 }

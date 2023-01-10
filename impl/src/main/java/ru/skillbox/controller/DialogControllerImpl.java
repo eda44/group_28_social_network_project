@@ -19,7 +19,7 @@ public class DialogControllerImpl implements DialogController {
     //Получение списка диалогов пользователя
     @GetMapping
     public ResponseEntity<DialogListResponse> allDialogs(@RequestParam(required = false) Integer offset,
-                                                         @RequestParam(required = false) Integer itemPerPage){
+                                                         @RequestParam(required = false) Integer itemPerPage) {
         return dialogService.getDialogs(offset, itemPerPage);
     }
 

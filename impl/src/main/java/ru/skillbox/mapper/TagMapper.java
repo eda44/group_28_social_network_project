@@ -5,6 +5,7 @@ import ru.skillbox.dto.PostTagDto;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+//todo удалить если не используется
 
 public class TagMapper implements RowMapper<PostTagDto> {
     @Override

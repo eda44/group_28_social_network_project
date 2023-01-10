@@ -12,5 +12,5 @@ import ru.skillbox.model.PostComment;
 public interface PostCommentRepository extends JpaRepository<PostComment, Long>,
         JpaSpecificationExecutor<PostComment> {
     Page<PostComment> findByPostAndIsDeleteAndParentId(Post post, Boolean isDelete,
-                                                       Long parentId,Pageable pageable);
+                                                       Long parentId, Pageable pageable);
 }

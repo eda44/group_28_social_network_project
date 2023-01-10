@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skillbox.model.PostFile;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -35,17 +33,12 @@ public class CloudinaryConfig {
                 "secure", true));
     }
 
-    public PostFile uploadImage(MultipartFile file) {
-        Cloudinary cloudinary = getCloudinary();
-        PostFile postFile = new PostFile();
+    public String getCloudinaryUrl(MultipartFile file) {
         try {
-            Map upload = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-            String url = (String) upload.get("url");
-            postFile.setPath(url);
-            postFile.setName(file.getOriginalFilename());
+            return (String) getCloudinary().uploader().upload(file
+                    .getBytes(), ObjectUtils.emptyMap()).get("url");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return postFile;
     }
 }

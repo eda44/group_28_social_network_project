@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import ru.skillbox.dto.LogoutDto;
 
-
 import java.util.Date;
 
 @Getter
@@ -29,6 +28,15 @@ public class RegistrationResponse {
                 .error("Неверный запрос")
                 .timestamp(new Date().getTime())
                 .errorDescription("Этот аккуант уже зарегистрирован")
+                .build();
+    }
+
+
+    public static RegistrationResponse getCaptchaResponse() {
+        return RegistrationResponse.builder()
+                .error("Неверный запрос")
+                .timestamp(new Date().getTime())
+                .errorDescription("Неверный код")
                 .build();
     }
 }

@@ -1,28 +1,32 @@
 package ru.skillbox.request.account;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Date;
 
 @Builder
-@Data
+@Getter
+@Setter
 public class AccountEditRq {
 
-  private String phone;
+    private String phone;
 
-  private String about;
+    private String about;
 
-  private int city;
+    private String city;
 
-  private int country;
+    private String country;
 
-  private int firstName;
+    private String firstName;
 
-  private String lastName;
+    private String lastName;
 
-  private String birthDay;
+    private Date birthDate;
 
-  private String photoId;
+    private String photoId;
 
-  private String photoName;
+    private String photoName;
 
 }

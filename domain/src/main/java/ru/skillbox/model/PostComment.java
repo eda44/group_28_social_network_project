@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @Getter
 @Builder
-@Data
 public class PostComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,21 +22,18 @@ public class PostComment {
 
     private Long timeChanged;
 
+    @Column(name = "is_delete")
     private Boolean isDelete;
 
-    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id", referencedColumnName = "id")
-    private List<CommentFile> commentFiles;
-
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id",referencedColumnName = "id")
+    @JoinColumn(name = "post_id", referencedColumnName = "id")
     private Post post;
 
     @Column(name = "parent_id")
     private Long parentId;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id",referencedColumnName = "id")
+    @JoinColumn(name = "author_id", referencedColumnName = "id")
     private Person person;
 
     @Column(name = "comment_text")

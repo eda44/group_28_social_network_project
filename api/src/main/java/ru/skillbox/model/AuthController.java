@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.skillbox.request.LoginRequest;
 import ru.skillbox.request.PasswordRecoveryRequest;
 import ru.skillbox.request.RegistrationRequest;
-import ru.skillbox.response.LoginResponse;
-import ru.skillbox.response.PasswordRecoveryResponse;
-import ru.skillbox.response.RegistrationResponse;
+import ru.skillbox.response.*;
 
 @RequestMapping("/api/v1/auth")
 public interface AuthController {
@@ -39,10 +37,10 @@ public interface AuthController {
             )
     })
     @PostMapping("/login")
-    ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
+    ResponseEntity<Responsable> login(@RequestBody LoginRequest request);
 
     @PostMapping("/logout")
-    String logout();
+    void logout();
 
     @ApiResponses(value = {
             @ApiResponse(
@@ -65,10 +63,10 @@ public interface AuthController {
             )
     })
     @PostMapping("/register")
-    ResponseEntity<RegistrationResponse> registration(@RequestBody RegistrationRequest request);
+    ResponseEntity<Responsable> registration(@RequestBody RegistrationRequest request);
 
     @GetMapping("/captcha")
-    ResponseEntity<String> captcha();
+    ResponseEntity<CaptchaResponse> captcha();
 
     @ApiResponses(value = {
             @ApiResponse(
@@ -91,5 +89,5 @@ public interface AuthController {
             )
     })
     @PostMapping("/password/recovery")
-    ResponseEntity<PasswordRecoveryResponse> passwordRecovery(@RequestBody PasswordRecoveryRequest request);
+    ResponseEntity<Responsable> passwordRecovery(@RequestBody PasswordRecoveryRequest request);
 }

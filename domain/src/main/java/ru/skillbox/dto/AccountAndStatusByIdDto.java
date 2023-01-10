@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import ru.skillbox.dto.enums.MessagePermission;
-import ru.skillbox.dto.enums.StatusCode;
 import ru.skillbox.model.Person;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.List;
 @Getter
 @Builder
 public class AccountAndStatusByIdDto {
-
+    //TODO: УДАЛИТЬ
     private Long id;
     private String email;
     private String phone;
@@ -58,6 +57,7 @@ public class AccountAndStatusByIdDto {
 //                .isBlocked(person.isBlocked())
                 .build();
     }
+
     public static List<AccountAndStatusByIdDto> getCorrectListResponseFrom(List<Person> people) {
         List<AccountAndStatusByIdDto> accountDtos = new ArrayList<>();
         for (Person person : people) {

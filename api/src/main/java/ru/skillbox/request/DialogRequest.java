@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+//todo удалить если не используется
 
 @Setter
 @Getter

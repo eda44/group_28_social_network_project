@@ -2,6 +2,7 @@ package ru.skillbox.response;
 
 import lombok.Getter;
 import lombok.Setter;
+//todo удалить если не используется
 
 @Setter
 @Getter
