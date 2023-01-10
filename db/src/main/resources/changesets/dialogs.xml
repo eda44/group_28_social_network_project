@@ -1,21 +1,15 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-                   xmlns:pro="http://www.liquibase.org/xml/ns/pro"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
-                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
-                   http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd
-                   http://www.liquibase.org/xml/ns/dbchangelog
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet id="createTable dialogs" author="Daniil Epikhov">
         <createTable tableName="dialogs">
             <column autoIncrement="true" name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="dialogs_pkey"/>
             </column>
-            <column name="unread_count" type="bigint"/>
-            <column name="owner_id" type="bigint"/>
-            <column name="partner_id" type="bigint"/>
-            <!--<column name="last_message" type="varchar"/>-->
+            <column name="companion_1" type="bigint"/>
+            <column name="companion_2" type="bigint"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
+

@@ -11,5 +11,6 @@ public interface DialogController {
     ResponseEntity<DialogRs> getMessages(Long interlocutorId, Integer offset, Integer itemPerPage);
 
     ResponseEntity<MessageRs> markAsRead(Long companionId);
-}
 
+    ResponseEntity<MessageRs> getUnreadMessages();
+}

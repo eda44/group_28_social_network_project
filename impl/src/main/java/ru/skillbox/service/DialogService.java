@@ -1,15 +1,13 @@
 package ru.skillbox.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.dto.enums.Status;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.request.MessageRq;
-import ru.skillbox.response.data.DialogDto;
-import ru.skillbox.response.data.MessageDto;
 import ru.skillbox.mapper.DialogMapper;
 import ru.skillbox.model.Dialog;
 import ru.skillbox.model.Message;
@@ -21,154 +19,146 @@ import ru.skillbox.response.DialogListResponse;
 import ru.skillbox.response.DialogRs;
 import ru.skillbox.response.MessageRs;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Log4j2
 @Service
+@RequiredArgsConstructor
 public class DialogService {
     private final DialogRepository dialogRepository;
     private final MessageRepository messageRepository;
     private final DialogMapper dialogMapper;
-    private final  PersonService personService;
+    private final PersonService personService;
 
-    @Autowired
-    public DialogService(DialogRepository dialogRepository, MessageRepository messageRepository,
-                         DialogMapper dialogMapper, PersonService personService) {
-        this.dialogRepository = dialogRepository;
-        this.messageRepository = messageRepository;
-        this.dialogMapper = dialogMapper;
-        this.personService = personService;
-    }
-
+    //Получение списка диалогов пользователя
     @Transactional(readOnly = true)
     public ResponseEntity<DialogListResponse> getDialogs(Integer offset, Integer itemPerPage) {
-        Person curPerson = personService.getCurrentPerson();
-        List<Dialog> dialogList = dialogRepository.findAllDialogsForPerson(curPerson);
-        List<DialogDto> dialogDtoList = new ArrayList<>();
+        Person currentPerson = personService.getCurrentPerson();
+        List<Dialog> dialogList = dialogRepository.findAllDialogsForPerson(currentPerson);
 
-        for (Dialog dialog : dialogList) {
+        dialogList.forEach(dialog -> {
+            dialog.setConversationPartner(dialog.getCompanion1().equals(currentPerson)
+                    ? dialog.getCompanion2() : dialog.getCompanion1());
 
-            Person conversationPartner = dialog.getOwner() == curPerson
-                    ? dialog.getConversationPartner() : dialog.getOwner();
+            dialog.setUnreadCount(
+                    messageRepository.findAllByDialogId(dialog)
+                            .stream()
+                            .filter(message -> message.getRecipientId().getId().equals(currentPerson.getId()))
+                            .filter(message -> message.getStatus().equals(Status.SENT))
+                            .count());
 
-            if (conversationPartner != dialog.getConversationPartner())
-                dialog.setConversationPartner(conversationPartner);
+            dialog.setLastMessage(
+                    dialog.getMessages().stream()
+                            .max(Comparator.comparing(Message::getTime))
+                            .orElse(new Message()));
+        });
 
-            List<Message> messages = dialog.getMessages();
-
-            /*MessageDto messageDto = !messages.isEmpty()
-                    ? dialogMapper.toDto(messages.get(messages.size() - 1))
-                    : MessageDto.builder().build();*/
-            if (!messages.isEmpty()){
-                dialog.setLastMessage(messages.get(messages.size() - 1));//TODO заглушка
-            }
-
-
-            dialogDtoList.add(dialogMapper.DialogToDto(dialog));
-        }
-
-        return ResponseEntity.ok(DialogListResponse.builder()
-                .timestamp(System.currentTimeMillis())
-                .total(10)
-                .offset(offset)
-                .perPage(itemPerPage)
-                .currentUserId(curPerson.getId())
-                .data(dialogDtoList)
-                .build());
+        return ResponseEntity.ok(
+                DialogListResponse.builder()
+                        .timestamp(System.currentTimeMillis())
+                        .total(10)
+                        .offset(offset)
+                        .perPage(itemPerPage)
+                        .currentUserId(currentPerson.getId())
+                        .data(dialogMapper.listDialogToDto(dialogList))
+                        .build());
     }
 
+    //Получение сообщений диалога
     @Transactional
     public ResponseEntity<DialogRs> getMessages(Long id, Integer offset, Integer itemPerPage) {
-        Person curPerson = personService.getCurrentPerson();
-        Person companion;
+        Person currentPerson = personService.getCurrentPerson();
+        Person conversationPartner;
         try {
-            companion = personService.getPersonById(id);
+            conversationPartner = personService.getPersonById(id);
         } catch (UserNotFoundException e) {
             throw new RuntimeException(e);
         }
 
-        List<Dialog> dialogList = dialogRepository.findAllDialogsForPerson(curPerson);
-        Dialog dialogRes = null;
+        Optional<Dialog> dialog = dialogRepository.findDialogByCompanions(
+                currentPerson, conversationPartner);
 
-        for (Dialog dialog : dialogList) {
-            if (dialog.getOwner() == companion || dialog.getConversationPartner() == companion)
-                dialogRes = dialog;
-        }
+        Dialog dialogRes = dialog.orElseGet(() -> saveAndGetDialog(currentPerson, conversationPartner));
 
-        if (dialogRes == null) {
-            dialogRes = new Dialog();
-            dialogRes.setUnreadCount(0L);
-            dialogRes.setOwner(curPerson);
-            dialogRes.setConversationPartner(companion);
-
-            dialogRepository.save(dialogRes);
-        }
-
-
-        List<Message> messageList = messageRepository.findAllByDialogId(dialogRes);
-        List<MessageDto> messageDtoList = new ArrayList<>();
-
-        messageList.forEach(message -> messageDtoList.add(dialogMapper.MessageToDto(message)));
-
-        return ResponseEntity.ok(DialogRs.builder()
-                .timestamp(System.currentTimeMillis())
-                .total(10)
-                .offset(offset)
-                .perPage(itemPerPage)
-                .data(messageDtoList)
-                .build());
+        return ResponseEntity.ok(
+                DialogRs.builder()
+                        .timestamp(System.currentTimeMillis())
+                        .total(10)
+                        .offset(offset)
+                        .perPage(itemPerPage)
+                        .data(dialogMapper.listMessageToDto(messageRepository.findAllByDialogId(dialogRes)))
+                        .build());
     }
 
+    //Сохраниние сообщения
     @Transactional
     public void saveMessage(MessageRq messageRq) {
         Message message = dialogMapper.DtoToMessage(messageRq.getData());
         message.setStatus(Status.SENT);
-        Dialog dialog = dialogRepository.findDialogByOwnerAndConversationPartner(message.getAuthorId(),
+        Optional<Dialog> dialog = dialogRepository.findDialogByCompanions(message.getAuthorId(),
                 message.getRecipientId());
-        message.setDialogId(dialog);
+        message.setDialogId(
+                dialog.orElseGet(() ->
+                        saveAndGetDialog(message.getAuthorId(), message.getRecipientId())));
         messageRepository.save(message);
     }
 
+    //Сохранение диалога двух пользователей
+    private Dialog saveAndGetDialog(Person companion1, Person companion2) {
+        Dialog dialog = new Dialog();
+        dialog.setCompanion1(companion1);
+        dialog.setCompanion2(companion2);
+
+        return dialogRepository.save(dialog);
+    }
+
+    //Пометить сообщения прочитанными
     @Transactional
     public ResponseEntity<MessageRs> markAsRead(Long id) {
         Person currentPerson = personService.getCurrentPerson();
 
         try {
-            Dialog dialog = dialogRepository.findDialogByOwnerAndConversationPartner(
-                    currentPerson, personService.getPersonById(id));
+            Dialog dialog = dialogRepository.findDialogByCompanions(
+                    currentPerson, personService.getPersonById(id)).get();
 
-            List<Message> messages = messageRepository.findAllByDialogId(dialog);
-            messages.forEach(message -> {
+            List<Message> readMessage = new ArrayList<>();
+
+            messageRepository.findAllByDialogId(dialog).forEach(message -> {
                 if (message.getRecipientId().getId().equals(currentPerson.getId())) {
                     message.setStatus(Status.READ);
-                    messageRepository.save(message);
+                    readMessage.add(message);
                 }
             });
-        }catch (UserNotFoundException e) {
+
+            messageRepository.saveAll(readMessage);
+        } catch (UserNotFoundException e) {
             e.printStackTrace();
         }
 
-        return ResponseEntity.ok(MessageRs.builder()
-                .timestamp(System.currentTimeMillis())
-                .data(DataMessage.builder()
-                        .message("Ok")
-                        .build())
-                .build());
+        return ResponseEntity.ok(
+                MessageRs.builder()
+                        .timestamp(System.currentTimeMillis())
+                        .data(DataMessage.builder()
+                                .message("Ok")
+                                .build())
+                        .build());
     }
 
+
+    //Посчитать количество непрочитанных сообщений
     @Transactional(readOnly = true)
     public ResponseEntity<MessageRs> getUnreadMessage() {
 
         List<Message> unreadMessages = messageRepository.findAllByRecipientIdAndStatus(
                 personService.getCurrentPerson(), Status.SENT);
 
-        return ResponseEntity.ok(MessageRs.builder()
-                .timestamp(System.currentTimeMillis())
-                .data(DataMessage.builder()
-                        .count(unreadMessages.size())
-                        .build())
-                .build());
+        return ResponseEntity.ok(
+                MessageRs.builder()
+                        .timestamp(System.currentTimeMillis())
+                        .data(DataMessage.builder()
+                                .count(unreadMessages.size())
+                                .build())
+                        .build());
     }
 }
 

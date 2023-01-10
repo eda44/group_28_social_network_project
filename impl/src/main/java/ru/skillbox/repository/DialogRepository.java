@@ -13,11 +13,11 @@ import java.util.Optional;
 @Repository
 public interface DialogRepository extends JpaRepository<Dialog, Long> {
 
-    @Query("select d from dialogs d where d.owner = :person or d.conversationPartner = :person")
+    @Query("select d from dialogs d where d.companion1 = :person or d.companion2 = :person")
     List<Dialog> findAllDialogsForPerson(@Param("person") Person person);
 
-    @Query("select d from dialogs d where d.owner = :person1 and d.conversationPartner = :person2" +
-            " or d.owner = :person2 and d.conversationPartner = :person1")
-    Dialog findDialogByOwnerAndConversationPartner(@Param("person1") Person person1,
-                                                   @Param("person2") Person person2);
+    @Query("select d from dialogs d where d.companion1 = :person1 and d.companion2 = :person2" +
+            " or d.companion1 = :person2 and d.companion2 = :person1")
+    Optional<Dialog> findDialogByCompanions(@Param("person1") Person person1,
+                                            @Param("person2") Person person2);
 }

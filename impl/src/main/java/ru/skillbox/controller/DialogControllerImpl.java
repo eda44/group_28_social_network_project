@@ -1,6 +1,6 @@
 package ru.skillbox.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.model.DialogController;
@@ -10,15 +10,11 @@ import ru.skillbox.response.MessageRs;
 import ru.skillbox.service.DialogService;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/dialogs")
 public class DialogControllerImpl implements DialogController {
 
     private final DialogService dialogService;
-
-    @Autowired
-    public DialogControllerImpl(DialogService dialogService) {
-        this.dialogService = dialogService;
-    }
 
     //Получение списка диалогов пользователя
     @GetMapping

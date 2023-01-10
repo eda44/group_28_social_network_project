@@ -17,20 +17,23 @@ public class Dialog {
     private Long id;
 
     @ManyToOne()
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
-    private Person owner;
+    @JoinColumn(name = "companion_1", referencedColumnName = "id")
+    private Person companion1;
 
     @ManyToOne()
-    @JoinColumn(name = "partner_id", referencedColumnName = "id")
-    private Person conversationPartner;
-
-    @Column(name = "unread_count")
-    private Long unreadCount;
+    @JoinColumn(name = "companion_2", referencedColumnName = "id")
+    private Person companion2;
 
     @OneToMany(mappedBy = "dialogId")
     List<Message> messages;
 
     @Transient
+    private Long unreadCount;
+
+    @Transient
     private Message lastMessage;
+
+    @Transient
+    private Person conversationPartner;
 
 }
