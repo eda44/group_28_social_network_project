@@ -12,15 +12,16 @@ import java.util.List;
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DialogRs {
+public class DialogRs implements Responsable{
 
-    private String error;
-    private Long timestamp;
     private Integer total;
     private Integer offset;
     private List<MessageDto> data;
-    private String errorDescription;
     private Integer perPage;
     private Integer currentUserId;
 
+    @Override
+    public Responsable getResponse(String s) {
+        return null;
+    }
 }

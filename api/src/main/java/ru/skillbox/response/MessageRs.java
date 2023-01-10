@@ -9,9 +9,12 @@ import lombok.Setter;
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MessageRs {
-    private String error;
-    private Long timestamp;
+public class MessageRs implements Responsable {
+
     private DataMessage data;
-    private String errorDescription;
+
+    @Override
+    public Responsable getResponse(String s) {
+        return null;
+    }
 }

@@ -14,10 +14,7 @@ import ru.skillbox.model.Message;
 import ru.skillbox.model.Person;
 import ru.skillbox.repository.DialogRepository;
 import ru.skillbox.repository.MessageRepository;
-import ru.skillbox.response.DataMessage;
-import ru.skillbox.response.DialogListResponse;
-import ru.skillbox.response.DialogRs;
-import ru.skillbox.response.MessageRs;
+import ru.skillbox.response.*;
 
 import java.util.*;
 
@@ -32,7 +29,7 @@ public class DialogService {
 
     //Получение списка диалогов пользователя
     @Transactional(readOnly = true)
-    public ResponseEntity<DialogListResponse> getDialogs(Integer offset, Integer itemPerPage) {
+    public ResponseEntity<Responsable> getDialogs(Integer offset, Integer itemPerPage) {
         Person currentPerson = personService.getCurrentPerson();
         List<Dialog> dialogList = dialogRepository.findAllDialogsForPerson(currentPerson);
 
@@ -55,7 +52,6 @@ public class DialogService {
 
         return ResponseEntity.ok(
                 DialogListResponse.builder()
-                        .timestamp(System.currentTimeMillis())
                         .total(10)
                         .offset(offset)
                         .perPage(itemPerPage)
@@ -66,7 +62,7 @@ public class DialogService {
 
     //Получение сообщений диалога
     @Transactional
-    public ResponseEntity<DialogRs> getMessages(Long id, Integer offset, Integer itemPerPage) {
+    public ResponseEntity<Responsable> getMessages(Long id, Integer offset, Integer itemPerPage) {
         Person currentPerson = personService.getCurrentPerson();
         Person conversationPartner;
         try {
@@ -82,7 +78,6 @@ public class DialogService {
 
         return ResponseEntity.ok(
                 DialogRs.builder()
-                        .timestamp(System.currentTimeMillis())
                         .total(10)
                         .offset(offset)
                         .perPage(itemPerPage)
@@ -114,7 +109,7 @@ public class DialogService {
 
     //Пометить сообщения прочитанными
     @Transactional
-    public ResponseEntity<MessageRs> markAsRead(Long id) {
+    public ResponseEntity<Responsable> markAsRead(Long id) {
         Person currentPerson = personService.getCurrentPerson();
 
         try {
@@ -137,7 +132,6 @@ public class DialogService {
 
         return ResponseEntity.ok(
                 MessageRs.builder()
-                        .timestamp(System.currentTimeMillis())
                         .data(DataMessage.builder()
                                 .message("Ok")
                                 .build())
@@ -147,14 +141,13 @@ public class DialogService {
 
     //Посчитать количество непрочитанных сообщений
     @Transactional(readOnly = true)
-    public ResponseEntity<MessageRs> getUnreadMessage() {
+    public ResponseEntity<Responsable> getUnreadMessage() {
 
         List<Message> unreadMessages = messageRepository.findAllByRecipientIdAndStatus(
                 personService.getCurrentPerson(), Status.SENT);
 
         return ResponseEntity.ok(
                 MessageRs.builder()
-                        .timestamp(System.currentTimeMillis())
                         .data(DataMessage.builder()
                                 .count(unreadMessages.size())
                                 .build())

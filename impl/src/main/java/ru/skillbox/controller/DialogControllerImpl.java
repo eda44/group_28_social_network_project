@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.model.DialogController;
-import ru.skillbox.response.DialogListResponse;
-import ru.skillbox.response.DialogRs;
-import ru.skillbox.response.MessageRs;
+import ru.skillbox.response.*;
 import ru.skillbox.service.DialogService;
 
 @RestController
@@ -18,29 +16,46 @@ public class DialogControllerImpl implements DialogController {
 
     //Получение списка диалогов пользователя
     @GetMapping
-    public ResponseEntity<DialogListResponse> allDialogs(@RequestParam(required = false) Integer offset,
-                                                         @RequestParam(required = false) Integer itemPerPage) {
-        return dialogService.getDialogs(offset, itemPerPage);
+    public ResponseEntity<Responsable> allDialogs(@RequestParam(required = false) Integer offset,
+                                                  @RequestParam(required = false) Integer itemPerPage) {
+        try {
+            return dialogService.getDialogs(offset, itemPerPage);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse().getResponse(e.getMessage()));
+        }
     }
 
     //Получение сообщений диалога
     @GetMapping("/messages")
-    public ResponseEntity<DialogRs> getMessages(@RequestParam Long companionId,
-                                                @RequestParam(required = false) Integer offset,
-                                                @RequestParam(required = false) Integer itemPerPage) {
-        return dialogService.getMessages(companionId, offset, itemPerPage);
+    public ResponseEntity<Responsable> getMessages(@RequestParam Long companionId,
+                                                   @RequestParam(required = false) Integer offset,
+                                                   @RequestParam(required = false) Integer itemPerPage) {
+        try {
+            return dialogService.getMessages(companionId, offset, itemPerPage);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse().getResponse(e.getMessage()));
+        }
+
     }
 
     //Пометить сообщения прочитанными
     @PutMapping("/{companionId}")
-    public ResponseEntity<MessageRs> markAsRead(@PathVariable Long companionId) {
-        return dialogService.markAsRead(companionId);
+    public ResponseEntity<Responsable> markAsRead(@PathVariable Long companionId) {
+        try {
+            return dialogService.markAsRead(companionId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse().getResponse(e.getMessage()));
+        }
     }
 
     //Получить количество непрочитанных сообщений
     @GetMapping("/unreaded")
-    public ResponseEntity<MessageRs> getUnreadMessages() {
-        return dialogService.getUnreadMessage();
+    public ResponseEntity<Responsable> getUnreadMessages() {
+        try {
+            return dialogService.getUnreadMessage();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse().getResponse(e.getMessage()));
+        }
     }
 }
 
