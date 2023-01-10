@@ -14,4 +14,5 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findAllByDialogId(Dialog dialog);
 
     List<Message> findAllByRecipientIdAndStatus(Person recipient, Status status);
+
 }

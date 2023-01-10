@@ -12,8 +12,8 @@
             <column autoIncrement="true" name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="messages_pkey"/>
             </column>
-            <column name="time" type="bigint"/>
-            <column name="status" type="varchar(255)" defaultValue="SENT"/>
+            <column name="time" type="timestamp"/>
+            <column name="status" type="varchar(255)"/>
             <column name="message_text" type="varchar"/>
             <column name="author_id" type="bigint"/>
             <column name="recipient_id" type="bigint"/>

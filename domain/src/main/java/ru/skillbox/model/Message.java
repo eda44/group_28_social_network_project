@@ -5,6 +5,8 @@ import lombok.Setter;
 import ru.skillbox.dto.enums.Status;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Calendar;
 
 @Setter
 @Getter
@@ -16,7 +18,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long time;
+    private LocalDateTime time;
 
     @Enumerated(EnumType.STRING)
     private Status status;

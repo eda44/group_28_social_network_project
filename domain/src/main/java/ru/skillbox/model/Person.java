@@ -87,10 +87,4 @@ public class Person {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     private Settings settings;
-
-    @OneToMany(mappedBy = "owner")
-    private List<Dialog> myDialogs;
-
-    @OneToMany(mappedBy = "conversationPartner")
-    private List<Dialog> partnerDialogs;
 }
