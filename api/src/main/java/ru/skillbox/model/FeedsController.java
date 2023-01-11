@@ -9,7 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.skillbox.response.CommentResponse;
-import ru.skillbox.response.FeedsResponseOK;
+import ru.skillbox.response.FeedsResponse;
+import ru.skillbox.response.Responsable;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -24,21 +25,18 @@ public interface FeedsController {
                     content = {
                             @Content(
                                     mediaType = "*/*",
-                                    schema = @Schema(implementation = FeedsResponseOK.class))
+                                    schema = @Schema(implementation = FeedsResponse.class))
                     }
             )
     })
 
 
-
     @GetMapping("/api/v1/post")
-    public ResponseEntity<FeedsResponseOK> getFeedsSearch(
+    public ResponseEntity<Responsable> getFeedsSearch(
             HttpServletRequest httpServletRequest
 
     )
-            throws  IOException;
-
-
+            throws IOException;
 
 
     @ApiResponses(value = {
@@ -56,10 +54,9 @@ public interface FeedsController {
 
 
     @GetMapping("/api/v1/post/{id}/comment")
-    public ResponseEntity<CommentResponse> getAllCommentsToPost(@PathVariable long id,
-                                                                HttpServletRequest httpServletRequest)
+    public ResponseEntity<Responsable> getAllCommentsToPost(@PathVariable long id,
+                                                            HttpServletRequest httpServletRequest)
             throws JsonProcessingException;
-
 
 
     @ApiResponses(value = {
@@ -77,8 +74,8 @@ public interface FeedsController {
 
 
     @GetMapping("/api/v1/post/{id}/comment/{commentId}/subcomment")
-    public ResponseEntity<CommentResponse> getAllSubComments(@PathVariable long id, @PathVariable long commentId,
-                                                             HttpServletRequest httpServletRequest)
+    public ResponseEntity<Responsable> getAllSubComments(@PathVariable long id, @PathVariable long commentId,
+                                                         HttpServletRequest httpServletRequest)
             throws JsonProcessingException;
 
 

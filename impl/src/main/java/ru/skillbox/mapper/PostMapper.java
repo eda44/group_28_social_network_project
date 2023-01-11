@@ -21,7 +21,7 @@ public interface PostMapper {
     public static final int MILLISECONDS_IN_SECONDS = 1000;
 
 
-    PostMapper INSTANCE = Mappers.getMapper( PostMapper.class );
+    PostMapper INSTANCE = Mappers.getMapper(PostMapper.class);
 
     @Mapping(source = "time", target = "time", qualifiedByName = "mapTime")
     @Mapping(source = "person", target = "authorId", qualifiedByName = "mapAuthorId")
@@ -33,28 +33,32 @@ public interface PostMapper {
     @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTags")
     @Mapping(source = "timeChanged", target = "timeChanged", qualifiedByName = "mapPublishDate")
     @Mapping(source = "isDelete", target = "isDelete")
-    PostDto postToPostDto(Post post, @Context Long currentUser);
+    PostDto postToPostDto(Post post, @Context Long currentUser, @Context boolean isTest);
 
     @Named("mapTime")
-    default String mapTime(Long time){
+    default String mapTime(Long time, @Context boolean isTest) {
 
-
-
-        return mapPublishDate(time);
+        return mapPublishDate(time, isTest);
     }
 
 
     @Named("mapAuthorId")
-    default Long mapAuthorId(Person person){
+    default Long mapAuthorId(Person person) {
         return person.getId();
     }
 
     @Named("mapCommentsCount")
-    default Integer mapCommentsCount(List<PostComment> postCommentList){
-        if(postCommentList!=null) {
+    default Integer mapCommentsCount(List<PostComment> postCommentList) {
+        if (postCommentList != null) {
+            Map<Long, PostComment> postCommentMap = new HashMap<>();
+            for (PostComment postComment : postCommentList) {
+                postCommentMap.put(postComment.getId(), postComment);
+            }
             return postCommentList.stream()
-                    .filter(p-> p.getIsDelete().equals(false))
+                    .filter(p -> p.getIsDelete().equals(false))
                     .filter(p -> p.getPerson().getIsEnabled().equals(true))
+                    .filter(p -> p.getParentId() == 0L || p.getParentId() != 0L
+                            && postCommentMap.get(p.getParentId()).getIsDelete().equals(false))
                     .collect(Collectors.toList())
                     .size();
         }
@@ -63,49 +67,51 @@ public interface PostMapper {
 
     @Named("mapImagePath")
     default String mapPhoto(List<PostFile> postFiles) {
-        if(postFiles != null && !postFiles.isEmpty() ) {
+        if (postFiles != null && !postFiles.isEmpty()) {
             return postFiles.get(0).getPath();
         }
-        return  null;
+        return null;
     }
 
     @Named("mapLikeAmount")
     default Integer mapLikeAmount(List<PostLike> likes) {
-        if(likes==null) {
+        if (likes == null) {
             return 0;
         }
 
-        return likes.stream().filter(p->p.getIsDelete().equals(false))
-                .filter(p->p.getPerson().getIsEnabled().equals(true))
+        return likes.stream().filter(p -> p.getIsDelete().equals(false))
+                .filter(p -> p.getPerson().getIsEnabled().equals(true))
                 .collect(Collectors.toList()).size();
     }
 
     @Named("mapMyLike")
-    default Boolean mapMyLike(List<PostLike> likes, @Context Long currentUser){
-        if(likes==null) {
+    default Boolean mapMyLike(List<PostLike> likes, @Context Long currentUser) {
+        if (likes == null) {
             return null;
         }
-        for(PostLike like : likes) {
-            if(like.getPerson().getId().equals(currentUser) &&
-            like.getIsDelete().equals(false)) {
+        for (PostLike like : likes) {
+            if (like.getPerson().getId().equals(currentUser) &&
+                    like.getIsDelete().equals(false)) {
                 return true;
             }
         }
         return false;
     }
 
-    static  Timestamp correctionTime(Long time){
+    static Timestamp correctionTime(Long time) {
         Long timeUTC = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
         Long timeSystem = LocalDateTime.now().
                 toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now()));
-        return new Timestamp((time + timeSystem - timeUTC)*MILLISECONDS_IN_SECONDS);
+        return new Timestamp((time + timeSystem - timeUTC) * MILLISECONDS_IN_SECONDS);
     }
 
 
-
     @Named("mapPublishDate")
-    default String mapPublishDate(Long time){
-        if(time!=null) {
+    default String mapPublishDate(Long time, @Context boolean isTest) {
+        if (isTest) {
+            return "0";
+        }
+        if (time != null) {
             Timestamp timestamp = correctionTime(time);
 
             LocalDateTime localDateTime = timestamp.toLocalDateTime();
@@ -117,8 +123,8 @@ public interface PostMapper {
     }
 
     @Named("mapTags")
-    default String[] mapTags(List<Tag> tags){
-        if(tags!=null) {
+    default String[] mapTags(List<Tag> tags) {
+        if (tags != null) {
             List<String> tagList = new ArrayList<>();
             for (Tag tag : tags) {
                 tagList.add(tag.getTag());

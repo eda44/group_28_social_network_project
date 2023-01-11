@@ -10,22 +10,22 @@ import javax.persistence.criteria.Root;
 
 public class PostCommentSpecification implements Specification<PostComment> {
 
-    public Specification<PostComment> getCommentsByPostId(Long postId){
+    public Specification<PostComment> getCommentsByPostId(Long postId) {
         return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("post")
-                .get("id"),postId));
+                .get("id"), postId));
     }
 
-    public Specification<PostComment> getCommentsByIsDelete(){
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDelete"),false));
+    public Specification<PostComment> getCommentsByIsDelete() {
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDelete"), false));
     }
 
-    public Specification<PostComment> getCommentsByParentId(Long parentId){
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("parentId"),parentId));
+    public Specification<PostComment> getCommentsByParentId(Long parentId) {
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("parentId"), parentId));
     }
 
-    public Specification<PostComment> getCommentsByAuthorIsNotDelete(){
-         return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person")
-                 .get("isEnabled"),true));
+    public Specification<PostComment> getCommentsByAuthorIsNotDelete() {
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person")
+                .get("isEnabled"), true));
     }
 
 

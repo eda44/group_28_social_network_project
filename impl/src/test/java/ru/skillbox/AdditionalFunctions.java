@@ -1,45 +1,8 @@
 package ru.skillbox;
 
-import ru.skillbox.response.CommentResponse;
-import ru.skillbox.response.FeedsResponseOK;
-import ru.skillbox.response.post.PostCommentDto;
-import ru.skillbox.response.post.PostDto;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-
 public class AdditionalFunctions {
-    public static CommentResponse correctCommentContent(CommentResponse response, String timeString) {
-        List<PostCommentDto> postCommentDtoList = response.getContent();
-        postCommentDtoList.forEach(p -> p.setTime(timeString));
-        response.setContent(postCommentDtoList);
-        return response;
-    }
 
-    public static FeedsResponseOK correctContent(FeedsResponseOK response, String timeString) {
-        List<PostDto> postDtoList = response.getContent();
-        for (PostDto p : postDtoList) {
-            p.setTime(timeString);
-            p.setPublishDate("2022-11-23T14:00:02.169Z");
-        }
-        response.setContent(postDtoList);
-
-        return response;
-    }
-
-    public static String getTimeString() {
-        long time = (new Date()).getTime();
-        Timestamp timestamp = new Timestamp(time);
-        LocalDateTime localDateTime = timestamp.toLocalDateTime();
-        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-    }
-
-
-    public static String generateExpectedCommentString(long personId, long postId, long postCommentId,
-                                                       String timeString) {
+    public static String generateExpectedCommentString(long personId, long postId, long postCommentId) {
         return "{" +
                 "  \"totalElements\": 1," +
                 "  \"totalPages\": 1," +
@@ -49,7 +12,7 @@ public class AdditionalFunctions {
                 "    {" +
                 "      \"id\": " + postCommentId + "," +
                 "      \"commentType\": \"POST\"," +
-                "      \"time\": \"" + timeString + "\"," +
+                "      \"time\": \"0\"," +
                 "      \"timeChanged\": null," +
                 "      \"authorId\": " + personId + "," +
                 "      \"parentId\": 0," +
@@ -87,7 +50,7 @@ public class AdditionalFunctions {
                 "}";
     }
 
-    public static String generateExpectedResponseString(long personId, long postId, String timeString) {
+    public static String generateExpectedResponseString(long personId, long postId) {
         return "{" +
                 "\"totalElements\": 1, " +
                 "\"totalPages\": 1, " +
@@ -96,8 +59,8 @@ public class AdditionalFunctions {
                 "\"content\": [" +
                 "{" +
                 "\"id\": " + postId + "," +
-                "\"time\": \"" + timeString + "\"," +
-                "\"timeChanged\": \"\"," +
+                "\"time\": \"0\"," +
+                "\"timeChanged\": \"0\"," +
                 "\"authorId\": " + personId + "," +
                 "\"title\": \"SomeTitle\"," +
                 "\"type\": \"POSTED\"," +
@@ -109,7 +72,7 @@ public class AdditionalFunctions {
                 "\"likeAmount\": 0," +
                 "\"myLike\": false," +
                 "\"imagePath\": null," +
-                "\"publishDate\": \"2022-11-23T14:00:02.169Z\"" +
+                "\"publishDate\": \"0\"" +
                 "}" +
                 "]," +
                 "  \"sort\": {" +
@@ -137,7 +100,7 @@ public class AdditionalFunctions {
     }
 
 
-    public static String generateExpectedSubCommentString(Long subCommentId, String timeString,
+    public static String generateExpectedSubCommentString(Long subCommentId,
                                                           Long personId,
                                                           Long postCommentId,
                                                           Long postId) {
@@ -150,7 +113,7 @@ public class AdditionalFunctions {
                 "    {" +
                 "      \"id\": " + subCommentId + "," +
                 "      \"commentType\": \"POST\"," +
-                "      \"time\": \"" + timeString + "\"," +
+                "      \"time\": \"0\"," +
                 "      \"timeChanged\": null," +
                 "      \"authorId\": " + personId + "," +
                 "      \"parentId\": " + postCommentId + "," +

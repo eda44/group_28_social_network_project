@@ -16,8 +16,8 @@ import ru.skillbox.repository.FriendsRepository;
 import ru.skillbox.repository.PersonRepository;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.request.FeedsRequest;
-import ru.skillbox.response.CommentResponse;
-import ru.skillbox.response.FeedsResponseOK;
+import ru.skillbox.response.FeedsResponse;
+import ru.skillbox.response.Responsable;
 import ru.skillbox.service.FeedsService;
 import ru.skillbox.service.UserService;
 
@@ -29,7 +29,7 @@ import java.io.IOException;
 public class FeedsControllerImpl implements FeedsController {
 
 
-    private final FeedsService feedsService;
+    private FeedsService feedsService;
 
     private PostRepository postRepository;
 
@@ -41,7 +41,7 @@ public class FeedsControllerImpl implements FeedsController {
 
     private CloudinaryConfig config;
 
-    private UserService userService;
+    private final UserService userService;
 
     @Value("{${isTest}}")
     private String isTestString;
@@ -64,28 +64,42 @@ public class FeedsControllerImpl implements FeedsController {
 
     @Override
     @GetMapping("/api/v1/post")
-    public ResponseEntity<FeedsResponseOK> getFeedsSearch(HttpServletRequest httpServletRequest
+    public ResponseEntity<Responsable> getFeedsSearch(HttpServletRequest httpServletRequest
 
     )
-            throws  IOException {
+            throws IOException {
 
-        FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
-        return feedsService.getObjectResponseEntity(feedsRequest, isTestString.equals("{true}"));
+        try {
+            FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
+            return feedsService.getObjectResponseEntity(feedsRequest, isTestString.equals("{true}"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body((new FeedsResponse()).getResponse(e.getMessage()));
+        }
     }
 
     @GetMapping("/api/v1/post/{id}/comment")
-    public ResponseEntity<CommentResponse> getAllCommentsToPost(@PathVariable long id,
-                                                                HttpServletRequest httpServletRequest)
+    public ResponseEntity<Responsable> getAllCommentsToPost(@PathVariable long id,
+                                                            HttpServletRequest httpServletRequest)
             throws JsonProcessingException {
-        FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
-        return  feedsService.getComments(id,feedsRequest,isTestString.equals("{true}"));
+        try {
+            FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
+            return feedsService.getComments(id, feedsRequest, isTestString.equals("{true}"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body((new FeedsResponse()).getResponse(e.getMessage()));
+        }
+
     }
 
     @GetMapping("/api/v1/post/{id}/comment/{commentId}/subcomment")
-    public ResponseEntity<CommentResponse> getAllSubComments(@PathVariable long id, @PathVariable long commentId,
-                                                    HttpServletRequest httpServletRequest)
+    public ResponseEntity<Responsable> getAllSubComments(@PathVariable long id, @PathVariable long commentId,
+                                                         HttpServletRequest httpServletRequest)
             throws JsonProcessingException {
-        FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
-        return feedsService.getSubComments(id,commentId,feedsRequest, isTestString.equals("{true}"));
+        try {
+            FeedsRequest feedsRequest = new FeedsRequest(httpServletRequest);
+            return feedsService.getSubComments(id, commentId, feedsRequest, isTestString.equals("{true}"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body((new FeedsResponse()).getResponse(e.getMessage()));
+        }
+
     }
 }
