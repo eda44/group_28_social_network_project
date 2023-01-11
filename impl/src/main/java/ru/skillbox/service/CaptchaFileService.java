@@ -50,8 +50,7 @@ public class CaptchaFileService {
         final Painter painter = new Painter(150, 70, null, null, null, null);
         Cage cage = new Cage(painter, null, null, null, null, null, null);
         String code = cage.getTokenGenerator().next().substring(0, 4);
-        CaptchaDto captcha = new CaptchaDto(code, cage.draw(code));
-        return captcha;
+        return new CaptchaDto(code, cage.draw(code));
     }
 
     private String getCloudinaryUrl(byte[] bytes) {

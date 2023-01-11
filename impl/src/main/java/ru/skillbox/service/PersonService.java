@@ -2,9 +2,8 @@ package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.skillbox.common.SearchPersonDto;
+import ru.skillbox.common.AccountDto;
 import ru.skillbox.enums.MessagePermission;
 import ru.skillbox.exception.NotAuthorizedException;
 import ru.skillbox.exception.UserNotFoundException;
@@ -17,23 +16,22 @@ import ru.skillbox.repository.SettingRepository;
 import ru.skillbox.request.RegistrationRequest;
 import ru.skillbox.request.account.AccountEditRq;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PersonService {
-    private static final String USER_NOT_FOUND = "неверные учётные данные";
     private final GeoService geoService;
     private final PersonRepository personRepository;
     private final SettingRepository repositorySettings;
 
 
-
     public Person getPersonByEmail(String email) {
         Optional<Person> person = personRepository.findByEmail(email);
         if (person.isEmpty()) {
-            throw new UsernameNotFoundException(USER_NOT_FOUND);
+            throw new UserNotFoundException();
         }
         return person.get();
     }
@@ -55,33 +53,38 @@ public class PersonService {
         personRepository.save(person);
     }
 
-    public SearchPersonDto.AccountDto editing(AccountEditRq accountEditRq){
+    public AccountDto editing(AccountEditRq accountEditRq) {
         Person person = getCurrentPerson();
         person.setFirstName(accountEditRq.getFirstName());
         person.setLastName(accountEditRq.getLastName());
         person.setPhone(accountEditRq.getPhone());
         person.setAbout(accountEditRq.getAbout());
-        if (!accountEditRq.getCity().equals("none")) {
-            person.setCity(geoService.getCityByTitle(accountEditRq.getCity()));
-        }
-        person.setBirthDate(accountEditRq.getBirthDate().getTime());
+        person.setCity(geoService.getCityByTitle(accountEditRq.getCity()));
         person.setCountry(geoService.getCountryByTitle(accountEditRq.getCountry()));
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        try {
+            Date date = inputFormat.parse(accountEditRq.getBirthDate());
+            person.setBirthDate(date.getTime());
+        } catch (Exception e) {
+            person.setBirthDate(null);
+        }
         savePerson(person);
         return AccountMapper.INSTANCE.personToAccountDto(person);
     }
 
-    public void deletePerson(Person person){
+    public void deletePerson(Person person) {
         person.setIsEnabled(false);
         savePerson(person);
     }
-    public void isBlock(Long id, boolean isBlock){
+
+    public void isBlock(Long id, boolean isBlock) {
         Person person = getPersonById(id);
         person.setIsBlocked(isBlock);
     }
 
     public Person getCurrentPerson() {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (email.equals("anonymousUser")){
+        if (email.equals("anonymousUser")) {
             throw new NotAuthorizedException();
         }
         Person current = getPersonByEmail(email);
@@ -107,7 +110,7 @@ public class PersonService {
     public Person getPersonById(long id) throws UserNotFoundException {
         Optional<Person> person = personRepository.findById(id);
         if (person.isEmpty()) {
-            throw new UsernameNotFoundException(USER_NOT_FOUND);
+            throw new UserNotFoundException();
         }
         return person.get();
     }

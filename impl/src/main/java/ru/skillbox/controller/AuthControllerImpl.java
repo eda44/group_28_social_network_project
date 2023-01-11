@@ -62,4 +62,6 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<CaptchaResponse> captcha() {
         return ResponseEntity.ok(captchaFileService.generateCaptchaResponse());
     }
+
+
 }

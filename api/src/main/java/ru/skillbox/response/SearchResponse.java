@@ -2,7 +2,7 @@ package ru.skillbox.response;
 
 import lombok.Data;
 import org.springframework.data.domain.Page;
-import ru.skillbox.common.SearchPersonDto;
+import ru.skillbox.common.AccountDto;
 import ru.skillbox.model.Person;
 
 import java.util.List;
@@ -14,14 +14,14 @@ public class SearchResponse implements Responsable{
     private int numberOfElements;
     private long size;
     private long number;
-    private List<SearchPersonDto.AccountDto> content;
+    private List<AccountDto> content;
     private boolean first;
     private boolean last;
     private boolean empty;
     private long total;
     private long page;
 
-    public SearchResponse getOkResponse(List<SearchPersonDto.AccountDto> people,
+    public SearchResponse getOkResponse(List<AccountDto> people,
                                                Page<Person> page) {
         SearchResponse searchResponse = new SearchResponse();
         searchResponse.setTotalElements(page.getTotalElements());

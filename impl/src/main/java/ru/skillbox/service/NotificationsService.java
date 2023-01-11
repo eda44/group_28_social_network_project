@@ -2,7 +2,7 @@ package ru.skillbox.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.skillbox.common.SearchPersonDto;
+import ru.skillbox.common.AccountDto;
 import ru.skillbox.enums.NameNotification;
 import ru.skillbox.enums.Status;
 import ru.skillbox.enums.StatusCode;
@@ -144,7 +144,7 @@ public class NotificationsService {
             long personId,
             String title,
             NameNotification name,
-            SearchPersonDto.AccountDto acc) {
+            AccountDto acc) {
         Notification notification = new Notification();
         notification.setPersonId(personId);
         notification.setNameNotification(name);

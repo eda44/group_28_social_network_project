@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.skillbox.request.LoginRequest;
 import ru.skillbox.request.PasswordRecoveryRequest;
 import ru.skillbox.request.RegistrationRequest;
-import ru.skillbox.response.*;
+import ru.skillbox.response.CaptchaResponse;
+import ru.skillbox.response.LoginResponse;
+import ru.skillbox.response.PasswordRecoveryResponse;
+import ru.skillbox.response.Responsable;
 
 @RequestMapping("/api/v1/auth")
 public interface AuthController {
