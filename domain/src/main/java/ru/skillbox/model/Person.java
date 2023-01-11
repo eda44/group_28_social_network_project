@@ -46,11 +46,11 @@ public class Person {
     private Boolean isEnabled;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id",referencedColumnName = "id", insertable = false,updatable = false)
+    @JoinColumn(name = "city_id",referencedColumnName = "id", insertable = true,updatable = true)
     private City city;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id",referencedColumnName = "id", insertable = false,updatable = false)
+    @JoinColumn(name = "country_id",referencedColumnName = "id", insertable = true,updatable = true)
     private Country country;
 
     @Column(name = "confirmation_code")
