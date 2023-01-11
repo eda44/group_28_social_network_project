@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import ru.skillbox.common.AccountDto;
 import ru.skillbox.exception.NotAuthorizedException;
 import ru.skillbox.mapper.AccountMapper;
 import ru.skillbox.model.Person;
@@ -27,19 +28,18 @@ public class SearchService {
     public SearchResponse search(SearchRequest request,
                                  Integer size) throws NotAuthorizedException {
         Person person = personService.getCurrentPerson();
-        Page<Person> people = searchFilter(request, person, size);
+        Page<Person> people = searchFilter(specification(request, person), size);
         return new SearchResponse().getOkResponse(AccountMapper.INSTANCE.ListPersonToListAccountDto(people.getContent()), people);
     }
 
-    private Page<Person> searchFilter(SearchRequest request, Person current, int size) {
-        return personRepository.findAll(specification(request, current), Pageable.ofSize(size));
+    private Page<Person> searchFilter(Specification<Person> specification, int size) {
+        return personRepository.findAll(specification, Pageable.ofSize(size));
     }
 
     private Specification<Person> specification(SearchRequest request, Person current) {
         return Specification
                 .where(specificationAuthor(request.getAuthor()))
-                .and(PersonSpecification.getUsersByEnable())
-                .and(PersonSpecification.skipCurrentPerson(current.getEmail()))
+                .and(personByEnableAndSkipCurrent(current))
                 .and(PersonSpecification.getUsersByFirstName(request.getFirstName()))
                 .and(PersonSpecification.getUsersByLastName(request.getLastName()))
                 .and(PersonSpecification.getUsersByAgeFrom(yearToTimeInMillis(request.getAgeFrom())))
@@ -80,4 +80,25 @@ public class SearchService {
         if (title == null) return null;
         return geoService.getCityByTitle(title).getId();
     }
+
+    public List<AccountDto> searchRecommendations() throws NotAuthorizedException {
+        Person person = personService.getCurrentPerson();
+        Page<Person> people = searchFilter(specificationRecommendations(person), 5);
+        return AccountMapper.INSTANCE.ListPersonToListAccountDto(people.getContent());
+    }
+
+    private Specification<Person> specificationRecommendations(Person current) {
+        return Specification
+                .where(personByEnableAndSkipCurrent(current)
+                        .and(Specification.where(PersonSpecification.getUsersByCity(current.getCity() == null ? null : current.getCity().getId()))
+                                .or(PersonSpecification.getUsersByCountry(current.getCountry() == null ? null : current.getCountry().getId()))))
+                .or(personByEnableAndSkipCurrent(current))
+                ;
+    }
+
+    private Specification<Person> personByEnableAndSkipCurrent(Person current) {
+        return Specification.where(PersonSpecification.getUsersByEnable())
+                .and(PersonSpecification.skipCurrentPerson(current.getEmail()));
+    }
+
 }
