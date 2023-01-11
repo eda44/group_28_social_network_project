@@ -28,13 +28,11 @@ import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.repository.TagRepository;
 import ru.skillbox.request.FeedsRequest;
-import ru.skillbox.response.CommentResponse;
-import ru.skillbox.response.FeedsResponseOK;
+import ru.skillbox.response.Responsable;
 import ru.skillbox.service.FeedsService;
 import ru.skillbox.service.UserService;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -133,17 +131,14 @@ public class FeedsServiceTest extends TestCase {
     public void testGetObjectResponseEntity() throws Exception {
         Long personId = personRepository.findAll().get(0).getId();
         Long postId = postRepository.findAll().get(0).getId();
-        String timeString = AdditionalFunctions.getTimeString();
         Pageable pageable = PageRequest.of(0, 5, Sort.by("time").descending());
         FeedsRequest feedsRequest = new FeedsRequest(pageable);
-        ResponseEntity<FeedsResponseOK> response = feedsService.getObjectResponseEntity(feedsRequest,
+        ResponseEntity<Responsable> response = feedsService.getObjectResponseEntity(feedsRequest,
                 isTestString.equals("{true}"));
-        FeedsResponseOK responseBody = AdditionalFunctions.correctContent(Objects.requireNonNull(response.getBody()), timeString);
-
         JSONParser parser = new JSONParser();
         ObjectMapper mapper = new ObjectMapper();
-        JSONObject jsonObjectActual = (JSONObject) parser.parse(mapper.writeValueAsString(responseBody));
-        String expectedString = AdditionalFunctions.generateExpectedResponseString(personId, postId, timeString);
+        JSONObject jsonObjectActual = (JSONObject) parser.parse(mapper.writeValueAsString(response.getBody()));
+        String expectedString = AdditionalFunctions.generateExpectedResponseString(personId, postId);
         JSONObject jsonObjectExpected = (JSONObject) parser.parse(expectedString);
         assertEquals(jsonObjectExpected, jsonObjectActual);
     }
@@ -155,16 +150,14 @@ public class FeedsServiceTest extends TestCase {
         Long postCommentId = postCommentRepository.findAll().stream()
                 .filter(postComment -> postComment.getParentId() == 0)
                 .collect(Collectors.toList()).get(0).getId();
-        String timeString = AdditionalFunctions.getTimeString();
         Pageable pageable = PageRequest.of(0, 5, Sort.by("time").descending());
         FeedsRequest feedsRequest = new FeedsRequest(pageable);
-        ResponseEntity<CommentResponse> response = feedsService
+        ResponseEntity<Responsable> response = feedsService
                 .getComments(postId, feedsRequest, isTestString.equals("{true}"));
-        CommentResponse responseBody = AdditionalFunctions.correctCommentContent(Objects.requireNonNull(response.getBody()), timeString);
         JSONParser parser = new JSONParser();
         ObjectMapper mapper = new ObjectMapper();
-        JSONObject jsonObjectActual = (JSONObject) parser.parse(mapper.writeValueAsString(responseBody));
-        String expectedString = AdditionalFunctions.generateExpectedCommentString(personId, postId, postCommentId, timeString);
+        JSONObject jsonObjectActual = (JSONObject) parser.parse(mapper.writeValueAsString(response.getBody()));
+        String expectedString = AdditionalFunctions.generateExpectedCommentString(personId, postId, postCommentId);
         JSONObject jsonObjectExpected = (JSONObject) parser.parse(expectedString);
         assertEquals(jsonObjectExpected, jsonObjectActual);
     }
@@ -176,21 +169,20 @@ public class FeedsServiceTest extends TestCase {
         Long postCommentId = postCommentRepository.findAll().stream()
                 .filter(postComment -> postComment.getParentId() == 0)
                 .collect(Collectors.toList()).get(0).getId();
-        String timeString = AdditionalFunctions.getTimeString();
         Pageable pageable = PageRequest.of(0, 5, Sort.by("time").descending());
         Long subCommentId = postCommentRepository.findAll().stream()
                 .filter(postComment -> postComment.getParentId() != 0)
                 .collect(Collectors.toList()).get(0).getId();
         FeedsRequest feedsRequest = new FeedsRequest(pageable);
-        ResponseEntity<CommentResponse> response = feedsService.getSubComments(postId, postCommentId, feedsRequest,
+        ResponseEntity<Responsable> response = feedsService.getSubComments(postId, postCommentId, feedsRequest,
                 isTestString.equals("{true}"));
-        CommentResponse responseBody = AdditionalFunctions.correctCommentContent(Objects.requireNonNull(response.getBody()), timeString);
+
         JSONParser parser = new JSONParser();
         ObjectMapper mapper = new ObjectMapper();
-        JSONObject jsonObjectActual = (JSONObject) parser.parse(mapper.writeValueAsString(responseBody));
+        JSONObject jsonObjectActual = (JSONObject) parser.parse(mapper.writeValueAsString(response.getBody()));
 
         String expectedString = AdditionalFunctions.generateExpectedSubCommentString(subCommentId,
-                timeString, personId, postCommentId, postId);
+                personId, postCommentId, postId);
         JSONObject jsonObjectExpected = (JSONObject) parser.parse(expectedString);
         assertEquals(jsonObjectExpected, jsonObjectActual);
     }

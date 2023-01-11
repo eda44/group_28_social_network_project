@@ -27,4 +27,5 @@
     <include file="changesets/profile_file.xml"/>
     <include file="changesets/captcha_file.xml"/>
     <include file="changesets/notification.xml"/>
+    <include file="changesets/country_city_data.xml"/>
 </databaseChangeLog>

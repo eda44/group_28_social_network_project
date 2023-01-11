@@ -31,11 +31,15 @@ public interface PostCommentMapper {
     @Mapping(source = "post", target = "postId", qualifiedByName = "mapPostId")
     @Mapping(source = "isDelete", target = "isDelete")
     PostCommentDto postCommentToPostCommentDto(PostComment comment, @Context long currentUserId,
-                                               @Context PostCommentRepository postCommentRepository);
+                                               @Context PostCommentRepository postCommentRepository,
+                                               @Context boolean isTest);
 
 
     @Named("mapTime")
-    default String mapTime(Long time) {
+    default String mapTime(Long time, @Context boolean isTest) {
+        if (isTest) {
+            return "0";
+        }
         if (time != null) {
             Timestamp timestamp = PostMapper.correctionTime(time);
 

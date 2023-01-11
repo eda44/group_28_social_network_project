@@ -9,7 +9,7 @@ import java.util.List;
 
 @Setter
 @Getter
-public class FeedsResponseOK {
+public class FeedsResponse implements Responsable {
     private long totalElements;
     private long totalPages;
     private long number;
@@ -22,4 +22,10 @@ public class FeedsResponseOK {
     Integer numberOfElements;
     org.springframework.data.domain.Pageable pageable;
     boolean empty;
+
+    @Override
+    public Responsable getResponse(String s) {
+        FeedsResponse feedsResponse = new FeedsResponse();
+        return feedsResponse;
+    }
 }

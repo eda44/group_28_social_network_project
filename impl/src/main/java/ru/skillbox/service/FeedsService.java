@@ -22,8 +22,9 @@ import ru.skillbox.model.Tag;
 import ru.skillbox.repository.*;
 import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.CommentResponse;
-import ru.skillbox.response.FeedsResponseOK;
+import ru.skillbox.response.FeedsResponse;
 
+import ru.skillbox.response.Responsable;
 import ru.skillbox.response.post.PostCommentDto;
 import ru.skillbox.response.post.PostDto;
 import ru.skillbox.specification.PostCommentSpecification;
@@ -39,68 +40,58 @@ import java.util.stream.Collectors;
 @Log4j2
 @Service
 public class FeedsService {
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
-    private PersonRepository personRepository;
+    private final PostCommentRepository postCommentRepository;
 
-    private PostCommentRepository postCommentRepository;
+    private final TagRepository tagRepository;
 
-    private TagRepository tagRepository;
+    private final PersonService personService;
 
-    private PersonService personService;
+    private final FriendsRepository friendsRepository;
 
-    private FriendsRepository friendsRepository;
-
-       @Autowired
+    @Autowired
     public FeedsService(PostRepository postRepository,
                         PostCommentRepository postCommentRepository,
                         PersonService personService,
                         TagRepository tagRepository,
-                        PersonRepository personRepository,
                         FriendsRepository friendsRepository) {
         this.postRepository = postRepository;
         this.personService = personService;
         this.postCommentRepository = postCommentRepository;
         this.tagRepository = tagRepository;
-        this.personRepository = personRepository;
         this.friendsRepository = friendsRepository;
     }
 
-    public void updatePostType(){
-       List<Post> posts = postRepository.findAll();
-       for(Post post : posts){
-           if(post.getType().equals(Type.QUEUED) && post.getTime() <= LocalDateTime.now()
-                   .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now()))) {
-               post.setType(Type.POSTED);
-               postRepository.saveAndFlush(post);
-           }
-       }
+    public void updatePostType() {
+        List<Post> posts = postRepository.findAll();
+        for (Post post : posts) {
+            if (post.getType().equals(Type.QUEUED) && post.getTime() <= LocalDateTime.now()
+                    .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now()))) {
+                post.setType(Type.POSTED);
+                postRepository.saveAndFlush(post);
+            }
+        }
     }
 
-       @Transactional
-    public ResponseEntity<FeedsResponseOK> getObjectResponseEntity(FeedsRequest feedsRequest,
-                                                                   boolean isTest)
+    @Transactional
+    public ResponseEntity<Responsable> getObjectResponseEntity(FeedsRequest feedsRequest,
+                                                               boolean isTest)
             throws JsonProcessingException {
-        long currentUserId;
-        if(isTest){
-            currentUserId = 1;
-            log.debug("Test mode!");
-        } else {
-            currentUserId = personService.getCurrentPerson().getId();
-        }
-        updatePostType();
 
-           Specification<Post> postSpec = generatePostSpecification(feedsRequest);
-           Page<Post> pagedPosts = postRepository.findAll(postSpec,feedsRequest.getPageable());
-        log.debug("CurrentUserId={}",currentUserId);
+        long currentUserId = getCurrentUserId(isTest);
+        updatePostType();
+        Specification<Post> postSpec = generatePostSpecification(feedsRequest);
+        Page<Post> pagedPosts = postRepository.findAll(postSpec, feedsRequest.getPageable());
+        log.debug("CurrentUserId={}", currentUserId);
 
         List<Post> posts = pagedPosts.getContent();
         log.debug("Find all posts from repository with given Criteria");
         List<PostDto> postDtoList = new ArrayList<>();
-        if(posts!=null  && posts.size() != 0){
-            fillPostDtoList(currentUserId, posts, postDtoList);
+        if (posts != null && posts.size() != 0) {
+            fillPostDtoList(currentUserId, posts, postDtoList, isTest);
         }
-        FeedsResponseOK feedsResponse = getFeedsResponseOK(feedsRequest.getPageable(), pagedPosts, postDtoList);
+        FeedsResponse feedsResponse = getFeedsResponseOK(feedsRequest.getPageable(), pagedPosts, postDtoList);
         return ResponseEntity.ok(feedsResponse);
     }
 
@@ -110,16 +101,16 @@ public class FeedsService {
                 .and(spec.getPostsByIsDelete(feedsRequest.getIsDelete()))
 
                 .and(getPostSpecificationByAccountId(feedsRequest, spec))
-                .and(getPostSpecificationByFriends(feedsRequest,spec))
+                .and(getPostSpecificationByFriends(feedsRequest, spec))
                 .and(getPostSpecificationByText(feedsRequest, spec))
                 .and(getPostSpecificationByTags(feedsRequest, spec))
                 .and(getPostSpecificationByAuthor(feedsRequest, spec));
     }
 
-    private  Specification<Post> getPostSpecificationByAccountId(FeedsRequest feedsRequest,
-                                                                       PostSpecification spec) {
+    private Specification<Post> getPostSpecificationByAccountId(FeedsRequest feedsRequest,
+                                                                PostSpecification spec) {
         Specification<Post> accountSpec = spec;
-        if(feedsRequest.getAccountId()!=null) {
+        if (feedsRequest.getAccountId() != null) {
             accountSpec = accountSpec.and(spec.getPostsByPersonId(feedsRequest.getAccountId()))
                     .and(spec.getPostsNotIsDeletePerson())
                     .and(getPostedForNotCurrentPerson(feedsRequest, spec));
@@ -132,7 +123,7 @@ public class FeedsService {
 
     private Specification<Post> getPostedForNotCurrentPerson(FeedsRequest feedsRequest, PostSpecification spec) {
         Specification<Post> accountSpec = new PostSpecification();
-        if(feedsRequest.getAccountId()!= personService.getCurrentPerson().getId()){
+        if (feedsRequest.getAccountId() != personService.getCurrentPerson().getId()) {
             accountSpec = accountSpec.and(spec.getPostsByType(Type.POSTED));
         }
         return accountSpec;
@@ -140,44 +131,43 @@ public class FeedsService {
 
 
     private Specification<Post> getPostSpecificationByFriends(FeedsRequest feedsRequest,
-                                                                      PostSpecification spec) {
-           Specification<Post> result = spec;
-           if(feedsRequest.getWithFriends()!=null && feedsRequest.getWithFriends().equals(true)){
-               List<Long> friendOrSubscriptionIds = getFriendOrSubscriptionIds(friendsRepository,personService);
-               result = result.and(spec.getPostsByPersonIds(friendOrSubscriptionIds));
-           }
-           return result;
+                                                              PostSpecification spec) {
+        Specification<Post> result = spec;
+        if (feedsRequest.getWithFriends() != null && feedsRequest.getWithFriends().equals(true)) {
+            List<Long> friendOrSubscriptionIds = getFriendOrSubscriptionIds(personService);
+            result = result.and(spec.getPostsByPersonIds(friendOrSubscriptionIds));
+        }
+        return result;
     }
 
-    private  List<Long> getFriendOrSubscriptionIds(FriendsRepository friendsRepository, PersonService personService) {
-           long id = personService.getCurrentPerson().getId();
+    private List<Long> getFriendOrSubscriptionIds(PersonService personService) {
+        long id = personService.getCurrentPerson().getId();
         Set<Long> ids = new HashSet<>();
         ids.add(id);
         addFriendsOrSubscriptions(id, StatusCode.FRIEND, ids);
-        addFriendsOrSubscriptions(id,StatusCode.REQUEST_TO,ids);
-        return ids.stream().collect(Collectors.toList());
+        addFriendsOrSubscriptions(id, StatusCode.REQUEST_TO, ids);
+        addFriendsOrSubscriptions(id, StatusCode.SUBSCRIBED, ids);
+        return new ArrayList<>(ids);
     }
 
-    private  void addFriendsOrSubscriptions(long id,
-                                            StatusCode code,
-                                            Set<Long> ids) {
-        Optional<List<Friendship>> setOptional = friendsRepository.findAllByStatusCodeAndSrcPersonId(code,id);
-        if(setOptional.isPresent()){
-            setOptional.get().forEach(f ->ids.add(f.getDstPerson().getId()));
-        }
+    private void addFriendsOrSubscriptions(long id,
+                                           StatusCode code,
+                                           Set<Long> ids) {
+        Optional<List<Friendship>> setOptional = friendsRepository.findAllByStatusCodeAndSrcPersonId(code, id);
+        setOptional.ifPresent(friendships -> friendships.forEach(f -> ids.add(f.getDstPerson().getId())));
     }
 
     private static Specification<Post> getPostSpecificationByAuthor(FeedsRequest feedsRequest, PostSpecification spec) {
         Specification<Post> authSpec = spec;
-           if(feedsRequest.getAuthor()!=null) {
+        if (feedsRequest.getAuthor() != null) {
             String[] names = feedsRequest.getAuthor().split(" ");
-            if(names.length > 1){
-                authSpec = authSpec.or(spec.getPostsByTwoNames(names[0],names[1]))
-                                    .or(spec.getPostsByTwoNames(names[1],names[0]));
+            if (names.length > 1) {
+                authSpec = authSpec.or(spec.getPostsByTwoNames(names[0], names[1]))
+                        .or(spec.getPostsByTwoNames(names[1], names[0]));
 
             } else {
                 authSpec = authSpec.or(spec.getPostsByFirstName(names[0]))
-                                    .or(spec.getPostsByLastName(names[0]));
+                        .or(spec.getPostsByLastName(names[0]));
             }
         }
         return authSpec;
@@ -185,15 +175,15 @@ public class FeedsService {
 
     private Specification<Post> getPostSpecificationByTags(FeedsRequest feedsRequest, PostSpecification spec) {
         Specification<Post> tagsSpec = spec;
-           if(feedsRequest.getTags()!=null){
+        if (feedsRequest.getTags() != null) {
             List<Tag> tags = new ArrayList<>();
-            for(String tagString : feedsRequest.getTags()) {
+            for (String tagString : feedsRequest.getTags()) {
                 TagSpecification tagSpec = new TagSpecification();
                 Specification<Tag> tagSpecification = tagSpec.getTagsByName(tagString);
                 tags.addAll(tagRepository.findAll(tagSpecification));
             }
-            if(!tags.isEmpty()){
-                for(Tag tag : tags) {
+            if (!tags.isEmpty()) {
+                for (Tag tag : tags) {
                     tagsSpec = tagsSpec.or(spec.getPostsByTag(tag));
                 }
             }
@@ -203,8 +193,8 @@ public class FeedsService {
 
     private static Specification<Post> getPostSpecificationByText(FeedsRequest feedsRequest, PostSpecification spec) {
         Specification<Post> wordSpec = spec;
-        if(feedsRequest.getWords()!=null){
-            for(String word : feedsRequest.getWords()){
+        if (feedsRequest.getWords() != null) {
+            for (String word : feedsRequest.getWords()) {
                 wordSpec = wordSpec.or(spec.getPostsByTitleOrText(word));
             }
 
@@ -213,29 +203,31 @@ public class FeedsService {
     }
 
     private static Specification<Post> getPostSpecificationByDate(FeedsRequest feedsRequest, PostSpecification spec) {
-           Specification<Post> result = spec;
-        if(feedsRequest.getDateTo()!=null){
+        Specification<Post> result = spec;
+        if (feedsRequest.getDateTo() != null) {
             result = result.and(spec.getPostsByDateTo(feedsRequest.getDateTo()));
-            log.debug("DateTo={}",feedsRequest.getDateTo());
+            log.debug("DateTo={}", feedsRequest.getDateTo());
         }
-        if(feedsRequest.getDateFrom()!=null){
+        if (feedsRequest.getDateFrom() != null) {
             result = result.and(spec.getPostsByDateFrom(feedsRequest.getDateFrom()));
-            log.debug("DateFrom={}",feedsRequest.getDateFrom());
+            log.debug("DateFrom={}", feedsRequest.getDateFrom());
         }
         return result;
     }
 
-    private void fillPostDtoList(long currentUserId, List<Post> posts, List<PostDto> postDtoList) {
-        for(Post post : posts) {
+    private void fillPostDtoList(long currentUserId, List<Post> posts, List<PostDto> postDtoList,
+                                 boolean isTest
+    ) {
+        for (Post post : posts) {
             log.debug("Mapping post number " + post.getId());
-            PostDto postDto = PostMapper.INSTANCE.postToPostDto(post, currentUserId);
+            PostDto postDto = PostMapper.INSTANCE.postToPostDto(post, currentUserId, isTest);
             postDtoList.add(postDto);
         }
     }
 
-    private static FeedsResponseOK getFeedsResponseOK(Pageable pageable, Page<Post> pagedPosts,
-                                                      List<PostDto> postDtoList) throws JsonProcessingException {
-        FeedsResponseOK feedsResponse = new FeedsResponseOK();
+    private static FeedsResponse getFeedsResponseOK(Pageable pageable, Page<Post> pagedPosts,
+                                                    List<PostDto> postDtoList) throws JsonProcessingException {
+        FeedsResponse feedsResponse = new FeedsResponse();
         log.debug("Generating feeds response!");
         feedsResponse.setContent(postDtoList);
         feedsResponse.setSize(pageable.getPageSize());
@@ -255,11 +247,11 @@ public class FeedsService {
 
 
     @Transactional
-    public ResponseEntity<CommentResponse> getComments(long id, FeedsRequest feedsRequest, boolean isTest)
+    public ResponseEntity<Responsable> getComments(long id, FeedsRequest feedsRequest, boolean isTest)
             throws JsonProcessingException {
         Post post = postRepository.findById(id).get();
-        Specification<PostComment> specification = getPostCommentSpecification(post,0L);
-        Page<PostComment> postCommentPage = postCommentRepository.findAll(specification,feedsRequest.getPageable());
+        Specification<PostComment> specification = getPostCommentSpecification(post, 0L);
+        Page<PostComment> postCommentPage = postCommentRepository.findAll(specification, feedsRequest.getPageable());
 
 
         CommentResponse commentResponse = getCommentResponse(feedsRequest.getPageable(), postCommentPage, isTest);
@@ -267,7 +259,7 @@ public class FeedsService {
         return ResponseEntity.ok(commentResponse);
     }
 
-    private  Specification<PostComment> getPostCommentSpecification(Post post, Long parentId) {
+    private Specification<PostComment> getPostCommentSpecification(Post post, Long parentId) {
         Specification<PostComment> specification = new PostCommentSpecification();
         PostCommentSpecification commentSpecification = new PostCommentSpecification();
         specification = specification
@@ -278,31 +270,37 @@ public class FeedsService {
         return specification;
     }
 
-    private CommentResponse getCommentResponse(Pageable pageable,  Page<PostComment> pages,
+    private CommentResponse getCommentResponse(Pageable pageable, Page<PostComment> pages,
                                                boolean isTest)
             throws JsonProcessingException {
         log.debug("Generating comment response!");
 
-        List<PostComment> comments =  pages.getContent();
+        List<PostComment> comments = pages.getContent();
 
         List<PostCommentDto> postCommentDtoList = new ArrayList<>();
-        long currentUserId;
-        if(isTest){
-            currentUserId = 1;
-            log.debug("Test mode!");
-        } else {
-            currentUserId = personService.getCurrentPerson().getId();
-        }
-        for(PostComment comment : comments) {
+        long currentUserId = getCurrentUserId(isTest);
+        for (PostComment comment : comments) {
             log.debug("Mapping comment number " + comment.getId());
             PostCommentDto postCommentDtoDto = PostCommentMapper.
-                    INSTANCE.postCommentToPostCommentDto(comment, currentUserId,postCommentRepository);
+                    INSTANCE.postCommentToPostCommentDto(comment, currentUserId, postCommentRepository,
+                            isTest);
             postCommentDtoList.add(postCommentDtoDto);
         }
         CommentResponse commentResponse = fillCommentResponse(pageable, pages, postCommentDtoList);
         ObjectMapper mapper = new ObjectMapper();
         log.debug(mapper.writeValueAsString(commentResponse));
         return commentResponse;
+    }
+
+    private long getCurrentUserId(boolean isTest) {
+        long currentUserId;
+        if (isTest) {
+            currentUserId = 1;
+            log.debug("Test mode!");
+        } else {
+            currentUserId = personService.getCurrentPerson().getId();
+        }
+        return currentUserId;
     }
 
     private static CommentResponse fillCommentResponse(Pageable pageable, Page<PostComment> pages,
@@ -323,14 +321,14 @@ public class FeedsService {
     }
 
     @Transactional
-    public ResponseEntity<CommentResponse> getSubComments(long id, long commentId, FeedsRequest feedsRequest,
-    boolean isTest)
+    public ResponseEntity<Responsable> getSubComments(long id, long commentId, FeedsRequest feedsRequest,
+                                                      boolean isTest)
             throws JsonProcessingException {
         Pageable subCommentsPageable = PageRequest.of(0,
-                postCommentRepository.findAll().size(),feedsRequest.getPageable().getSort());
+                postCommentRepository.findAll().size(), feedsRequest.getPageable().getSort());
         Post post = postRepository.findById(id).get();
-        Specification<PostComment> specification = getPostCommentSpecification(post,commentId);
-        Page<PostComment> postCommentPage = postCommentRepository.findAll(specification,subCommentsPageable);
+        Specification<PostComment> specification = getPostCommentSpecification(post, commentId);
+        Page<PostComment> postCommentPage = postCommentRepository.findAll(specification, subCommentsPageable);
 
         CommentResponse commentResponse = getCommentResponse(subCommentsPageable, postCommentPage, isTest);
         return ResponseEntity.ok(commentResponse);
