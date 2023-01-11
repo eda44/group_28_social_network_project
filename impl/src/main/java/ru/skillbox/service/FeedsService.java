@@ -19,11 +19,13 @@ import ru.skillbox.model.Friendship;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.model.Tag;
-import ru.skillbox.repository.*;
+import ru.skillbox.repository.FriendsRepository;
+import ru.skillbox.repository.PostCommentRepository;
+import ru.skillbox.repository.PostRepository;
+import ru.skillbox.repository.TagRepository;
 import ru.skillbox.request.FeedsRequest;
 import ru.skillbox.response.CommentResponse;
 import ru.skillbox.response.FeedsResponse;
-
 import ru.skillbox.response.Responsable;
 import ru.skillbox.response.post.PostCommentDto;
 import ru.skillbox.response.post.PostDto;
@@ -34,7 +36,6 @@ import ru.skillbox.specification.TagSpecification;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Log4j2
