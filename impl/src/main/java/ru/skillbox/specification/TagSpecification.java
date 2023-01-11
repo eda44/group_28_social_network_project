@@ -11,7 +11,7 @@ import javax.persistence.criteria.Root;
 public class TagSpecification implements Specification<Tag> {
 
     public Specification<Tag> getTagsByName(String tag) {
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("tag"), tag));
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(criteriaBuilder.lower(root.get("tag")), tag));
     }
 
     @Override

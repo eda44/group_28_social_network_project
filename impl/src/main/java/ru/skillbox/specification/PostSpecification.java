@@ -37,11 +37,11 @@ public class PostSpecification implements Specification<Post> {
     }
 
     public Specification<Post> getPostsByFirstName(String firstName) {
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person").get("firstName"), firstName));
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(criteriaBuilder.lower(root.get("person").get("firstName")), firstName));
     }
 
     public Specification<Post> getPostsByLastName(String lastName) {
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("person").get("lastName"), lastName));
+        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(criteriaBuilder.lower(root.get("person").get("lastName")), lastName));
     }
 
     public Specification<Post> getPostsByPersonId(Long id) {
