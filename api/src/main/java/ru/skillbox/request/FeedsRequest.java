@@ -69,7 +69,7 @@ public class FeedsRequest {
     private List<String> getTags(HttpServletRequest httpServletRequest) {
         String tagsString = httpServletRequest.getParameter("tags");
         if (tagsString != null) {
-            String[] tags = tagsString.split(",");
+            String[] tags = tagsString.toLowerCase(Locale.ROOT).split(",");
             Arrays.stream(tags).collect(Collectors.toList()).forEach(t -> log.debug("tag={}", t));
             return Arrays.stream(tags).collect(Collectors.toList());
         }
@@ -80,7 +80,7 @@ public class FeedsRequest {
         String authorString = httpServletRequest.getParameter("author");
         if (authorString != null) {
             log.debug("author={}", authorString.trim().replaceAll("\\s{2,}", "\\s"));
-            return authorString.trim().replaceAll("\\s{2,}", "\\s");
+            return authorString.trim().toLowerCase(Locale.ROOT).replaceAll("\\s{2,}", "\\s");
         }
         return null;
     }
