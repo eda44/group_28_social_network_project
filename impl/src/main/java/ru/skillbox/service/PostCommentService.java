@@ -7,11 +7,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.skillbox.enums.NotificationType;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostComment;
 import ru.skillbox.repository.PostCommentRepository;
 import ru.skillbox.request.CommentAddRequest;
+import ru.skillbox.request.settings.NotificationInputDto;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -23,14 +25,16 @@ public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostService postService;
     private final PersonService personService;
+    private final NotificationsService notificationsService;
     private static final Logger logger = LogManager.getLogger(PostCommentService.class);
 
     @Autowired
     public PostCommentService(PostCommentRepository postCommentRepository, PostService postService,
-                              PersonService personService, MeterRegistry meterRegistry) {
+                              PersonService personService, MeterRegistry meterRegistry, NotificationsService notificationsService) {
         this.postCommentRepository = postCommentRepository;
         this.postService = postService;
         this.personService = personService;
+        this.notificationsService = notificationsService;
         meterRegistry.gauge("postCommentsCount", postCommentRepository.findAll().size());
     }
 
@@ -60,8 +64,18 @@ public class PostCommentService {
                 .toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())));
         postComment.setIsDelete(false);
         postComment.setIsBlocked(false);
+        sendNotification(currentUserId, post.getPerson().getId());
         logger.info("saving comment № " + postComment.getId());
         postCommentRepository.save(postComment);
+    }
+
+    private void sendNotification(Long currentUser, Long otherPersonId) {
+        NotificationInputDto notificationInputDto = new NotificationInputDto();
+        notificationInputDto.setAuthorId(currentUser);
+        notificationInputDto.setUserId(otherPersonId);
+        notificationInputDto.setNotificationType(NotificationType.POST_COMMENT);
+        notificationInputDto.setContent("Получен коментаррий");
+        notificationsService.createAndSaveNotification(notificationInputDto);
     }
 
     public void deleteComment(String id, String commentId) {

@@ -14,7 +14,7 @@ import ru.skillbox.service.SettingService;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping("/api/v1")
 public class NotificationSettingController {
 
     private final SettingService settingService;
@@ -32,12 +32,12 @@ public class NotificationSettingController {
     }
 
 
-    @GetMapping("/settings")
+    @GetMapping("/notifications/settings")
     public ResponseEntity<NotificationSettingsDto> getSettings(){
-        return ResponseEntity.ok(settingService.getSetting());
+        return ResponseEntity.ok(settingService.makeSetting());
     }
 
-    @PutMapping("/settings")
+    @PutMapping("/notifications/settings")
     public ResponseEntity<DefaultRs> putSettings(@RequestBody SettingRq settingRq){
         settingService.saveSettings(settingRq.getNotificationType(), settingRq.isEnable());
         DefaultRs defaultRs = new DefaultRs();
@@ -50,7 +50,7 @@ public class NotificationSettingController {
         return ResponseEntity.ok().body(defaultRs);
     }
 
-    @PostMapping("/settings")
+    @PostMapping("/notifications/settings")
     public SettingsDto createSettings(SettingsDto settingsDto){
         logger.info("postSetting" + settingService
                 .compareSettings(settingsDto)
@@ -58,7 +58,7 @@ public class NotificationSettingController {
         return settingService.compareSettings(settingsDto);
     }
 
-    @GetMapping("")
+    @GetMapping("/notifications")
     public ResponseEntity<NotificationSentDto> getNotification() {
         logger.info("getNotification " + notificationsService
                 .getNotifications()
@@ -66,12 +66,12 @@ public class NotificationSettingController {
         return ResponseEntity.ok(notificationsService.getNotifications());
     }
 
-    @PostMapping("")
+    @PostMapping("/notifications")
     public ResponseEntity<NotificationDto> createNotification(@RequestBody NotificationInputDto notif){
-        return ResponseEntity.ok(notificationsService.getNotificationDto(notif));
+        return ResponseEntity.ok(notificationsService.postNotificationDto(notif));
     }
 
-    @GetMapping("/count")
+    @GetMapping("/notifications/count")
     public ResponseEntity<NotificationCountRs> getNotificationCount(){
         return ResponseEntity.ok(notificationsService.getNotificationCount());
     }

@@ -6,12 +6,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.skillbox.enums.NotificationType;
+import ru.skillbox.enums.StatusCode;
 import ru.skillbox.enums.Type;
+import ru.skillbox.model.Person;
 import ru.skillbox.model.Post;
 import ru.skillbox.model.PostFile;
 import ru.skillbox.model.Tag;
 import ru.skillbox.repository.PostRepository;
 import ru.skillbox.request.PostAddRequest;
+import ru.skillbox.request.settings.NotificationInputDto;
 import ru.skillbox.response.post.PostResponse;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,13 +33,17 @@ public class PostService {
     private final PostFileService postFileService;
     private final PersonService personService;
     private static final Logger logger = LogManager.getLogger(PostService.class);
+    private final NotificationsService notificationsService;
+    private final FriendsService friendsService;
 
     @Autowired
     public PostService(PostRepository postRepository, PostFileService postFileService,
-                       PersonService personService, MeterRegistry meterRegistry) {
+                       PersonService personService, MeterRegistry meterRegistry, NotificationsService notificationsService, FriendsService friendsService) {
         this.postRepository = postRepository;
         this.postFileService = postFileService;
         this.personService = personService;
+        this.notificationsService = notificationsService;
+        this.friendsService = friendsService;
         meterRegistry.gauge("postsCount", postRepository.findAll().size());
     }
 
@@ -73,13 +81,14 @@ public class PostService {
 
     @Timed("gettingNewPostsCount")
     public void addPost(PostAddRequest request, HttpServletRequest httpServletRequest) {
+        Person person = personService.getCurrentPerson();
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setPostText(request.getPostText());
         post.setTags(convertStringToTag(request.getTags()));
         post.setIsBlocked(request.getIsBlocked());
         post.setIsDelete(false);
-        post.setPerson(personService.getCurrentPerson());
+        post.setPerson(person);
 
 
         String publishDateString = httpServletRequest.getParameter("publishDate");
@@ -88,6 +97,7 @@ public class PostService {
             post.setType(Type.QUEUED);
         } else {
             post.setType(Type.POSTED);
+            sendNotification(person.getId());
         }
         switch (post.getType()) {
             case POSTED: {
@@ -120,6 +130,18 @@ public class PostService {
         response.setCommentsCount(post.getPostCommentList().size());
         response.setTags(convertTagToString(post.getTags()));
         return response;
+    }
+
+    private void sendNotification(Long currentUser) {
+        List<Long> listFriendsId = friendsService.getByCodePersonIdsForCurrentUser(StatusCode.FRIEND);
+        for (Long id : listFriendsId) {
+            NotificationInputDto notificationInputDto = new NotificationInputDto();
+            notificationInputDto.setAuthorId(currentUser);
+            notificationInputDto.setUserId(id);
+            notificationInputDto.setNotificationType(NotificationType.POST);
+            notificationInputDto.setContent("Пост");
+            notificationsService.createAndSaveNotification(notificationInputDto);
+        }
     }
 
     public void updatePost(PostAddRequest request, HttpServletRequest httpServletRequest,

@@ -3,6 +3,7 @@ package ru.skillbox.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.skillbox.enums.NotificationType;
 import ru.skillbox.enums.StatusCode;
 import ru.skillbox.exception.BadRequestException;
 import ru.skillbox.exception.UserNotFoundException;
@@ -10,6 +11,7 @@ import ru.skillbox.model.Friendship;
 import ru.skillbox.model.Person;
 import ru.skillbox.model.User;
 import ru.skillbox.repository.FriendsRepository;
+import ru.skillbox.request.settings.NotificationInputDto;
 import ru.skillbox.response.data.PersonDto;
 
 import java.util.*;
@@ -20,6 +22,7 @@ import java.util.*;
 public class FriendsService {
     private final FriendsRepository friendsRepository;
     private final PersonService personService;
+    private final NotificationsService notificationsService;
 
     //For Andrew
     public List<Long> getByCodePersonIdsForCurrentUser(StatusCode code) {
@@ -97,12 +100,23 @@ public class FriendsService {
                 fr.setStatusCode(StatusCode.REQUEST_FROM);
                 friendsRepository.save(fr);
 
+                sendNotification(currentUser, otherPersonId);
+
                 log.debug("friendship saved {}", fr);
             } else {
 
             }
         }
         return "Ok";
+    }
+
+    private void sendNotification(Long currentUser, Long otherPersonId) {
+        NotificationInputDto notificationInputDto = new NotificationInputDto();
+        notificationInputDto.setAuthorId(currentUser);
+        notificationInputDto.setUserId(otherPersonId);
+        notificationInputDto.setNotificationType(NotificationType.FRIEND_REQUEST);
+        notificationInputDto.setContent("Заявка в друзья");
+        notificationsService.createAndSaveNotification(notificationInputDto);
     }
 
     public int getFriendsRequestsCountFor(Long personId) {

@@ -6,8 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.skillbox.enums.NameNotification;
+import ru.skillbox.enums.NotificationType;
 //todo удалить если не используется
+
+/**
+ * используется
+ */
 
 @Builder
 @Data
@@ -17,9 +21,6 @@ import ru.skillbox.enums.NameNotification;
 @Table(name = "notification")
 public class Notification {
 
-    /**
-     * id оповещения
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,9 +33,9 @@ public class Notification {
 
     private String content;
 
-    @Column(name = "name_notification")
+    @Column(name = "notification_type")
     @Enumerated(EnumType.STRING)
-    private NameNotification nameNotification;
+    private NotificationType notificationType;
 
     private boolean read;
 

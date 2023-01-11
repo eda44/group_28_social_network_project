@@ -2,7 +2,7 @@ package ru.skillbox.response.settings;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skillbox.enums.NameNotification;
+import ru.skillbox.enums.NotificationType;
 
 @Getter
 @Setter
@@ -13,6 +13,6 @@ public class NotificationDto {
     private Long authorId;
     private Long userId;
     private String content;
-    private NameNotification notificationType;
+    private NotificationType notificationType;
     private boolean isStatusSent;
 }
