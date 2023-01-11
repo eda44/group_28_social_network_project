@@ -12,8 +12,10 @@ import ru.skillbox.enums.StatusCode;
 import ru.skillbox.exception.UserNotFoundException;
 import ru.skillbox.model.FriendsController;
 import ru.skillbox.model.User;
+import ru.skillbox.response.ErrorResponse;
 import ru.skillbox.response.data.PersonDto;
 import ru.skillbox.service.FriendsService;
+import ru.skillbox.service.SearchService;
 import ru.skillbox.service.UserService;
 
 @AllArgsConstructor
@@ -22,7 +24,7 @@ import ru.skillbox.service.UserService;
 public class FriendsControllerImpl implements FriendsController {
     private final FriendsService friendsService;
     private final UserService userService;
-
+    private final SearchService searchService;
 
     @Override
     public ResponseEntity<Page<PersonDto>> getRelationships(SearchPersonDto dto) {
@@ -51,7 +53,7 @@ public class FriendsControllerImpl implements FriendsController {
             log.error("sendFriendRequest throws {}", e.getMessage());
 
             //FixMe to smthg better it is not ok! need front rework maybe
-            return  ResponseEntity
+            return ResponseEntity
                     .ok("Ok");
         }
     }
@@ -70,7 +72,7 @@ public class FriendsControllerImpl implements FriendsController {
             log.info("approveFriendRequest throws {}", e.getMessage());
 
             //FixMe to smthg better it is not ok! need front rework maybe
-            return  ResponseEntity
+            return ResponseEntity
                     .ok("Ok");
         }
     }
@@ -98,7 +100,7 @@ public class FriendsControllerImpl implements FriendsController {
     public ResponseEntity<String> block(Long id) {
         User currentUser = userService.getCurrentUser();
         try {
-        return ResponseEntity.ok(friendsService.blockFriend(currentUser.getId(), id));
+            return ResponseEntity.ok(friendsService.blockFriend(currentUser.getId(), id));
         } catch (UserNotFoundException e) {
             log.info("block {}", e.getMessage());
             return ResponseEntity.ok("Ok");
@@ -107,9 +109,11 @@ public class FriendsControllerImpl implements FriendsController {
 
     @Override
     public ResponseEntity<Object> recommendations() {
-        User currentUser = userService.getCurrentUser();
-        return ResponseEntity.ok(friendsService.searchRecommendations(currentUser));
-
+        try {
+            return ResponseEntity.ok(searchService.searchRecommendations());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse().getResponse(e.getMessage()));
+        }
     }
 
     @Override
