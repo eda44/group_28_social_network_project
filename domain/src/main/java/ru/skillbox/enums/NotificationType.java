@@ -3,7 +3,7 @@ package ru.skillbox.enums;
 import lombok.Getter;
 
 @Getter
-public enum NameNotification {
+public enum NotificationType {
 
     FRIEND_REQUEST("friendRequest"),
     FRIEND_BIRTHDAY("friendBirthday"),
@@ -16,7 +16,7 @@ public enum NameNotification {
 
     private final String name;
 
-    NameNotification(String name) {
+    NotificationType(String name) {
         this.name = name;
     }
 }

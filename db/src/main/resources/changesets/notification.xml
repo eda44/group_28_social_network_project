@@ -15,7 +15,7 @@
             <column name="person_id" type="bigint"/>
             <column name="author_id" type="bigint"/>
             <column name="content" type="varchar(255)"/>
-            <column name="name_notification" type="varchar(255)"/>
+            <column name="notification_type" type="varchar(255)"/>
             <column name="read" type="boolean"/>
         </createTable>
     </changeSet>
