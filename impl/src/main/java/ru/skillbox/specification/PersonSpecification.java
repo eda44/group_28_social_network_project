@@ -7,12 +7,12 @@ import ru.skillbox.model.Person;
 public class PersonSpecification {
     public static Specification<Person> getUsersByFirstName(String firstName) {
         if (firstName == null) return null;
-        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get(PersonSpecificationRoot.FIRST_NAME.getValue()), getCorrectString(firstName));
+        return (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get(PersonSpecificationRoot.FIRST_NAME.getValue())), getCorrectString(firstName));
     }
 
     public static Specification<Person> getUsersByLastName(String lastName) {
         if (lastName == null) return null;
-        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get(PersonSpecificationRoot.LAST_NAME.getValue()), getCorrectString(lastName));
+        return (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get(PersonSpecificationRoot.LAST_NAME.getValue())), getCorrectString(lastName));
     }
 
     public static Specification<Person> getUsersByAgeFrom(Long ageFrom) {

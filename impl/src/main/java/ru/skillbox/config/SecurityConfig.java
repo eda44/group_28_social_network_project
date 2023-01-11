@@ -33,8 +33,6 @@ public class SecurityConfig {
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
                 .csrf().disable()
-                //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                //.and()
                 .authorizeRequests()
                 .antMatchers("/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/post/**").permitAll()
@@ -44,10 +42,16 @@ public class SecurityConfig {
                 .authenticated()
                 .and()
                 .logout()
+                .logoutUrl("/api/v1/auth/logout")
+                .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .and()
                 .apply(jwtConfigurer)
+                .and()
+                .sessionManagement()
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(true)
         ;
 
         return http.build();

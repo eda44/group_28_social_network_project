@@ -3,12 +3,12 @@ package ru.skillbox.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import ru.skillbox.common.SearchPersonDto;
-import ru.skillbox.response.data.DialogDto;
-import ru.skillbox.response.data.MessageDto;
+import ru.skillbox.common.AccountDto;
 import ru.skillbox.model.Dialog;
 import ru.skillbox.model.Message;
 import ru.skillbox.model.Person;
+import ru.skillbox.response.data.DialogDto;
+import ru.skillbox.response.data.MessageDto;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -50,7 +50,7 @@ public interface DialogMapper {
     List<MessageDto> listMessageToDto(List<Message> messages);
 
     @Named("account")
-    default SearchPersonDto.AccountDto account(Person person) {
+    default AccountDto account(Person person) {
         return AccountMapper.INSTANCE.personToAccountDto(person);
     }
 

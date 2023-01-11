@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import ru.skillbox.common.SearchPersonDto;
+import ru.skillbox.common.AccountDto;
 import ru.skillbox.model.City;
 import ru.skillbox.model.Country;
 import ru.skillbox.model.Person;
@@ -21,7 +21,7 @@ public interface AccountMapper {
     @Mapping(target = "city", qualifiedByName = "mapCity")
     @Mapping(target = "country", qualifiedByName = "mapCountry")
     @Mapping(target = "isOnline", source = "lastOnlineTime", qualifiedByName = "mapOnline")
-    SearchPersonDto.AccountDto personToAccountDto(Person person);
+    AccountDto personToAccountDto(Person person);
 
     @Named("mapCountry")
     default String mapCountry(Country country) {
@@ -39,8 +39,8 @@ public interface AccountMapper {
         return city.getTitle();
     }
 
-    default List<SearchPersonDto.AccountDto> ListPersonToListAccountDto(List<Person> people) {
-        List<SearchPersonDto.AccountDto> accountDto = new ArrayList<>();
+    default List<AccountDto> ListPersonToListAccountDto(List<Person> people) {
+        List<AccountDto> accountDto = new ArrayList<>();
         people.forEach(person -> accountDto.add(personToAccountDto(person)));
         return accountDto;
     }
