@@ -17,6 +17,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(messageWebSocketHandler, "/api/v1/streaming/ws").setAllowedOrigins("*");
+        registry.addHandler(messageWebSocketHandler, "/api/v1/streaming/ws")
+                .setAllowedOrigins("http://localhost:8086", "http://194.58.100.187:8090");
     }
 }

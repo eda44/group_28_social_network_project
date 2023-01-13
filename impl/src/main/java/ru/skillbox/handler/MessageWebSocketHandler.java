@@ -38,8 +38,9 @@ public class MessageWebSocketHandler extends AbstractWebSocketHandler {
         Optional<Person> recipient = personRepository.findById(messageRq.getData().getRecipientId());
 
         for (Map.Entry<String, WebSocketSession> entry : sessionMap.entrySet()) {
-            if(entry.getKey().equals(recipient.get().getEmail())) {
-                entry.getValue().sendMessage(new TextMessage(payload));
+            if(recipient.isPresent()) {
+                if(entry.getKey().equals(recipient.get().getEmail()))
+                    entry.getValue().sendMessage(new TextMessage(payload));
             }
         }
 
